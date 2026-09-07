@@ -14,9 +14,9 @@ of the same commit as the CP/Sup content.
 | CP-004 | — | — | — | RESERVED | — |
 | CP-005 | Pin VDA 5050 version to 2.1 | d69e8ce | 2026-08-21 | MERGED | rocom-standard |
 | CP-006 | CostModel generalization — cost_factors array | 76c4cbb | 2026-08-22 | MERGED | rocom-standard |
-| CP-007 | Agent Identity Model (issuer-agnostic, UDI-aligned) | — | 2026-08-28 | PROPOSAL | rocom-standard |
-| CP-008 | Resource Authority Model | — | 2026-08-30 | PROPOSAL | rocom-standard |
-| CP-009 | Priority and Preemption Model | — | 2026-08-31 | PROPOSAL | rocom-standard |
+| CP-007 | Agent Identity Model (issuer-agnostic, UDI-aligned) | 055892d | 2026-08-28 | MERGED | rocom-standard |
+| CP-008 | Resource Authority Model | 055892d | 2026-08-30 | MERGED | rocom-standard |
+| CP-009 | Priority and Preemption Model | 055892d | 2026-08-31 | MERGED | rocom-standard |
 
 > Note: Commit d69e8ce message says "CP-001" — incorrect labeling.
 > This registry is authoritative.
@@ -27,7 +27,7 @@ of the same commit as the CP/Sup content.
 |-----|-------|--------|------|--------|
 | Sup-001 | Orchestrator Service Interface | 2df097b | 2026-08-12 | MERGED |
 | Sup-002 | Annex A — Engineering Practice Notes | e257ab5 | 2026-08-18 | MERGED |
-| Sup-003 | BMS Infrastructure Contract | c75b931 (scope), 1d742df (normative) | 2026-08-21 | DRAFT |
+| Sup-003 | BMS Infrastructure Contract | c75b931 (scope), 1d742df (normative) | 2026-08-21 | MERGED |
 | Sup-004 | — | — | — | RESERVED |
 
 ## Numbering Rules
