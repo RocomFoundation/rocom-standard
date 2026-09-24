@@ -3,3 +3,5 @@ _site/
 node_modules/
 package.json
 package-lock.json
+/.vibe
+__pycache__/

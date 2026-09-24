@@ -10,7 +10,17 @@ on:
       - 'CONTRIBUTING.md'
       - 'build/**'
       - '.github/workflows/pages.yml'
+  pull_request:
+    branches: [main]
+    paths: 
+       - 'spec/**'
+       - 'README.md'
+       - 'GOVERNANCE.md'
+       - 'CONTRIBUTING.md'
+       - 'build/**'
+       - '.github/workflows/pages.yml'
   workflow_dispatch:
+    branches: [main]
 
 permissions:
   contents: read
@@ -19,10 +29,11 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: false 
 
 jobs:
   build:
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,7 +55,29 @@ jobs:
         with:
           path: _site
 
+  check_site_match:
+    if: ${{ github.event_name == 'push'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run file_check.py
+        id: file_check
+        run: python file_check.py
+
+      - name: "Check output"
+        run: echo "File check variable ${{steps.file_check.outputs.FILE_CHECK}}"
+
+      - name: Fail if illegal phrases found
+        if: steps.file_check.outputs.FILE_CHECK == 'FALSE'
+        run: |
+          echo "Illegal phrases found!"
+          exit 1
+          
+
   deploy:
+    if: ${{ github.event_name == 'push'}}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
