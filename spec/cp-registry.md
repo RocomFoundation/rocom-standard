@@ -17,6 +17,7 @@ of the same commit as the CP/Sup content.
 | CP-007 | Agent Identity Model (issuer-agnostic, UDI-aligned) | — | 2026-08-28 | PROPOSAL | rocom-standard |
 | CP-008 | Resource Authority Model | — | 2026-08-30 | PROPOSAL | rocom-standard |
 | CP-009 | Priority and Preemption Model | — | 2026-08-31 | PROPOSAL | rocom-standard |
+| CP-010 | Shared Occupancy and Physical State Authority | — | 2026-09-17 | PROPOSAL | rocom-standard |
 
 > Note: Commit d69e8ce message says "CP-001" — incorrect labeling.
 > This registry is authoritative.
@@ -33,6 +34,6 @@ of the same commit as the CP/Sup content.
 ## Numbering Rules
 
 1. Numbers are sequential within each series (CP-001, CP-002, ... Sup-001, Sup-002, ...).
-2. The NEXT available number is **CP-010** and **Sup-004**.
+2. The NEXT available number is **CP-011** and **Sup-004**.
 3. New CPs/Sup must update this registry in the same commit.
 4. Commit messages reference the CP/Sup number; the registry is authoritative.
