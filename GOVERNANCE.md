@@ -1,9 +1,20 @@
 # Rocom Governance
 
+## Ownership
+
+The Rocom specification is owned by **ROCOM** (CVR 46774043), an
+independent Danish non-profit association established September 2026.
+ROCOM holds the specification, domain (rocom.org), and word mark
+in the interest of the standard and its users.
+
+**Tech Happens Europe ApS** (Odense, Denmark) participates as an
+organizational member of ROCOM and provides operational support.
+Tech Happens is not the owner — ROCOM is.
+
 ## Specification Steward
 
-The Rocom specification is stewarded by **Tech Happens Europe ApS**
-(Odense, Denmark). The steward is responsible for:
+The day-to-day stewardship of the specification is handled by
+Tech Happens Europe ApS on behalf of ROCOM. The steward is responsible for:
 
 - Maintaining the specification repository
 - Processing Supplements, Correction Proposals, and Part revisions
@@ -13,9 +24,9 @@ The Rocom specification is stewarded by **Tech Happens Europe ApS**
 
 ## Stewardship Principles
 
-0. **Held in trust.** The specification, domain and word mark
-   are held in trust for the standard; the certification program
-   is a commercial service of the steward.
+0. **Owned by ROCOM.** The specification, domain, and word mark
+    are owned by the ROCOM association. The certification program
+    is operated by the steward under ROCOM oversight.
 
 1. **Vendor neutrality.** The specification MUST NOT contain language
    that advantages or disadvantages any specific vendor, product, or
@@ -67,6 +78,10 @@ received to date. Funding sources will not influence
 specification content.
 
 ## Contact
+
+ROCOM · c/o Tech Happens Europe ApS
+Aarestrupsvej 22, 5230 Odense M, Denmark
+Phone: +45 22 54 01 30
 
 For conformance inquiries, certification applications, or governance
 questions: specs@techhappens.eu

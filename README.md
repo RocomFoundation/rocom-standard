@@ -35,5 +35,7 @@ Correction Proposal process.
 
 ## Governance
 
-The Rocom specification is maintained by Tech Happens Europe ApS.
+The Rocom specification is owned by **ROCOM** (CVR 46774043), an
+independent non-profit association established in Denmark (2026).
+Tech Happens Europe ApS participates as an organizational member.
 See [GOVERNANCE.md](GOVERNANCE.md) for the stewardship model.
