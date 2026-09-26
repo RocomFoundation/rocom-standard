@@ -3,13 +3,13 @@
 # Status: PROPOSAL (2026-08-12)
 # License: CC-BY 4.0
 # Scope: Define the normative orchestrator service interface by splitting
-#        the HRRM product API into standard and product-specific endpoints.
+#        a management system product API into standard and product-specific endpoints.
 # NOTE:  This is a scope proposal. No normative text until approved.
 
 ## Purpose
 
 The orchestrator service interface defines the REST API that any
-conformant orchestrator MUST implement. Currently, the HRRM product
+conformant orchestrator MUST implement. Currently, a management system product
 API (17 endpoints) mixes standard requirements with product-specific
 features. This supplement proposes a split so that the standard can
 specify the interface independently of any single implementation.
@@ -57,8 +57,8 @@ cross-cutting requirement that every conformant orchestrator MUST provide.
 
 | Endpoint | Rationale |
 |----------|-----------|
-| `POST /proposals` | Proposal generation with strategies (`greedy`, `cost_optimized`, `fastest`) is an HRRM-specific allocation approach. |
-| `POST /proposals/{id}/accept` | The accept/reject workflow is HRRM's human-in-the-loop design choice. |
+| `POST /proposals` | Proposal generation with strategies (`greedy`, `cost_optimized`, `fastest`) is a product-specific allocation approach. |
+| `POST /proposals/{id}/accept` | The accept/reject workflow is a product-specific human-in-the-loop design choice. |
 | `POST /proposals/{id}/reject` | Same — a product-specific approval workflow. |
 
 **Verdict:** Product-specific. Other orchestrators may use direct
@@ -73,25 +73,26 @@ approach among many.
 | Agents | 7 | YES — normative (Part 8: Orchestrator Service Interface) |
 | Tasks | 4 | YES — normative |
 | Audit | 2 | YES — normative |
-| Proposals | 3 | NO — HRRM product feature |
+| Proposals | 3 | NO — product-specific feature
 
 **Standard interface:** 13 endpoints (Agents + Tasks + Audit)
-**HRRM-specific:** 3 endpoints (Proposals)
-**Total:** 16 endpoints (13 standard + 3 HRRM-specific)
+**Product-specific:** 3 endpoints (Proposals)
+**Total:** 16 endpoints (13 standard + 3 product-specific)
 
 > Note: Postman collection has 17 requests because "Cancel Task" is a
 > separate request for PATCH /tasks/{id} with `status: cancelled` — not
 > a distinct endpoint. The OpenAPI spec has 16 paths. The count of
 > 13 standard endpoints excludes the 3 proposal endpoints, which are
-> HRRM product features, not normative.
+> product-specific features, not normative.
 
 ## Recommendation
 
 1. Create Part 8 (Orchestrator Service Interface) with the 13 normative
    endpoints as OpenAPI specification.
-2. HRRM's Postman collection references the standard's 13 endpoints via
-   submodule and extends with its own 3 proposal endpoints.
-3. The proposal model is documented in HRRM product docs, not in the standard.
+2. A management system's Postman collection references the standard's 13
+   endpoints via submodule and extends with its own 3 proposal endpoints.
+3. The proposal model is documented in the management system's product docs,
+   not in the standard.
 
 ## Pending Approval
 
@@ -99,4 +100,4 @@ This supplement is a PROPOSAL. No normative text is created until Egil
 reviews and approves the split. After approval:
 - Part 8 is drafted as OpenAPI spec (vendor-neutral, "orchestrator")
 - Conformance Postman collection is generated
-- HRRM collection is updated to reference the standard via submodule
+- The management system's collection is updated to reference the standard via submodule

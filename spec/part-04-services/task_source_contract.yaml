@@ -4,7 +4,7 @@
 # to feed work requests into the orchestrator allocation engine.
 #
 # Implementations:
-#   - HRRM allocation engine receives tasks via POST /tasks (Sup-001)
+#   - Management system allocation engine receives tasks via POST /tasks (Sup-001)
 #   - Enterprise ERP systems (SAP, columna) as task sources
 #   - BMS-generated maintenance tasks
 #   - Manual task entry via cockpit interface
