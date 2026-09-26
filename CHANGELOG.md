@@ -5,6 +5,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/) adapted for standards.
 
 ---
 
+### Added
+- **Sup-005** Certification Provider Requirements — 28 krav (CP-REQ, OP-REQ, IND-REQ, INF-REQ) for certification provider operating on behalf of ROCOM
+
+---
+
 ## [2026a-draft] — 2026-09-26
 
 ### Added
