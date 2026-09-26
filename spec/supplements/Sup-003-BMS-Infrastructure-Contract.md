@@ -197,7 +197,7 @@ The following are explicitly NOT included in Sup-003:
    protocol-agnostic.
 
 3. **IT-side allocation logic:** Cost models, collective agreement rules,
-   and allocation decision logic remain in the closed HRRM repository.
+   and allocation decision logic remain in the closed management system repository.
    Sup-003 only defines the OT-side contract.
 
 4. **VDA 5050 modifications:** This supplement does not modify standard
@@ -267,11 +267,11 @@ actual approval status.
 | Source | Count | Notes |
 |--------|-------|-------|
 | Postman collection | 17 | Includes "Cancel Task" as separate request |
-| OpenAPI (hrrm-core-api.yaml) | 16 paths | PATCH /tasks/{id} handles update + cancel |
-| Sup-001 table | 13 standard + 3 HRRM-specific = 16 | Excludes proposals from standard |
+| OpenAPI (management-system-api.yaml) | 16 paths | PATCH /tasks/{id} handles update + cancel |
+| Sup-001 table | 13 standard + 3 product-specific = 16 | Excludes proposals from standard |
 
 The discrepancy: Postman's "Cancel Task" is a PATCH /tasks/{id} with
 `status: cancelled` — not a distinct endpoint. Sup-001's count of 13
 standard endpoints is correct if proposals (3) are excluded from the
 standard. The true count is **16 total endpoints** (13 standard + 3
-HRRM-specific).
+product-specific).

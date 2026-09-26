@@ -28,11 +28,12 @@ of the same commit as the CP/Sup content.
 | Sup-001 | Orchestrator Service Interface | 2df097b | 2026-08-12 | MERGED |
 | Sup-002 | Annex A — Engineering Practice Notes | e257ab5 | 2026-08-18 | MERGED |
 | Sup-003 | BMS Infrastructure Contract | c75b931 (scope), 1d742df (normative) | 2026-08-21 | MERGED |
-| Sup-004 | — | — | — | RESERVED |
+| Sup-004 | Governance Structure: Board and Working Groups | — | 2026-09-26 | DRAFT |
+| Sup-005 | — | — | — | RESERVED |
 
 ## Numbering Rules
 
 1. Numbers are sequential within each series (CP-001, CP-002, ... Sup-001, Sup-002, ...).
-2. The NEXT available number is **CP-010** and **Sup-004**.
+2. The NEXT available number is **CP-010** and **Sup-005**.
 3. New CPs/Sup must update this registry in the same commit.
 4. Commit messages reference the CP/Sup number; the registry is authoritative.

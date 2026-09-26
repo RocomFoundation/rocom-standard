@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/) adapted for standards.
 
 ---
 
+## [2026a-draft] — 2026-09-26
+
+### Added
+- **Sup-004** Governance Structure: Board and Working Groups — Board of Directors (5-9 members), 4 Working Groups (Robot, Infrastructure, Workforce, Task)
+
+---
+
 ## [2026a-draft] — 2026-09-07
 
 ### Changed
