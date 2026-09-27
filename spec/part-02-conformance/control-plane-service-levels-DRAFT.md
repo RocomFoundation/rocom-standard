@@ -131,11 +131,91 @@ Lease expiry is not proof that a physical resource is empty. The resulting avail
 
 Example: `Robot L3 · Infrastructure L2 · Workforce L1 · Task L3` is a valid capability description. A workflow using all four planes cannot claim end-to-end L3. A different workflow may have a different set of dependencies, but must declare and test that set explicitly.
 
-## 5. Measurable service-quality profiles — normative on adoption
+## 5. Location model — system-agnostic — normative on adoption
+
+All four planes must be able to refer to and exchange information about the same physical place. The systems involved may use different identifier schemes, different coordinate systems, and different naming conventions. This section provides a shared location model that is independent of any particular standard, vendor, or region.
+
+### 5.1 Location identity
+
+A location identity is the persistent statement "this is that place." It is separate from the place's name, its position in a floor plan, its coordinates in a robot map, and its transient state (occupied, accessible, under maintenance).
+
+| Component | Meaning | Stability |
+|---|---|---|
+| **Namespace / identification system** | The system or registry that defines the identifier format and scope. | Stable — chosen by the deployment. |
+| **Identifier** | The value that is unique within its namespace. | Stable — does not change with state or occupancy. |
+| **Name** | Human-readable label(s). Locale-dependent. | Volatile — may change with reorganisation. |
+| **Hierarchy / containment** | Parent, child, sibling relations (building → floor → ward → room → bay). | Stable — changes require explicit revision. |
+| **Coordinates / spatial reference** | Position within a map, geodetic coordinates, or other spatial reference frame. | Semi-stable — map revisions create new coordinate sets. |
+| **State** | Current availability, access permission, occupancy, capacity. | Dynamic — governed by service-quality profiles and L2/L3 rules. |
+
+**cpl-req-801 — Namespace declaration.** Every location identifier used in a plane interface SHALL identify its namespace or identification system. A bare string without namespace context SHALL NOT be treated as globally unique. The namespace MAY be expressed as part of the identifier (for example, a GS1 GLN where the GS1 prefix carries namespace semantics), as a separate `namespace` field, or as a URI scheme. The standard does not mandate any particular identification system.
+
+**cpl-req-802 — Cross-namespace linking.** Where a deployment uses different identifiers for the same physical place in different systems, the declaration SHALL provide explicit links between them. Each link SHALL identify both identifiers, the source of the mapping, its asserted validity period, and the granularity relationship (identical, contains, contained-in, or unknown). A link does not establish equivalence; it records an assertion that must be independently verified before automated decisions rely on it.
+
+**cpl-req-803 — Identity versus state.** Location identity SHALL be carried separately from location state. A change in access permission, occupancy, or availability SHALL NOT create a new location identity or invalidate an existing identifier. Conversely, a new or updated identifier SHALL NOT silently change the reported state of the place it identifies.
+
+**cpl-req-804 — Name and hierarchy are not identity.** Human-readable names, room numbers, and hierarchical parentage are informational attributes of a location. They SHALL NOT serve as the sole basis for automated identification. Two places with the same name in different namespaces are distinct until a verified link is established.
+
+### 5.2 Location references in plane interfaces
+
+Each plane interface uses location information differently. The model accommodates these differences without requiring a single global registry.
+
+**Robot:** A robot map identifies waypoints, docking stations, no-go zones, and navigable areas by identifiers within that map's namespace. The map may cover a subset of the building. Map revisions create new coordinate sets; location identity is carried by the map's own identifiers.
+
+**Infrastructure:** The BMS and access-control systems identify rooms, zones, doors, lifts, and docks using identifiers from the facility's space management system (for example, Uniclass, a local facility register, or an operator-defined scheme). These identifiers carry authority for physical access.
+
+**Workforce:** Staffing and allocation systems identify departments, wards, teams, and duty stations. These identifiers are organisational rather than spatial; they map to physical places through the facility hierarchy.
+
+**Task:** The task source identifies origin and destination locations for work. These references MUST be resolvable through the Infrastructure interface's resource model so that access, routing, and capacity decisions are based on the authoritative resource representation.
+
+Informative examples of identifier schemes in use (none mandatory for ROCOM conformance):
+
+| Scheme | Namespace | Example identifier | Typical plane |
+|---|---|---|---|
+| GS1 GLN | GS1 (global, 14-digit) | `70123456789012` | Task, Workforce |
+| URI (deployment-local) | Operator-defined | `urn:facility:st-olavs:room:3B-12` | Infrastructure |
+| Robot map ID | Vendor map | `map-v3:waypoint:dock-3B` | Robot |
+| Local register | Hospital ITSM | `FAC-ZONE-3B` | Infrastructure, Workforce |
+
+### 5.3 Verifiable cross-system location mapping
+
+When a workflow requires the same physical place to be identified across multiple plane interfaces, the mapping must be auditable.
+
+| Mapping field | Required | Purpose |
+|---|---|---|
+| `source_namespace` | Yes | Namespace of the source identifier. |
+| `source_id` | Yes | Identifier in the source system. |
+| `target_namespace` | Yes | Namespace of the target identifier. |
+| `target_id` | Yes | Identifier in the target system. |
+| `granularity` | Yes | `identical`, `contains`, `contained_in`, or `unknown`. |
+| `asserted_by` | Yes | Actor or system that created the mapping. |
+| `asserted_at` | Yes | Timestamp of the mapping assertion. |
+| `valid_until` | No | Expiry of the mapping assertion; absence means the deployment owner is responsible for timely review. |
+
+**cpl-req-805 — Granularity and containment.** A mapping SHALL declare the granularity relationship between source and target. A robot waypoint may be `contained_in` a room; a zone may `contain` multiple docks. A task destination that refers to a ward is `contains` relative to a specific room within that ward. `identical` means the two identifiers are asserted to refer to the same place at the same granularity. `unknown` means the mapping exists but the spatial relationship is unverified; automated decisions SHALL NOT rely on `unknown` mappings without explicit escalation or reconfirmation.
+
+**cpl-req-806 — Source attribution.** Every location mapping SHALL carry source attribution. A mapping created by an automated import SHALL identify the import process, its version, and the last verified timestamp. It SHALL NOT be treated as authoritative without human or procedural verification.
+
+**cpl-req-807 — Missing or ambiguous mappings.** Where a required location reference cannot be resolved across the necessary plane interfaces, the coordinator SHALL treat the reference as unresolvable and SHALL NOT assume identity by name, partial identifier match, or proximity. The workflow SHALL be rejected, escalated, or entered into an explicitly approved alternative flow.
+
+### 5.4 Four-plane location example — informative
+
+A delivery task originates in the task system with destination `GLN:70123456789012` (the pharmacy receiving area). The following mappings exist:
+
+| Mapping | Source | Target | Granularity | Verified |
+|---|---|---|---|---|
+| Task → Infrastructure | `GLN:70123456789012` | `urn:facility:pharmacy:receiving` | `identical` | Yes, 2026-09-15 |
+| Infrastructure → Robot | `urn:facility:pharmacy:receiving` | `map-v3:waypoint:dock-pharmacy` | `identical` | Yes, 2026-09-15 |
+
+The robot receives an order referencing `map-v3:waypoint:dock-pharmacy`. The Infrastructure plane verifies that the room `urn:facility:pharmacy:receiving` has active access authority (no building mode restriction). The Workforce plane confirms a qualified person is available to receive. The task completes with correlated evidence: task ID, robot identity, resource grant, workforce acceptance, and the location mappings used.
+
+If the facility register is revised and the room identifier changes, the mappings are updated and reverified. The robot map waypoint may remain unchanged; the granularity relationship is preserved and reasserted.
+
+## 6. Measurable service-quality profiles — normative on adoption
 
 Coordination level expresses supported behaviour. Service-quality profiles express how reliably and how quickly the behaviour is delivered. A contractual SLA can refer to these profiles and add commercial terms; the level itself does not promise a universal response time or uptime percentage.
 
-**cpl-req-601 — Profile definition.** Every L1–L3 claim SHALL reference a versioned, immutable service-quality profile. For each applicable metric, the profile SHALL define the bound, unit, observation points, measurement method, aggregation/window, load envelope, exclusions and breach action. Timing bounds SHALL be finite. Omitted values or unresolved placeholders SHALL block a conformant claim. Non-applicability requires a scope-specific justification and cannot waive a required behaviour. Existing applicable protocol deadlines and their defined override rules SHALL be preserved unless explicitly amended by the approved revision.
+**cpl-req-901 — Profile definition.** Every L1–L3 claim SHALL reference a versioned, immutable service-quality profile. For each applicable metric, the profile SHALL define the bound, unit, observation points, measurement method, aggregation/window, load envelope, exclusions and breach action. Timing bounds SHALL be finite. Omitted values or unresolved placeholders SHALL block a conformant claim. Non-applicability requires a scope-specific justification and cannot waive a required behaviour. Existing applicable protocol deadlines and their defined override rules SHALL be preserved unless explicitly amended by the approved revision.
 
 | Metric | Applies to | Required measurement definition |
 |---|---|---|
@@ -147,15 +227,15 @@ Coordination level expresses supported behaviour. Service-quality profiles expre
 | State recovery | L2–L3 | Time from restored communication to reconciled state that is eligible for new decisions. Reconnection alone is insufficient. |
 | Evidence visibility | L1–L3 | Time from a decision/outcome to availability of its correlated audit evidence to authorised inspection. |
 
-**cpl-req-602 — Measurement validity.** Implementations SHALL report the evidence needed to evaluate their bounds under the declared load envelope, including unsuccessful requests, timeouts and refused work. A profile SHALL specify percentile/maximum semantics where used, minimum sample rules and clock assumptions. It SHALL NOT hide unsuccessful work by measuring only completed successes.
+**cpl-req-902 — Measurement validity.** Implementations SHALL report the evidence needed to evaluate their bounds under the declared load envelope, including unsuccessful requests, timeouts and refused work. A profile SHALL specify percentile/maximum semantics where used, minimum sample rules and clock assumptions. It SHALL NOT hide unsuccessful work by measuring only completed successes.
 
-**cpl-req-603 — Breach handling.** A bound violation SHALL create an observable service-state/evidence record and trigger the profile's defined action. The implementation SHALL distinguish a transient breach, an unavailable dependency and evidence that invalidates a longer-term conformance claim.
+**cpl-req-903 — Breach handling.** A bound violation SHALL create an observable service-state/evidence record and trigger the profile's defined action. The implementation SHALL distinguish a transient breach, an unavailable dependency and evidence that invalidates a longer-term conformance claim.
 
-**cpl-req-604 — Profile changes.** Changes to timing, authority, accepted load or degraded-mode policies SHALL be versioned, authorised and associated with affected claims. An implementation SHALL NOT improve its apparent result by silently relaxing a bound during a measurement period.
+**cpl-req-904 — Profile changes.** Changes to timing, authority, accepted load or degraded-mode policies SHALL be versioned, authorised and associated with affected claims. An implementation SHALL NOT improve its apparent result by silently relaxing a bound during a measurement period.
 
 No new universal numeric thresholds are introduced in this proposal. Existing contract defaults, such as Sup-003's door-response deadline and its request-level override mechanism, remain applicable until explicitly revised. The responsible profile owners must approve any additional concrete values for each workflow and deployment class before conformance testing. Missing values are implementation/review blockers, not zero, infinity or a default success.
 
-## 6. Declaration and evidence model — normative on adoption
+## 7. Declaration and evidence model — normative on adoption
 
 The next declaration version SHALL add an explicit `coordination` object. The current legacy `parts_declared[].level` field must retain its historical meaning while old declarations remain in circulation.
 
@@ -172,7 +252,7 @@ Minimum information:
 
 For an intended but untested integration, `target_level` MAY be L3 while `declared_level` is null and `verification_status` is `not_tested`. A target is not a capability claim. A `partial` declaration SHALL enumerate deviations using Part 2's applicable rules and SHALL NOT satisfy workflow admission as if it were conformant.
 
-### 6.1 Illustrative target declaration — informative
+### 7.1 Illustrative target declaration — informative
 
 The example below deliberately contains **no conformance or certification claim**. The `example` references identify documents to be supplied; they are not operational endpoints or evidence. Viktor should implement the versioned schema and validation before populating evidence-backed declarations.
 
@@ -248,7 +328,7 @@ workflows:
 
 The proposed schema shall enumerate provision states `planned`, `provided` and `not_provided`. A conformant L1–L3 claim requires `provided`, complete context/build/profile data and supporting evidence. The abbreviated target example omits those claim-only fields intentionally. Runtime condition is carried separately; it does not rewrite this target declaration.
 
-## 7. Verification and acceptance — normative on adoption
+## 8. Verification and acceptance — normative on adoption
 
 Test identifiers below are proposed. Each evidence record must identify the build, profiles, configuration, fixture, stimulus, timestamps and assertions. Simulation can demonstrate contract behaviour; physical deployment claims additionally require evidence for the real interfaces and environment covered by the claim.
 
@@ -269,29 +349,29 @@ Test identifiers below are proposed. Each evidence record must identify the buil
 | CPL-T13 | cpl-req-501, cpl-req-502 | Omit a required interface, lower its supported level, or remove a required capability. The workflow is not admitted under its original claim; only an explicitly approved alternative may proceed. |
 | CPL-T14 | cpl-req-503 | Combine four individually verified L3 adapters that disagree on a contract/profile version. Reject the end-to-end L3 claim until compatibility and the combined scenario are demonstrated. A mixed L3/L2/L1/L3 workflow is not averaged into L3. |
 | CPL-T15 | cpl-req-504 | Degrade a required plane during a running workflow. Affected workflows and their degraded state are visible; outstanding grants are handled according to authority rules; recovery requires state reconciliation. |
-| CPL-T16 | cpl-req-601, cpl-req-602 | Omit a timing value, use an infinite bound, exclude failed requests from measurement, or change the declared load. The relevant conformance assertion fails rather than returning success. |
-| CPL-T17 | cpl-req-603, cpl-req-604 | Exceed a configured bound and attempt to relax it silently. Produce the breach and defined action; reject or version/authorise the profile change and retain the original measurement context. |
-| CPL-T18 | cpl-req-701, cpl-req-702, cpl-req-703, cpl-req-704 | Import a legacy Multi-Site L3 claim. Preserve its original semantics; do not infer any new plane L3 claim. Confirm traceable assurance mapping, versioned publication and absence of a new certificate before the revision and evidence process support it. |
+| CPL-T16 | cpl-req-901, cpl-req-902 | Omit a timing value, use an infinite bound, exclude failed requests from measurement, or change the declared load. The relevant conformance assertion fails rather than returning success. |
+| CPL-T17 | cpl-req-903, cpl-req-904 | Exceed a configured bound and attempt to relax it silently. Produce the breach and defined action; reject or version/authorise the profile change and retain the original measurement context. |
+| CPL-T18 | cpl-req-1001, cpl-req-1002, cpl-req-1003, cpl-req-1004 | Import a legacy Multi-Site L3 claim. Preserve its original semantics; do not infer any new plane L3 claim. Confirm traceable assurance mapping, versioned publication and absence of a new certificate before the revision and evidence process support it. |
 
 Required integrated demonstration: submit a healthcare transport task; allocate an eligible robot and the required workforce interaction; request shared infrastructure; make the intended lift unavailable; propose an allowed alternative; obtain revised commitments; complete or explicitly escalate; reconcile all resource releases and correlated task evidence. Repeat with connection loss, stale occupancy, a human refusal and a building safety override. Expected outcomes must be asserted from the approved workflow policy, not improvised by the demonstration.
 
-## 8. Migration and publication — normative on adoption
+## 9. Migration and publication — normative on adoption
 
-**cpl-req-701 — No automatic equivalence.** Legacy L1/Pilot, L2/Single Site and L3/Multi-Site SHALL NOT be converted mechanically into new coordination levels. Historical claims SHALL preserve their model, edition, build and scope. New coordination claims require the new declaration model and corresponding evidence.
+**cpl-req-1001 — No automatic equivalence.** Legacy L1/Pilot, L2/Single Site and L3/Multi-Site SHALL NOT be converted mechanically into new coordination levels. Historical claims SHALL preserve their model, edition, build and scope. New coordination claims require the new declaration model and corresponding evidence.
 
-**cpl-req-702 — Requirement migration ledger.** The revision SHALL publish a ledger for existing level-tagged requirements in Parts 2–7 and affected Supplements. Each entry SHALL identify the old ID/text, old applicability, new applicability, justification and test mapping. No requirement SHALL be weakened, lost or reassigned solely by changing its numeric level label. Existing safety, security and domain obligations continue until an explicitly reviewed replacement is adopted.
+**cpl-req-1002 — Requirement migration ledger.** The revision SHALL publish a ledger for existing level-tagged requirements in Parts 2–7 and affected Supplements. Each entry SHALL identify the old ID/text, old applicability, new applicability, justification and test mapping. No requirement SHALL be weakened, lost or reassigned solely by changing its numeric level label. Existing safety, security and domain obligations continue until an explicitly reviewed replacement is adopted.
 
-**cpl-req-703 — Versioned rollout.** Providers and consumers SHALL identify supported declaration/contract versions. A migration adapter MAY preserve compatibility, but SHALL NOT manufacture missing state, evidence or dynamic capability. The implementation SHALL maintain a clear distinction between legacy declarations and new coordination declarations throughout transition.
+**cpl-req-1003 — Versioned rollout.** Providers and consumers SHALL identify supported declaration/contract versions. A migration adapter MAY preserve compatibility, but SHALL NOT manufacture missing state, evidence or dynamic capability. The implementation SHALL maintain a clear distinction between legacy declarations and new coordination declarations throughout transition.
 
-**cpl-req-704 — Publication and claims.** Draft implementation and evaluation MAY proceed under this proposal with explicit draft labelling. Adopted normative requirements, public certification claims and website statements SHALL follow the approved edition/revision and evidence status. No draft or successful simulation alone establishes production conformance or certification.
+**cpl-req-1004 — Publication and claims.** Draft implementation and evaluation MAY proceed under this proposal with explicit draft labelling. Adopted normative requirements, public certification claims and website statements SHALL follow the approved edition/revision and evidence status. No draft or successful simulation alone establishes production conformance or certification.
 
-### 8.1 Editorial adoption route — informative
+### 9.1 Editorial adoption route — informative
 
 The baseline `CONTRIBUTING.md` explicitly assigns new conformance levels to **Full Part Revisions**, requiring Editor approval, a `[Revision]` issue, a minimum 14-day discussion period, a draft within the Part directory and replacement on Edition release. This proposal follows that route. It is not a cosmetic CP and does not allocate CP-010 or the reserved Sup-006.
 
 Use the draft above as the proposed replacement for Part 2 §1–§1.1 plus new service-level, composition, measurement and migration clauses. Integrate the declaration additions into Part 2's existing template, retaining provenance, deviations and independent certification requirements. The coordinated updates to other Parts must be included in the review, rather than treating Part 2 alone as sufficient.
 
-## 9. Implementation brief for Viktor — informative
+## 10. Implementation brief for Viktor — informative
 
 ### Objective
 
@@ -326,7 +406,7 @@ Use concrete model fields such as `coordination_level` in product APIs; avoid an
 - Document unresolved decisions instead of filling them with implementation assumptions.
 - Do not publish L3 conformance or certification before the relevant evidence and approval process support it.
 
-## 10. Decisions to resolve during review — informative
+## 11. Decisions to resolve during review — informative
 
 1. Approve the new level semantics and their separation from deployment scope/stage and assurance.
 2. Complete the per-requirement migration ledger, especially for existing L1–L3 security/data-governance requirements and transport bindings.
@@ -337,7 +417,7 @@ Use concrete model fields such as `coordination_level` in product APIs; avoid an
 
 These are explicit review decisions. They do not prevent producing an experimental schema, simulator fixtures or a reviewable implementation plan.
 
-## 11. Source basis
+## 12. Source basis
 
 Source links below are pinned to the reviewed baseline. The proposal introduces new requirements; it does not claim that those requirements already exist in these sources.
 
