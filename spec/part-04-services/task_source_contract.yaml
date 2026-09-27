@@ -36,9 +36,9 @@ contract:
       example: '"transport.medication"'
 
     - name: priority
-      type: "Integer"
-      description: "Priority level per Part 3 (CP-009): immediate, expedited, routine, deferred."
-      example: "7"
+      type: "Enum { immediate, expedited, routine, deferred }"
+      description: "Priority level per Part 3 (CP-009). 'immediate' for life-safety. 'expedited' for time-critical. 'routine' is the default. 'deferred' for scheduled/background work."
+      example: "routine"
 
     - name: source_id
       type: "String"
@@ -123,14 +123,14 @@ contract:
     - level: "L2"
       name: "Scheduled + Constraint-Aware"
       requirement: >-
-        Bronze + deadline, constraints, and zone. Enables planned allocation
+        L1 + deadline, constraints, and zone. Enables planned allocation
         with zone-restricted and chain-of-custody tasks.
       example_implementations: ["SAP ERP production orders", "Columna Flow task management"]
 
     - level: "L3"
       name: "Full Allocation Ready"
       requirement: >-
-        Silver + chain_of_custody, compliance_flags, real-time push events.
+        L2 + chain_of_custody, compliance_flags, real-time push events.
         Enables fully automated allocation with compliance verification.
       example_implementations: ["SAP + Rocom adapter", "BMS maintenance integration"]
 
@@ -165,13 +165,13 @@ asyncapi_sketch: |
                 format: uuid
               description:
                 type: string
-              required_capability:
-                type: string
-              priority:
-                type: integer
-                minimum: 0
-                maximum: 9
-              source_id:
+               required_capability:
+                 type: string
+               priority:
+                 type: string
+                 enum: [immediate, expedited, routine, deferred]
+                 default: routine
+               source_id:
                 type: string
               status:
                 type: string
@@ -203,13 +203,12 @@ asyncapi_sketch: |
               event_type:
                 type: string
                 const: task.updated
-              task_id: { type: string, format: uuid }
-              description: { type: string }
-              priority:
-                type: integer
-                minimum: 0
-                maximum: 9
-              constraints:
+               task_id: { type: string, format: uuid }
+               description: { type: string }
+               priority:
+                 type: string
+                 enum: [immediate, expedited, routine, deferred]
+               constraints:
                 type: array
                 items: { type: string }
               deadline:

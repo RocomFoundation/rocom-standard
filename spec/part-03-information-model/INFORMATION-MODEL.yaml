@@ -42,49 +42,103 @@ agent:
       example: "robot-EVE-001"
     agent_identity:
       description: >
-        Three-layer identity model (CP-007). Distinguishes
-        how the agent is accessed, what device it is, and
-        what production unit it represents. Supports
-        issuer-agnostic resolution and UDI alignment for
-        medical devices.
+        Three-layer identity model (CP-007). access_key identifies
+        the agent type (stable across versions and units).
+        device_identifier identifies the configuration/version.
+        production_identifier identifies the individual unit.
+        Each layer declares its issuing_entity; implementations
+        MUST NOT require all layers to share the same issuer.
       type: object
       required_fields:
         - access_key
+        - device_identifier
+        - production_identifier
       fields:
         access_key:
-          type: string
+          type: object
           description: >
-            Orchestrator-assigned identifier for addressing
-            this agent. Stable across software updates.
-          example: "agt-hosp1-eve-001"
+            Canonical lookup key for the agent type. Stable across
+            software versions, configuration changes, and individual
+            units of the same model. Used for type-level addressing.
+          required_fields:
+            - issuing_entity
+            - value
+          fields:
+            issuing_entity:
+              type: string
+              enum: [gs1, hibcc, iccbba, ifa, vda5050, internal]
+              description: >
+                Entity that issued this identifier. gs1, hibcc, iccbba,
+                and ifa are the EU-designated UDI issuers (Decision 2019/939).
+                vda5050 denotes identity from VDA 5050 factsheet.
+                internal denotes operating-organisation assignment.
+                Implementations MUST treat this enumeration as extensible.
+              example: "internal"
+            value:
+              type: string
+              description: >
+                Basic UDI-DI where regulated; otherwise a stable
+                manufacturer+model key.
+              example: "EVE-transport-2026"
         device_identifier:
-          type: string
+          type: object
           description: >
-            Manufacturer-assigned unique identifier (serial number
-            or UDI-DI for medical devices). Distinguishes the
-            physical unit.
-          example: "SN-2026-EVE-00142"
+            Identifies the specific device configuration. Changes
+            when software version or capabilities change.
+          required_fields:
+            - issuing_entity
+            - value
+          fields:
+            issuing_entity:
+              type: string
+              enum: [gs1, hibcc, iccbba, ifa, vda5050, internal]
+              description: Entity that issued this identifier.
+              example: "gs1"
+            value:
+              type: string
+              description: Configuration/version-bearing identifier.
+              example: "SN-2026-EVE-00142"
+            software_version:
+              type: string
+              description: Optional, informative version string.
+              required: false
+              example: "2.1.0"
         production_identifier:
-          type: string
+          type: object
           description: >
-            Type and configuration: model, firmware version,
-            and capability profile. Two agents with the same
-            production_identifier are the same model/software.
-          example: "EVE-v2.1-transport"
-        issuer:
-          type: string
+            Identifies the individual unit. When the agent
+            communicates over VDA 5050, serial_number carries
+            the VDA 5050 serialNumber value verbatim.
+          required_fields:
+            - serial_number
+          fields:
+            serial_number:
+              type: string
+              description: VDA 5050 serialNumber verbatim.
+              example: "EVE-00142"
+            manufacture_date:
+              type: string
+              format: date
+              description: Optional manufacture date.
+              required: false
+        regulatory:
+          type: object
           description: >
-            Entity that issued this identity (orchestrator,
-            manufacturer, or regulatory body). Enables
-            issuer-agnostic resolution.
-          example: "rocom-orchestrator-hosp1"
-        udi:
-          type: string
-          description: >
-            Unique Device Identification data for regulated
-            medical devices. Populated when agent_type is
-            'robot' and the device is subject to MDR/IVDR.
+            Present only when the agent is a regulated medical
+            device under MDR (EU) 2017/745 or IVDR (EU) 2017/746.
+            Absence of this block MUST NOT be interpreted as a
+            claim of regulatory status.
           required: false
+          fields:
+            basic_udi_di:
+              type: string
+              description: Basic UDI-DI per MDR/IVDR.
+            udi_di:
+              type: string
+              description: UDI-DI for the specific device configuration.
+            eudamed_registered:
+              type: boolean
+              description: Whether the device is registered in EUDAMED.
     agent_type:
       type: string
       enum: [human, robot, cockpit]

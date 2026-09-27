@@ -4,6 +4,7 @@ set -euo pipefail
 OUTPUT_DIR="${1:-_site}"
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TEMPLATE="$REPO_DIR/build/template.html"
+HOMEPAGE="$REPO_DIR/build/homepage.html"
 
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
@@ -50,7 +51,16 @@ try:
 except Exception:
     body = clean.replace('\n', '<br>')
 
-# Build nested TOC from headings (DICOM-style)
+# Translate internal doc links: .md → .html (for published site)
+link_map = {
+    'CONTRIBUTING.md': 'contributing.html',
+    'GOVERNANCE.md': 'governance.html',
+    'README.md': 'index.html',
+}
+for md_src, html_dst in link_map.items():
+    body = body.replace(f'href="{md_src}"', f'href="{html_dst}"')
+
+# Build nested TOC from headings (collapsible)
 def build_toc(html_body):
     headings = re.findall(r'<h([1-6])(?:\s[^>]*)?>(.*?)</h\1>', html_body, re.DOTALL)
     if len(headings) < 2:
@@ -60,35 +70,28 @@ def build_toc(html_body):
     def make_slug(t):
         s = re.sub(r'[^\w\s-]', '', t[:60]).lower()
         return '-'.join(s.split())
-    # Compute depth relative to shallowest heading
-    levels = [int(l) for l, _ in headings]
-    base = min(levels)
-    items = [(int(lvl) - base, make_slug(clean_text(txt)), clean_text(txt)) for lvl, txt in headings]
-    # Simple renderer: track current depth, emit open/close as needed
-    out = ['<div class="toc"><div class="toc-title">Contents</div>']
+    base = min(int(l) for l, _ in headings)
+    items = [(int(l) - base, make_slug(clean_text(txt)), clean_text(txt)) for l, txt in headings]
+    out = ['<details class="toc"><summary>Contents</summary>']
     cur_depth = -1
     prev_depth = -1
     for i, (depth, slug, txt) in enumerate(items):
-        # Going deeper: open new <ul> for each level
         while cur_depth < depth:
             out.append('<ul>')
             cur_depth += 1
-        # Going shallower: close </li></ul> for each level, then close parent <li>
         while cur_depth > depth:
             out.append('</li></ul>')
             cur_depth -= 1
             if depth >= 0:
                 out.append('</li>')
-        # Same level as previous: close previous <li>
         if i > 0 and depth == prev_depth:
             out.append('</li>')
         out.append(f'<li><a href="#{slug}">{txt}</a>')
         prev_depth = depth
-    # Close remaining open lists
     while cur_depth >= 0:
         out.append('</li></ul>')
         cur_depth -= 1
-    out.append('</div>')
+    out.append('</details>')
     return ''.join(out)
 
 toc = build_toc(body)
@@ -113,70 +116,62 @@ if status and lic:
 # Read template and substitute
 with open(template) as f:
     tpl = f.read()
-
-content = meta + toc + '<div class="content">' + body + '</div>'
-html = tpl.replace('{{TITLE}}', title).replace('{{CONTENT}}', content)
-
+html = tpl.replace('{{TITLE}}', title).replace('{{CONTENT}}', toc + meta + '<div class="content">' + body + '</div>')
 with open(os.path.join(output_dir, out), 'w') as f:
     f.write(html)
 PYEOF
 }
 
-# Index
-[ -f "$REPO_DIR/README.md" ]      && convert_md "$REPO_DIR/README.md"      "index.html"       && echo "  index.html"
+# Homepage — custom layout
+if [ -f "$HOMEPAGE" ]; then
+  cp "$HOMEPAGE" "$OUTPUT_DIR/index.html"
+  echo "  index.html (homepage)"
+else
+  # Fallback: convert README
+  [ -f "$REPO_DIR/README.md" ] && convert_md "$REPO_DIR/README.md" "index.html" && echo "  index.html"
+fi
+
+# Governance and contributing
 [ -f "$REPO_DIR/GOVERNANCE.md" ]    && convert_md "$REPO_DIR/GOVERNANCE.md"    "governance.html"  && echo "  governance.html"
 [ -f "$REPO_DIR/CONTRIBUTING.md" ]  && convert_md "$REPO_DIR/CONTRIBUTING.md"  "contributing.html" && echo "  contributing.html"
 
-# Spec parts
-[ -f "$REPO_DIR/spec/part-01-overview/OVERVIEW.md" ]     && convert_md "$REPO_DIR/spec/part-01-overview/OVERVIEW.md"     "part-01-overview.html"     && echo "  part-01-overview.html"
-[ -f "$REPO_DIR/spec/part-01-overview/ARM.md" ]          && convert_md "$REPO_DIR/spec/part-01-overview/ARM.md"          "part-01-arm.html"            && echo "  part-01-arm.html"
+# Specification pages
+[ -f "$REPO_DIR/spec/part-01-overview/OVERVIEW.md" ] && convert_md "$REPO_DIR/spec/part-01-overview/OVERVIEW.md" "part-01-overview.html" && echo "  part-01-overview.html"
+[ -f "$REPO_DIR/spec/part-01-overview/ARM.md" ] && convert_md "$REPO_DIR/spec/part-01-overview/ARM.md" "part-01-arm.html" && echo "  part-01-arm.html"
 [ -f "$REPO_DIR/spec/part-02-conformance/CONFORMANCE.md" ] && convert_md "$REPO_DIR/spec/part-02-conformance/CONFORMANCE.md" "part-02-conformance.html" && echo "  part-02-conformance.html"
-[ -f "$REPO_DIR/spec/part-05-transport/PROFILE.md" ]       && convert_md "$REPO_DIR/spec/part-05-transport/PROFILE.md"       "part-05-transport.html"       && echo "  part-05-transport.html"
-
-# Principles & Architecture
+[ -f "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" "part-05-transport.html" && echo "  part-05-transport.html"
+[ -f "$REPO_DIR/spec/part-05-transport/PROFILE.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/PROFILE.md" "part-05-transport.html" && echo "  part-05-transport.html"
 [ -f "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" ] && convert_md "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" "principles.html" && echo "  principles.html"
 
-# YAML modules page — render as formatted requirement tables
+# Modules page — YAML rendering
 python3 - "$REPO_DIR" "$OUTPUT_DIR" "$TEMPLATE" << 'PYEOF'
 import sys, os, glob, re, subprocess
+from html import escape as html_esc
+
+def safe_esc(s):
+    return html_esc(str(s)) if not isinstance(s, bool) else str(s).lower()
+
 repo_dir, output_dir, template = sys.argv[1:]
 
-def html_esc(s):
-    return str(s).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+def render_requirements(reqs):
+    if not reqs:
+        return ''
+    rows = ''
+    for r in reqs:
+        rid = safe_esc(r.get('id', ''))
+        req = safe_esc(r.get('text', r.get('requirement', '')))
+        rows += f'<tr><td><strong>{rid}</strong></td><td>{req}</td></tr>\n'
+    return f'<h3>Requirements</h3><table><thead><tr><th>ID</th><th>Requirement</th></tr></thead><tbody>\n{rows}</tbody></table>\n'
 
 def render_principles(principles):
     if not principles:
         return ''
     rows = ''
     for p in principles:
-        pid = html_esc(p.get('id', ''))
-        stmt = html_esc(p.get('statement', ''))
-        rows += f'<tr><td><code>{pid}</code></td><td>{stmt}</td></tr>\n'
-    return f'<table><thead><tr><th style="width:140px">ID</th><th>Principle</th></tr></thead><tbody>\n{rows}</tbody></table>'
-
-def render_requirements(reqs):
-    if not reqs:
-        return ''
-    # Group by level
-    by_level = {}
-    for r in reqs:
-        lvl = r.get('level', 'unknown')
-        by_level.setdefault(lvl, []).append(r)
-    level_names = {'L1': 'L1 — Pilot / Lab', 'L2': 'L2 — Production Single Site', 'L3': 'L3 — Production Multi-Site', 'L1+': 'All Levels'}
-    sections = ''
-    for lvl in ['L1', 'L2', 'L3', 'L1+']:
-        items = by_level.get(lvl, [])
-        if not items:
-            continue
-        rows = ''
-        for r in items:
-            rid = html_esc(r.get('id', ''))
-            stmt = html_esc(r.get('statement', ''))
-            ver = html_esc(r.get('verification', ''))
-            rows += f'<tr><td><code>{rid}</code></td><td>{stmt}</td><td><small>{ver}</small></td></tr>\n'
-        lbl = level_names.get(lvl, lvl)
-        sections += f'<h3>{lbl}</h3>\n<table><thead><tr><th style="width:110px">ID</th><th>Requirement</th><th style="width:200px">Verification</th></tr></thead><tbody>\n{rows}</tbody></table>\n'
-    return sections
+        pid = safe_esc(p.get('id', ''))
+        txt = safe_esc(p.get('text', p.get('principle', '')))
+        rows += f'<tr><td><strong>{pid}</strong></td><td>{txt}</td></tr>\n'
+    return f'<h3>Principles</h3><table><thead><tr><th>ID</th><th>Principle</th></tr></thead><tbody>\n{rows}</tbody></table>\n'
 
 content = "<div class='doc-meta'><strong>Specification Modules</strong> — YAML modules rendered as requirement tables.</div><div class='content'>"
 for yp in sorted(glob.glob(os.path.join(repo_dir, 'spec', 'part-*', '*.yaml'))):
@@ -206,7 +201,7 @@ for yp in sorted(glob.glob(os.path.join(repo_dir, 'spec', 'part-*', '*.yaml'))):
     except yaml.YAMLError as e:
         print(f"  ERROR: {yn} YAML parse failed: {e}")
         data = {}
-    content += f'<h2>{html_esc(lp)}: {html_esc(yn)}</h2>\n'
+    content += f'<h2>{safe_esc(lp)}: {safe_esc(yn)}</h2>\n'
     if intro:
         content += intro + '\n'
     content += render_principles(data.get('principals', data.get('principles', [])))
@@ -215,17 +210,17 @@ for yp in sorted(glob.glob(os.path.join(repo_dir, 'spec', 'part-*', '*.yaml'))):
     if data.get('data_classes'):
         rows = ''
         for dc in data['data_classes']:
-            c = html_esc(dc.get('class', ''))
-            d = html_esc(dc.get('definition', ''))
-            pd = html_esc(dc.get('personal_data', ''))
+            c = safe_esc(dc.get('class', ''))
+            d = safe_esc(dc.get('definition', ''))
+            pd = safe_esc(dc.get('personal_data', ''))
             rows += f'<tr><td><strong>{c}</strong></td><td>{d}</td><td>{pd}</td></tr>\n'
         content += f'<h3>Data Classes</h3>\n<table><thead><tr><th>Class</th><th>Definition</th><th>Personal Data?</th></tr></thead><tbody>\n{rows}</tbody></table>\n'
     # Regulatory mapping
     if data.get('regulatory_mapping'):
         rows = ''
         for rm in data['regulatory_mapping']:
-            reg = html_esc(rm.get('regime', ''))
-            rel = html_esc(rm.get('relevance', ''))
+            reg = safe_esc(rm.get('regime', ''))
+            rel = safe_esc(rm.get('relevance', ''))
             rows += f'<tr><td><strong>{reg}</strong></td><td>{rel}</td></tr>\n'
         content += f'<h3>Regulatory Mapping</h3>\n<table><thead><tr><th>Regime</th><th>Relevance</th></tr></thead><tbody>\n{rows}</tbody></table>\n'
     content += '<hr/>\n'
@@ -270,22 +265,23 @@ def parse_sup_registry(path):
         cells = [c.strip() for c in m.group(1).split('|')]
         if len(cells) < 5 or cells[0] in ('Sup', '-----'):
             continue
-        sups[cells[0].lower()] = cells[4]  # status column
+        sups[cells[0].lower()] = cells[4]
     return sups
 
 sup_registry = parse_sup_registry(os.path.join(repo_dir, 'spec', 'cp-registry.md'))
 
 def sup_status_badge(status_text):
     s = status_text.upper().strip()
-    # Normalize: MERGED (Edition 2026a draft) -> MERGED
     s = re.split(r'\s', s)[0] if s else ''
-    if s in ('RATIFIED', 'MERGED'):
+    if s == 'MERGED':
+        return 'MERGED', 'badge-ratified'
+    elif s == 'RATIFIED':
         return 'RATIFIED', 'badge-ratified'
     elif s == 'SUPERSEDED':
         return 'SUPERSEDED', 'badge-superseded'
     elif s == 'RESERVED':
         return 'RESERVED', 'badge-reserved'
-    elif s in ('DRAFT',):
+    elif s == 'DRAFT':
         return 'DRAFT', 'badge-draft-status'
     elif s == 'PROPOSAL':
         return 'PROPOSAL', 'badge-proposal'
@@ -316,7 +312,7 @@ for sp in supps:
     sn = os.path.basename(sp).replace('.md', '')
     with open(sp) as f:
         raw = f.read()
-    # Strip all comment-header lines (# FILE:, # ===, # Sup-xxx, # Status:, # License:, # Scope:, # NOTE:, and indented # lines)
+    # Strip all comment-header lines
     clean = raw
     for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*', r'^# Scope:.*', r'^# NOTE:.*', r'^#[A-Z]{3}-\d+.*', r'^#\s+.+']:
         clean = re.sub(pat, '', clean, flags=re.M)
@@ -335,14 +331,14 @@ for sp in supps:
     status = sup_registry.get(sup_id, file_status)
     lic = file_lic
 
-    # Title from comment header (# Sup-001 ...) or filename with dashes replaced
+    # Title from comment header or filename
     title = sn.replace('-', ' ').title()
     for line in raw.splitlines():
         if line.startswith('# Sup-') or line.startswith('# sup-'):
             title = line[2:].strip()
             break
 
-    # Doc-meta — badge from status text (MERGED/DRAFT/PROPOSAL)
+    # Doc-meta
     meta = ''
     if status and lic:
         badge, cls = sup_status_badge(status)
@@ -385,16 +381,18 @@ def html_esc(s):
 
 def status_badge(status):
     s = status.upper().strip()
+    s = re.split(r'\s', s)[0] if s else ''
     cls = 'badge-proposal'
     label = s
-    if s in ('RATIFIED', 'MERGED'):
+    if s == 'MERGED':
         cls = 'badge-ratified'
-        label = 'RATIFIED'
+    elif s == 'RATIFIED':
+        cls = 'badge-ratified'
     elif s == 'SUPERSEDED':
         cls = 'badge-superseded'
     elif s == 'RESERVED':
         cls = 'badge-reserved'
-    elif s in ('DRAFT',):
+    elif s == 'DRAFT':
         cls = 'badge-draft-status'
     elif s == 'PROPOSAL':
         cls = 'badge-proposal'
@@ -458,18 +456,6 @@ def infer_part(title):
 # Parse registry
 cps, sups = parse_registry(os.path.join(repo_dir, 'spec', 'cp-registry.md'))
 
-# Build supplement ID -> output filename mapping
-sup_id_to_file = {}
-for sp in glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md')):
-    bn = os.path.basename(sp)
-    if bn.startswith('archived-'):
-        continue
-    sn = bn.replace('.md', '')
-    # Extract sup ID (e.g., "Sup-001-Orchestrator..." -> "sup-001")
-    m_sup = re.match(r'(?:Sup-|sup-)(\d+)', sn)
-    if m_sup:
-        sup_id_to_file[f"sup-{m_sup.group(1)}"] = f"supplement-{sn}.html"
-
 # Build registry_id -> filename mapping from actual CP files
 cp_files = sorted(glob.glob(os.path.join(repo_dir, 'spec', 'cp-*.md')))
 cp_id_to_file = {}
@@ -479,14 +465,18 @@ for cp_path in cp_files:
     if m_cp:
         cp_id_to_file[m_cp.group(1)] = bn
 
+# Build supplement ID -> output filename mapping
+sup_id_to_file = {}
+for sp in glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md')):
+    bn = os.path.basename(sp)
+    if bn.startswith('archived-'):
+        continue
+    sn = bn.replace('.md', '')
+    m_sup = re.match(r'(?:Sup-|sup-)(\d+)', sn)
+    if m_sup:
+        sup_id_to_file[f"sup-{m_sup.group(1)}"] = f"supplement-{sn}.html"
+
 # Sort: PROPOSAL first, then all by date descending
-def cp_sort_key(x):
-    s = x['status'].upper()
-    if s == 'PROPOSAL':
-        return (0, x['date'])
-    return (1, x['date'])
-cps_sorted = sorted(cps, key=cp_sort_key, reverse=True)
-# Fix: PROPOSAL should be first regardless, then rest by date desc
 cps_proposal = [x for x in cps if x['status'].upper() == 'PROPOSAL']
 cps_other = [x for x in cps if x['status'].upper() != 'PROPOSAL']
 cps_other.sort(key=lambda x: x['date'], reverse=True)
@@ -503,7 +493,7 @@ content = """<div class="content">
 </ul>
 
 <h2>Correction Proposals</h2>
-<p>Each CP below shows its current status. A <span class="badge badge-proposal">PROPOSAL</span> is under review and is not yet normative text. A <span class="badge badge-ratified">RATIFIED</span> has been accepted and incorporated into the specification. <span class="badge badge-superseded">SUPERSEDED</span> has been replaced by a later change.</p>
+<p>Each CP below shows its current status. A <span class="badge badge-proposal">PROPOSAL</span> is under review and is not yet normative text. A <span class="badge badge-ratified">MERGED</span> has been accepted and incorporated into the specification. <span class="badge badge-superseded">SUPERSEDED</span> has been replaced by a later change.</p>
 <table>
 <thead><tr><th style="width:70px">CP</th><th>Title</th><th style="width:90px">Status</th><th style="width:90px">Date</th><th style="width:80px">Part</th></tr></thead>
 <tbody>
@@ -530,8 +520,12 @@ content += """</tbody></table>
 for sup in sups:
     badge, _ = status_badge(sup['status'])
     sup_key = sup['id'].lower()
-    sup_filename = sup_id_to_file.get(sup_key, f"supplement-{sup_key}.html")
-    link = f'<a href="{sup_filename}">{html_esc(sup["id"])}</a>'
+    sup_status_upper = sup['status'].upper().strip()
+    if sup_status_upper == 'RESERVED':
+        link = html_esc(sup['id'])
+    else:
+        sup_filename = sup_id_to_file.get(sup_key, f"supplement-{sup_key}.html")
+        link = f'<a href="{sup_filename}">{html_esc(sup["id"])}</a>'
     content += f'<tr><td>{link}</td><td>{html_esc(sup["title"])}</td><td>{badge}</td><td>{html_esc(sup["date"])}</td></tr>\n'
 
 content += '</tbody></table></div>'
@@ -547,11 +541,10 @@ for cp_path in cp_files:
     bn = os.path.basename(cp_path).replace('.md', '')
     with open(cp_path) as f:
         raw = f.read()
-    # Get status from registry — match by CP-ID (e.g., "CP-007")
     cp_id_match = re.match(r'(cp-\d+)', bn, re.I)
-    cp_status = 'PROPOSAL'  # fallback
+    cp_status = 'PROPOSAL'
     if cp_id_match:
-        cp_id = cp_id_match.group(1).upper()  # "CP-007"
+        cp_id = cp_id_match.group(1).upper()
         for cp_entry in cps:
             if cp_entry['id'] == cp_id:
                 cp_status = cp_entry['status']
@@ -596,4 +589,6 @@ if [ -f "$REPO_DIR/build/CNAME" ]; then
 fi
 
 echo ""
-echo "Done: $(find "$OUTPUT_DIR" -name '*.html' | wc -l) pages in $OUTPUT_DIR/"
+# Count pages
+page_count=$(find "$OUTPUT_DIR" -name "*.html" | wc -l)
+echo "Done: $page_count pages in $OUTPUT_DIR/"

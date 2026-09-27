@@ -178,14 +178,14 @@ contract:
     - level: "L2"
       name: "Scheduled + Capability-Aware"
       requirement: >-
-        Bronze + availability_windows (with recurrence) and capabilities.
+        L1 + availability_windows (with recurrence) and capabilities.
         Enables shift planning and capability-based task matching.
       example_implementations: ["Columna Flow Task Management", "GAT/MinGat", "Workday"]
 
     - level: "L3"
       name: "Full Cross-Allocation Ready"
       requirement: >-
-        Silver + current_location, compliance_flags, real-time push events.
+        L2 + current_location, compliance_flags, real-time push events.
         Enables fully automated cross-allocation with compliance verification.
       example_implementations: ["Columna Flow + Rocom adapter", "GAT + Rocom fleet integration"]
 

@@ -337,7 +337,6 @@ components:
           custodySignature:
             type: string
             description: Cryptographic hash of custody state.
-            required: false
           timestamp:
             type: string
             format: date-time

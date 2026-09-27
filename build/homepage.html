@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocom Specification</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: "Inter", "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+      color: #1a2332;
+      background: #fff;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === Top Navigation === */
+    .topnav {
+      background: #fff;
+      border-bottom: 1px solid #e8ecf0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 56px;
+    }
+    .topnav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .topnav-logo {
+      height: 28px;
+      width: auto;
+      display: block;
+    }
+    .topnav-links { display: flex; gap: 0; align-items: center; }
+    .nav-group { position: relative; }
+    .nav-group > a {
+      color: #4a5568;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0 0.75rem;
+      line-height: 56px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-group > a:hover, .nav-group > a:focus {
+      color: #0a2c77;
+      border-bottom-color: #0a2c77;
+      outline: none;
+    }
+    .nav-group.has-dropdown > a::after {
+      content: ' ▾';
+      font-size: 0.6rem;
+      opacity: 0.5;
+    }
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: 56px;
+      left: 0;
+      background: #fff;
+      min-width: 240px;
+      border: 1px solid #e8ecf0;
+      border-top: 2px solid #0a2c77;
+      padding: 0.25rem 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      z-index: 200;
+    }
+    .nav-group:hover .nav-dropdown,
+    .nav-group:focus-within .nav-dropdown { display: block; }
+    .nav-dropdown a {
+      display: block;
+      color: #4a5568;
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 0.4rem 1rem;
+      transition: all 0.15s;
+    }
+    .nav-dropdown a:hover { color: #0a2c77; background: #f7f8fa; }
+    .nav-dropdown .dd-label {
+      color: #a0aec0;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      padding: 0.3rem 1rem 0.15rem;
+      pointer-events: none;
+    }
+
+    /* === Hero === */
+    .hero {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem 2rem;
+      text-align: left;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a2332;
+      margin-bottom: 0.8rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .hero h1 span { color: #0a2c77; }
+    .hero p {
+      font-size: 1.05rem;
+      color: #4a5568;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .hero-actions a {
+      display: inline-block;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: #0a2c77;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #0d3a96; }
+    .btn-secondary {
+      background: #f7f8fa;
+      color: #0a2c77;
+      border: 1px solid #e8ecf0;
+    }
+    .btn-secondary:hover { background: #e8ecf0; }
+    .meta-line {
+      font-size: 0.72rem;
+      color: #a0aec0;
+    }
+    .meta-line a { color: #718096; text-decoration: none; }
+    .meta-line a:hover { color: #0a2c77; }
+
+    /* === Four Areas === */
+    .areas {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+    .area-card {
+      padding: 1.3rem;
+      background: #f7f8fa;
+      border: 1px solid #e8ecf0;
+      border-radius: 4px;
+      transition: border-color 0.15s;
+    }
+    .area-card:hover { border-color: #0a2c77; }
+    .area-card h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0a2c77;
+      margin-bottom: 0.5rem;
+    }
+    .area-card p {
+      font-size: 0.82rem;
+      color: #4a5568;
+      line-height: 1.5;
+    }
+
+    /* === Wordmark Section === */
+    .wordmark-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 2rem 3rem;
+      border-top: 1px solid #e8ecf0;
+    }
+    .wordmark-section h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #718096;
+      margin-bottom: 1rem;
+    }
+    .wordmark-section img {
+      max-width: 400px;
+      width: 100%;
+      height: auto;
+    }
+    .wordmark-section p {
+      font-size: 0.78rem;
+      color: #a0aec0;
+      margin-top: 0.5rem;
+    }
+
+    /* === Footer === */
+    .footer {
+      border-top: 1px solid #e8ecf0;
+      padding: 1rem 2rem;
+      font-size: 0.7rem;
+      color: #a0aec0;
+      text-align: center;
+    }
+    .footer a { color: #718096; text-decoration: none; }
+    .footer a:hover { color: #0a2c77; }
+
+    /* === Focus === */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid #0a2c77;
+      outline-offset: 2px;
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .topnav-inner { padding: 0 1rem; }
+      .topnav-links { display: none; }
+      .hero { padding: 2rem 1.25rem 1.5rem; }
+      .hero h1 { font-size: 1.5rem; }
+      .areas { padding: 1.5rem 1.25rem; grid-template-columns: 1fr; }
+      .wordmark-section { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topnav">
+    <div class="topnav-inner">
+      <a href="index.html" aria-label="ROCOM home">
+        <img src="assets/rocom-wordmark-net.png" alt="ROCOM" class="topnav-logo">
+      </a>
+      <nav class="topnav-links" aria-label="Main navigation">
+        <div class="nav-group has-dropdown">
+          <a href="part-01-overview.html">Specification</a>
+          <div class="nav-dropdown">
+            <div class="dd-label">Parts</div>
+            <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
+            <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
+            <a href="part-02-conformance.html">Part 2 — Conformance</a>
+            <a href="part-05-transport.html">Part 5 — Transport Profile</a>
+            <div class="dd-label">Reference</div>
+            <a href="principles.html">Principles &amp; Architecture</a>
+            <a href="modules.html">Specification Modules (YAML)</a>
+          </div>
+        </div>
+        <div class="nav-group has-dropdown">
+          <a href="supplements.html">Supplements</a>
+          <div class="nav-dropdown">
+            <a href="supplements.html">All Supplements</a>
+            <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
+            <a href="supplement-Sup-002-Annex-A-Engineering-Practice.html">Annex A — Engineering Practice</a>
+            <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
+          </div>
+        </div>
+        <div class="nav-group"><a href="changes.html">Changes</a></div>
+        <div class="nav-group"><a href="governance.html">Governance</a></div>
+      </nav>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>Open standard for <span>healthcare robot orchestration</span></h1>
+    <p>Rocom defines the contracts between hospitals, robot vendors, and workforce systems so that heterogeneous robot fleets can be allocated, tracked, and audited across shared infrastructure — without vendor lock-in.</p>
+    <div class="hero-actions">
+      <a href="part-01-overview.html" class="btn-primary">Explore the standard</a>
+      <a href="governance.html" class="btn-secondary">Governance</a>
+    </div>
+    <div class="meta-line">
+      Edition 2026a (draft) &middot; CC-BY 4.0 &middot;
+      <a href="https://github.com/RocomFoundation/rocom-standard">Source on GitHub</a>
+    </div>
+  </div>
+
+  <div class="areas">
+    <div class="area-card">
+      <h2>Robot</h2>
+      <p>Agent identity, capability declarations, and VDA 5050 transport binding — the contract between robot and orchestrator.</p>
+    </div>
+    <div class="area-card">
+      <h2>Infrastructure</h2>
+      <p>Shared resources — lifts, doors, docks — with authority models, capacity, and time-bound grants.</p>
+    </div>
+    <div class="area-card">
+      <h2>Workforce</h2>
+      <p>Human agents, availability windows, and cross-allocation with robot fleets under unified priority.</p>
+    </div>
+    <div class="area-card">
+      <h2>Task</h2>
+      <p>Task source contracts, priority scales, chain-of-custody tracking, and compliance event auditing.</p>
+    </div>
+  </div>
+
+  <div class="wordmark-section">
+    <h2>Our Wordmark</h2>
+    <img src="assets/rocom-wordmark-white.png" alt="ROCOM wordmark — white text with layered blue accent on the O">
+    <p>The wordmark uses a custom layered O with gradient blue accent. Available in SVG and PNG. Usage guidelines coming in Sup-007.</p>
+  </div>
+
+  <div class="footer">
+    Rocom Specification &copy; 2026 ROCOM (CVR 46774043) &middot;
+    Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>
+  </div>
+
+</body>
+</html>
