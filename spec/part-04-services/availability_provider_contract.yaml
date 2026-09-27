@@ -192,137 +192,137 @@ contract:
 # ============================================================
 # AsyncAPI Skisse — Event-driven provider interface
 # ============================================================
-asyncapi_sketch: |
-  asyncapi: 3.0.0
-  info:
-    title: Rocom Availability Provider Interface
-    version: 0.1.0
-    description: >-
-      Event-driven contract for feeding agent availability data into the orchestrator
-      cross-allocation engine. Any workforce system implements this to become
-      an availability provider.
-
-  channels:
-    availability.events:
-      description: "Agent availability events — push model"
-      messages:
-        AgentRegistered:
-          name: AgentRegistered
-          payload:
-            type: object
-            required: [event_type, agent_id, agent_type, provider_id, capabilities, availability_status, cost_model, compliance_flags]
-            properties:
-              event_type:
-                type: string
-                const: agent.registered
-              agent_id:
-                type: string
-                format: uuid
-              agent_type:
-                type: string
-                enum: [human, robot, cockpit]
-              provider_id:
-                type: string
-              capabilities:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    capability_id: { type: string }
-                    name: { type: string }
-                    level: { type: string, enum: [basic, intermediate, expert] }
-              availability_status:
-                type: string
-                enum: [available, busy, unavailable, scheduled_absent]
-              availability_windows:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    start: { type: string, format: date-time }
-                    end: { type: string, format: date-time }
-                    status: { type: string, enum: [available, unavailable] }
-              cost_model:
-                type: object
-                properties:
-                  base_cost_per_minute: { type: number }
-                  min_engagement_minutes: { type: number }
-                  cost_factors:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        factor_id: { type: string }
-                        weight: { type: number }
-                        applies_when: { type: string }
-              compliance_flags:
-                type: array
-                items: { type: string }
-              timestamp:
-                type: string
-                format: date-time
-
-        AvailabilityChanged:
-          name: AvailabilityChanged
-          payload:
-            type: object
-            required: [event_type, agent_id, availability_status, timestamp]
-            properties:
-              event_type:
-                type: string
-                const: agent.availability_changed
-              agent_id: { type: string, format: uuid }
-              availability_status:
-                type: string
-                enum: [available, busy, unavailable, scheduled_absent]
-              availability_windows:
-                type: array
-              current_location:
-                type: object
-                properties:
-                  ward_or_zone: { type: string }
-                  coordinates:
+  asyncapi_sketch: |
+    asyncapi: 3.0.0
+    info:
+      title: Rocom Availability Provider Interface
+      version: 0.1.0
+      description: >-
+        Event-driven contract for feeding agent availability data into the orchestrator
+        cross-allocation engine. Any workforce system implements this to become
+        an availability provider.
+  
+    channels:
+      availability.events:
+        description: "Agent availability events — push model"
+        messages:
+          AgentRegistered:
+            name: AgentRegistered
+            payload:
+              type: object
+              required: [event_type, agent_id, agent_type, provider_id, capabilities, availability_status, cost_model, compliance_flags]
+              properties:
+                event_type:
+                  type: string
+                  const: agent.registered
+                agent_id:
+                  type: string
+                  format: uuid
+                agent_type:
+                  type: string
+                  enum: [human, robot, cockpit]
+                provider_id:
+                  type: string
+                capabilities:
+                  type: array
+                  items:
                     type: object
                     properties:
-                      x: { type: number }
-                      y: { type: number }
-                      map_id: { type: string }
-              timestamp: { type: string, format: date-time }
-
-        CapabilitiesUpdated:
-          name: CapabilitiesUpdated
-          payload:
-            type: object
-            required: [event_type, agent_id, capabilities, timestamp]
-            properties:
-              event_type:
-                type: string
-                const: agent.capabilities_updated
-              agent_id: { type: string, format: uuid }
-              capabilities:
-                type: array
-              timestamp: { type: string, format: date-time }
-
-        AgentDeregistered:
-          name: AgentDeregistered
-          payload:
-            type: object
-            required: [event_type, agent_id, reason, timestamp]
-            properties:
-              event_type:
-                type: string
-                const: agent.deregistered
-              agent_id: { type: string, format: uuid }
-              reason: { type: string }
-              timestamp: { type: string, format: date-time }
-
-  operations:
-    publishAvailability:
-      action: send
-      channel:
-        $ref: '#/channels/availability.events'
-      messages:
-        - $ref: '#/channels/availability.events/messages/AgentRegistered'
-        - $ref: '#/channels/availability.events/messages/AvailabilityChanged'
-        - $ref: '#/channels/availability.events/messages/CapabilitiesUpdated'
-        - $ref: '#/channels/availability.events/messages/AgentDeregistered'
+                      capability_id: { type: string }
+                      name: { type: string }
+                      level: { type: string, enum: [basic, intermediate, expert] }
+                availability_status:
+                  type: string
+                  enum: [available, busy, unavailable, scheduled_absent]
+                availability_windows:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      start: { type: string, format: date-time }
+                      end: { type: string, format: date-time }
+                      status: { type: string, enum: [available, unavailable] }
+                cost_model:
+                  type: object
+                  properties:
+                    base_cost_per_minute: { type: number }
+                    min_engagement_minutes: { type: number }
+                    cost_factors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          factor_id: { type: string }
+                          weight: { type: number }
+                          applies_when: { type: string }
+                compliance_flags:
+                  type: array
+                  items: { type: string }
+                timestamp:
+                  type: string
+                  format: date-time
+  
+          AvailabilityChanged:
+            name: AvailabilityChanged
+            payload:
+              type: object
+              required: [event_type, agent_id, availability_status, timestamp]
+              properties:
+                event_type:
+                  type: string
+                  const: agent.availability_changed
+                agent_id: { type: string, format: uuid }
+                availability_status:
+                  type: string
+                  enum: [available, busy, unavailable, scheduled_absent]
+                availability_windows:
+                  type: array
+                current_location:
+                  type: object
+                  properties:
+                    ward_or_zone: { type: string }
+                    coordinates:
+                      type: object
+                      properties:
+                        x: { type: number }
+                        y: { type: number }
+                        map_id: { type: string }
+                timestamp: { type: string, format: date-time }
+  
+          CapabilitiesUpdated:
+            name: CapabilitiesUpdated
+            payload:
+              type: object
+              required: [event_type, agent_id, capabilities, timestamp]
+              properties:
+                event_type:
+                  type: string
+                  const: agent.capabilities_updated
+                agent_id: { type: string, format: uuid }
+                capabilities:
+                  type: array
+                timestamp: { type: string, format: date-time }
+  
+          AgentDeregistered:
+            name: AgentDeregistered
+            payload:
+              type: object
+              required: [event_type, agent_id, reason, timestamp]
+              properties:
+                event_type:
+                  type: string
+                  const: agent.deregistered
+                agent_id: { type: string, format: uuid }
+                reason: { type: string }
+                timestamp: { type: string, format: date-time }
+  
+    operations:
+      publishAvailability:
+        action: send
+        channel:
+          $ref: '#/channels/availability.events'
+        messages:
+          - $ref: '#/channels/availability.events/messages/AgentRegistered'
+          - $ref: '#/channels/availability.events/messages/AvailabilityChanged'
+          - $ref: '#/channels/availability.events/messages/CapabilitiesUpdated'
+          - $ref: '#/channels/availability.events/messages/AgentDeregistered'

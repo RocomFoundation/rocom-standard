@@ -101,6 +101,59 @@
       pointer-events: none;
     }
 
+    /* === Hamburger button (mobile) === */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid #e8ecf0;
+      border-radius: 4px;
+      padding: 0.3rem 0.5rem;
+      cursor: pointer;
+      color: #4a5568;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .mobile-menu-btn:focus-visible {
+      outline: 2px solid #0a2c77;
+      outline-offset: 2px;
+    }
+    .mobile-menu-panel {
+      display: none;
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-bottom: 1px solid #e8ecf0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      z-index: 200;
+      padding: 0.5rem 0;
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+    .mobile-menu-panel[open] { display: block; }
+    .mobile-menu-panel a {
+      display: block;
+      padding: 0.6rem 1.5rem;
+      color: #4a5568;
+      text-decoration: none;
+      font-size: 0.88rem;
+    }
+    .mobile-menu-panel a:hover,
+    .mobile-menu-panel a:focus {
+      background: #f7f8fa;
+      color: #0a2c77;
+    }
+    .mobile-menu-panel .mm-label {
+      padding: 0.5rem 1.5rem 0.25rem;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: #a0aec0;
+    }
+
     /* === Document Header === */
     .docheader {
       max-width: 720px;
@@ -314,6 +367,7 @@
     @media (max-width: 768px) {
       .topnav-inner { padding: 0 1rem; }
       .topnav-links { display: none; }
+      .mobile-menu-btn { display: inline-block; }
       .docheader, .content { padding-left: 1.25rem; padding-right: 1.25rem; }
       details.toc, .doc-meta { margin-left: 1.25rem; margin-right: 1.25rem; }
     }
@@ -356,6 +410,24 @@
           <a href="governance.html">Governance</a>
         </div>
       </nav>
+      <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" onclick="var m=document.getElementById('mobile-menu');var b=this;m.toggleAttribute('open');b.setAttribute('aria-expanded',m.hasAttribute('open'));b.textContent=m.hasAttribute('open')?'Close':'Menu';">Menu</button>
+      <dialog class="mobile-menu-panel" id="mobile-menu" aria-label="Mobile navigation">
+        <div class="mm-label">Parts</div>
+        <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
+        <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
+        <a href="part-02-conformance.html">Part 2 — Conformance</a>
+        <a href="part-05-transport.html">Part 5 — Transport Profile</a>
+        <div class="mm-label">Reference</div>
+        <a href="principles.html">Principles &amp; Architecture</a>
+        <a href="modules.html">Specification Modules (YAML)</a>
+        <div class="mm-label">Supplements</div>
+        <a href="supplements.html">All Supplements</a>
+        <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
+        <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
+        <div class="mm-label">Other</div>
+        <a href="changes.html">Changes</a>
+        <a href="governance.html">Governance</a>
+      </dialog>
     </div>
   </div>
 

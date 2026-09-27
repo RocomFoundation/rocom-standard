@@ -38,7 +38,10 @@ agent:
       description: >
         Deprecated (CP-007). Use agent_identity instead.
         Retained for backward compatibility; must be derived from
-        agent_identity.access_key when present.
+        agent_identity.production_identifier.serial_number when present,
+        to ensure unique individual identification. Deriving from
+        access_key alone is insufficient — access_key identifies the
+        agent type, not the individual unit.
       example: "robot-EVE-001"
     agent_identity:
       description: >
@@ -147,8 +150,11 @@ agent:
       type: string
       description: >
         Deprecated (CP-007). Reference to HR system record
-        (employee ID or serial number). Use
-        agent_identity.device_identifier instead.
+        (employee ID or serial number). For robots, use
+        agent_identity.production_identifier.serial_number (individual
+        unit). For humans, use production_identifier from workforce
+        system. device_identifier is for configuration/version — not
+        for individual identification.
       required: false
     provider_id:
       type: string

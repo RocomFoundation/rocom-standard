@@ -137,9 +137,9 @@ contract:
 # ============================================================
 # AsyncAPI Skisse — Event-driven task source interface
 # ============================================================
-asyncapi_sketch: |
-  asyncapi: 3.0.0
-  info:
+  asyncapi_sketch: |
+    asyncapi: 3.0.0
+    info:
     title: Rocom Task Source Interface
     version: 0.1.0
     description: >-
@@ -147,7 +147,7 @@ asyncapi_sketch: |
       allocation engine. Any enterprise system implements this to become
       a task source.
 
-  channels:
+    channels:
     tasks.events:
       description: "Task events — push model"
       messages:
@@ -165,13 +165,13 @@ asyncapi_sketch: |
                 format: uuid
               description:
                 type: string
-               required_capability:
-                 type: string
-               priority:
-                 type: string
-                 enum: [immediate, expedited, routine, deferred]
-                 default: routine
-               source_id:
+              required_capability:
+                type: string
+              priority:
+                type: string
+                enum: [immediate, expedited, routine, deferred]
+                default: routine
+              source_id:
                 type: string
               status:
                 type: string
@@ -203,12 +203,12 @@ asyncapi_sketch: |
               event_type:
                 type: string
                 const: task.updated
-               task_id: { type: string, format: uuid }
-               description: { type: string }
-               priority:
-                 type: string
-                 enum: [immediate, expedited, routine, deferred]
-               constraints:
+              task_id: { type: string, format: uuid }
+              description: { type: string }
+              priority:
+                type: string
+                enum: [immediate, expedited, routine, deferred]
+              constraints:
                 type: array
                 items: { type: string }
               deadline:
@@ -229,7 +229,7 @@ asyncapi_sketch: |
               reason: { type: string }
               timestamp: { type: string, format: date-time }
 
-  operations:
+    operations:
     publishTask:
       action: send
       channel:

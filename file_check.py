@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import glob as globmod
 
 _DEFAULT_RELATIVE = "illegal.json"
 _SPEC_DIR = "spec"
@@ -107,5 +108,56 @@ def main():
         set_env_variables("FALSE")
         return False
 
+def validate_asyncapi_sketches(repo_dir: str) -> bool:
+    """Validate that asyncapi_sketch blocks in YAML contracts parse as valid YAML."""
+    import importlib
+    try:
+        yaml = importlib.import_module('yaml')
+    except ImportError:
+        print("  (yaml module not available — skipping AsyncAPI sketch validation)")
+        return True
+
+    ok = True
+    for ypath in globmod.glob(os.path.join(repo_dir, 'spec', '**', '*.yaml'), recursive=True):
+        try:
+            with open(ypath) as f:
+                data = yaml.safe_load(f)
+        except Exception as e:
+            print(f"  {os.path.relpath(ypath, repo_dir)}: outer YAML parse error: {e}")
+            ok = False
+            continue
+
+        # Find asyncapi_sketch in nested dicts
+        def find_sketches(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if k == 'asyncapi_sketch' and isinstance(v, str):
+                        try:
+                            inner = yaml.safe_load(v)
+                            if 'channels' not in inner:
+                                print(f"  {os.path.relpath(ypath, repo_dir)}: sketch missing 'channels'")
+                                ok = False
+                            elif 'operations' not in inner:
+                                print(f"  {os.path.relpath(ypath, repo_dir)}: sketch missing 'operations'")
+                                ok = False
+                            else:
+                                print(f"  {os.path.relpath(ypath, repo_dir)}: AsyncAPI sketch valid")
+                        except yaml.YAMLError as e:
+                            print(f"  {os.path.relpath(ypath, repo_dir)}: sketch parse error: {e}")
+                            ok = False
+                    else:
+                        find_sketches(v, f"{path}.{k}")
+        find_sketches(data)
+    return ok
+
+
 if __name__ == "__main__":
     main()
+
+    # Also validate AsyncAPI sketches
+    import sys
+    repo = os.path.dirname(os.path.abspath(__file__))
+    print("\n--- Validating AsyncAPI sketches ---")
+    if not validate_asyncapi_sketches(repo):
+        set_env_variables("FALSE")
+        sys.exit(1)

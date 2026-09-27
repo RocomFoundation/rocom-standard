@@ -60,22 +60,42 @@ link_map = {
 for md_src, html_dst in link_map.items():
     body = body.replace(f'href="{md_src}"', f'href="{html_dst}"')
 
-# Build nested TOC from headings (collapsible)
+# Demote h1 → h2 in body (docheader already provides the page h1)
+body = re.sub(r'<h1([^>]*)id="([^"]*)">([^<]*)</h1>', r'<h2\1 id="\2">\3</h2>', body)
+body = re.sub(r'<h1([^>]*)>([^<]*)</h1>', r'<h2\1>\2</h2>', body)
+
+# Build nested TOC from headings — use pandoc's actual id attributes
 def build_toc(html_body):
-    headings = re.findall(r'<h([1-6])(?:\s[^>]*)?>(.*?)</h\1>', html_body, re.DOTALL)
-    if len(headings) < 2:
+    # Match headings with id attributes: <hN ... id="...">text</hN>
+    headings = re.findall(r'<h([1-6])(?:\s[^>]*)?id="([^"]*)"(?:\s[^>]*)?>(.*?)</h\1>', html_body, re.DOTALL)
+    # Also match headings without id (fallback)
+    headings_no_id = re.findall(r'<h([1-6])(?:\s[^>]*)?>(.*?)</h\1>', html_body, re.DOTALL)
+    if not headings and len(headings_no_id) < 2:
         return ''
+
     def clean_text(t):
         return re.sub(r'<[^>]+>', '', t).strip()
+
+    # Build id map: for headings without id, generate slug
+    id_set = set(h[1] for h in headings)
     def make_slug(t):
         s = re.sub(r'[^\w\s-]', '', t[:60]).lower()
         return '-'.join(s.split())
-    base = min(int(l) for l, _ in headings)
-    items = [(int(l) - base, make_slug(clean_text(txt)), clean_text(txt)) for l, txt in headings]
+
+    if headings:
+        items = [(int(l), hid, clean_text(txt)) for l, hid, txt in headings]
+    else:
+        items = [(int(l), make_slug(clean_text(txt)), clean_text(txt)) for l, txt in headings_no_id]
+
+    if len(items) < 2:
+        return ''
+
+    base = min(lvl for lvl, _, _ in items)
     out = ['<details class="toc"><summary>Contents</summary>']
     cur_depth = -1
     prev_depth = -1
-    for i, (depth, slug, txt) in enumerate(items):
+    for i, (lvl, hid, txt) in enumerate(items):
+        depth = lvl - base
         while cur_depth < depth:
             out.append('<ul>')
             cur_depth += 1
@@ -86,7 +106,7 @@ def build_toc(html_body):
                 out.append('</li>')
         if i > 0 and depth == prev_depth:
             out.append('</li>')
-        out.append(f'<li><a href="#{slug}">{txt}</a>')
+        out.append(f'<li><a href="#{hid}">{txt}</a>')
         prev_depth = depth
     while cur_depth >= 0:
         out.append('</li></ul>')
