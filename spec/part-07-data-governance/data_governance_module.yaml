@@ -9,7 +9,7 @@
 #        fleet-binding (VDA 5050), availability-provider, task-source
 # NOTE:  Parameters marked PENDING-DEPLOYMENT-PROFILE are set per
 #        deployment profile, not by this specification.
-#        input via the Systematic workshop. Do not invent values.
+#        input via the Systematic workshop. Use placeholder values.
 # =====================================================================
 
 module: data-governance

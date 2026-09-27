@@ -57,9 +57,9 @@ def scan_file(filepath: str, phrases: list[str], case_sensitive: bool) -> list[t
 
 def set_env_variables(value: str):
     output_file = os.getenv('GITHUB_OUTPUT')
-    val = value
-    with open(output_file, "a") as env_file:
-        env_file.write(f"FILE_CHECK={val}")
+    if output_file:
+        with open(output_file, "a") as env_file:
+            env_file.write(f"FILE_CHECK={value}")
 
 def main():
     parser = argparse.ArgumentParser(description="Scan spec/ for illegal phrases.")
