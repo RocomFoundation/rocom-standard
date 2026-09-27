@@ -162,17 +162,17 @@ Each plane interface uses location information differently. The model accommodat
 
 **Robot:** A robot map identifies waypoints, docking stations, no-go zones, and navigable areas by identifiers within that map's namespace. The map may cover a subset of the building. Map revisions create new coordinate sets; location identity is carried by the map's own identifiers.
 
-**Infrastructure:** The BMS and access-control systems identify rooms, zones, doors, lifts, and docks using identifiers from the facility's space management system (for example, Uniclass, a local facility register, or an operator-defined scheme). These identifiers carry authority for physical access.
+**Infrastructure:** The BMS and access-control systems identify rooms, zones, doors, lifts, and docks using identifiers from the facility's space management system (for example, Uniclass, a local facility register, or an operator-defined scheme). These identifiers identify the place; access authority is determined by separate resource-grant and authorisation mechanisms (CP-008).
 
 **Workforce:** Staffing and allocation systems identify departments, wards, teams, and duty stations. These identifiers are organisational rather than spatial; they map to physical places through the facility hierarchy.
 
-**Task:** The task source identifies origin and destination locations for work. These references MUST be resolvable through the Infrastructure interface's resource model so that access, routing, and capacity decisions are based on the authoritative resource representation.
+**Task:** The task source identifies origin and destination locations for work. For workflows that depend on the Infrastructure plane (shared doors, lifts, docks, capacity), these references MUST be resolvable through the Infrastructure interface's resource model so that access, routing, and capacity decisions are based on the authoritative resource representation. Workflows that do not require shared infrastructure may use their own location references without cross-plane resolution.
 
 Informative examples of identifier schemes in use (none mandatory for ROCOM conformance):
 
 | Scheme | Namespace | Example identifier | Typical plane |
 |---|---|---|---|
-| GS1 GLN | GS1 (global, 14-digit) | `70123456789012` | Task, Workforce |
+| GS1 GLN | GS1 (global, 13-digit, namespace must be declared) | `701234567890123` | Task, Workforce |
 | URI (deployment-local) | Operator-defined | `urn:facility:st-olavs:room:3B-12` | Infrastructure |
 | Robot map ID | Vendor map | `map-v3:waypoint:dock-3B` | Robot |
 | Local register | Hospital ITSM | `FAC-ZONE-3B` | Infrastructure, Workforce |
@@ -200,12 +200,12 @@ When a workflow requires the same physical place to be identified across multipl
 
 ### 5.4 Four-plane location example — informative
 
-A delivery task originates in the task system with destination `GLN:70123456789012` (the pharmacy receiving area). The following mappings exist:
+A delivery task originates in the task system with destination `GLN:701234567890123` (the pharmacy receiving area). The following mappings exist:
 
 | Mapping | Source | Target | Granularity | Verified |
 |---|---|---|---|---|
-| Task → Infrastructure | `GLN:70123456789012` | `urn:facility:pharmacy:receiving` | `identical` | Yes, 2026-09-15 |
-| Infrastructure → Robot | `urn:facility:pharmacy:receiving` | `map-v3:waypoint:dock-pharmacy` | `identical` | Yes, 2026-09-15 |
+| Task → Infrastructure | `GLN:701234567890123` | `urn:facility:pharmacy:receiving` | `identical` | Yes, 2026-09-15 |
+| Infrastructure → Robot | `urn:facility:pharmacy:receiving` | `map-v3:waypoint:dock-pharmacy` | `contains` | Yes, 2026-09-15 |
 
 The robot receives an order referencing `map-v3:waypoint:dock-pharmacy`. The Infrastructure plane verifies that the room `urn:facility:pharmacy:receiving` has active access authority (no building mode restriction). The Workforce plane confirms a qualified person is available to receive. The task completes with correlated evidence: task ID, robot identity, resource grant, workforce acceptance, and the location mappings used.
 
@@ -352,8 +352,12 @@ Test identifiers below are proposed. Each evidence record must identify the buil
 | CPL-T16 | cpl-req-901, cpl-req-902 | Omit a timing value, use an infinite bound, exclude failed requests from measurement, or change the declared load. The relevant conformance assertion fails rather than returning success. |
 | CPL-T17 | cpl-req-903, cpl-req-904 | Exceed a configured bound and attempt to relax it silently. Produce the breach and defined action; reject or version/authorise the profile change and retain the original measurement context. |
 | CPL-T18 | cpl-req-1001, cpl-req-1002, cpl-req-1003, cpl-req-1004 | Import a legacy Multi-Site L3 claim. Preserve its original semantics; do not infer any new plane L3 claim. Confirm traceable assurance mapping, versioned publication and absence of a new certificate before the revision and evidence process support it. |
+| CPL-T19 | cpl-req-801, cpl-req-804 | Register locations with and without explicit namespace. A bare string without namespace is rejected. Two places with the same name in different namespaces are treated as distinct. A GS1 GLN identifier without the namespace `GS1` declared is rejected even if the numeric value is well-formed. |
+| CPL-T20 | cpl-req-802, cpl-req-805, cpl-req-806 | Create a `contains` mapping (room → waypoint), a `contained_in` reverse mapping, and an `identical` mapping. Change an `identical` mapping to `unknown` and verify that automated decisions stop relying on it. Remove the source attribution from a mapping and verify it is rejected. |
+| CPL-T21 | cpl-req-803 | Change the access permission or occupancy state of a location. The location identity and identifier remain unchanged. Create a new identifier for the same physical place and verify the previous identifier's state is not silently transferred to the new one. |
+| CPL-T22 | cpl-req-807 | Submit a task with a destination that cannot be resolved across the required plane interfaces. The workflow is rejected or escalated; it is not admitted based on name match, partial identifier match, or proximity. A workflow that does not depend on Infrastructure is admitted without cross-plane resolution. |
 
-Required integrated demonstration: submit a healthcare transport task; allocate an eligible robot and the required workforce interaction; request shared infrastructure; make the intended lift unavailable; propose an allowed alternative; obtain revised commitments; complete or explicitly escalate; reconcile all resource releases and correlated task evidence. Repeat with connection loss, stale occupancy, a human refusal and a building safety override. Expected outcomes must be asserted from the approved workflow policy, not improvised by the demonstration.
+Required integrated demonstration: submit a healthcare transport task with a destination that maps across three namespaces (Task → Infrastructure → Robot); allocate an eligible robot and the required workforce interaction; request shared infrastructure; verify the location mappings carry granularity, source attribution, and validity. Make the intended lift unavailable; propose an allowed alternative; obtain revised commitments; complete or explicitly escalate; reconcile all resource releases and correlated task evidence. Repeat with connection loss, stale occupancy, a human refusal, a building safety override, and a location mapping degraded to `unknown`. Expected outcomes must be asserted from the approved workflow policy, not improvised by the demonstration.
 
 ## 9. Migration and publication — normative on adoption
 
@@ -382,7 +386,7 @@ Implement versioned, evidence-backed L0–L3 declarations per control-plane inte
 | Package | Deliverable | Acceptance |
 |---|---|---|
 | WP1 — Standards mapping | The requirement migration ledger, proposed Part 2 text and amendments to Parts 3–7/Sup-001/Sup-003/Sup-005. | Every affected legacy level-tagged requirement is accounted for; reviewers can see the semantic changes. No global search-and-replace of L1/L2/L3. |
-| WP2 — Declaration schemas | Versioned machine-readable schemas for declarations, plane capabilities, service-quality profiles and operational state. Valid/invalid fixtures and a validator. | Target vs claim, L0 vs not-provided, evidence vs runtime condition, profile digests and provenance are validated. Test CPL-T01–03 and CPL-T16–18. |
+| WP2 — Declaration schemas | Versioned machine-readable schemas for declarations, plane capabilities, service-quality profiles, operational state, and location mappings. Valid/invalid fixtures and a validator. | Target vs claim, L0 vs not-provided, evidence vs runtime condition, profile digests, provenance, namespace enforcement, and granularity are validated. Test CPL-T01–03, CPL-T16–22. |
 | WP3 — Registry and adapters | Provider/interface registration; version/capability support; stable agent/resource references; per-plane status/freshness. | Exercise all four adapter types and preserve two distinct units of the same robot type. A disconnected adapter does not appear available. |
 | WP4 — Workflow admission | Dependency declaration, minimum-level/capability matching, assurance checks and explicit reasons for rejection or alternative flow. | Mixed-level, absent-plane and incompatible-version fixtures behave as CPL-T13–14 require. |
 | WP5 — Dynamic coordination | State-driven replanning, commitment acknowledgements/refusals, bounded negotiation, retries, leases, release and reconciliation. | Pass per-plane tests and integrated normal/degraded/recovery scenarios without requiring routine manual reconfiguration. No prescribed vendor planning algorithm. |
