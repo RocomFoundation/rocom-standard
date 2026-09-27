@@ -1,5 +1,5 @@
 {
-    "version": "0.2",
-    "phrases": ["Ask Egil", "spørg Egil", "do not invent"],
-    "note": "TODO and FIXME are allowed in YAML templates and conformance statement examples. This check targets phrases that indicate unresolved governance decisions or missing vendor evaluation."
+    "version": "0.3",
+    "phrases": ["Ask Egil", "spørg Egil", "do not invent", "check with Egil"],
+    "note": "TODO and FIXME are allowed in YAML templates and conformance statement examples. This check targets phrases that indicate unresolved governance decisions or missing vendor evaluation. Replace with 'TBD — requires Board decision' or 'pending deployment profile'."
 }
