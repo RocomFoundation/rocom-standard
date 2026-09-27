@@ -202,7 +202,23 @@
     .meta-line a { color: #718096; text-decoration: none; }
     .meta-line a:hover { color: #0a2c77; }
 
-    /* === Four Areas === */
+    /* === Four control planes — restrained colours from the layered O === */
+    .areas-intro {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1rem 2rem 0;
+    }
+    .areas-intro h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a2332;
+      margin-bottom: 0.5rem;
+    }
+    .areas-intro p {
+      font-size: 0.9rem;
+      color: #4a5568;
+      line-height: 1.6;
+    }
     .areas {
       max-width: 1100px;
       margin: 0 auto;
@@ -213,13 +229,16 @@
     }
     .area-card {
       padding: 1.3rem;
-      background: #f7f8fa;
+      background: var(--plane-tint);
       border: 1px solid #e8ecf0;
+      border-top: 2px solid var(--plane-accent);
       border-radius: 4px;
-      transition: border-color 0.15s;
     }
-    .area-card:hover { border-color: #0a2c77; }
-    .area-card h2 {
+    .area-card--robot { --plane-accent: #00b5cc; --plane-tint: #f2fafb; }
+    .area-card--infrastructure { --plane-accent: #459eda; --plane-tint: #f4f8fc; }
+    .area-card--workforce { --plane-accent: #2460cd; --plane-tint: #f3f6fc; }
+    .area-card--task { --plane-accent: #102878; --plane-tint: #f5f6fa; }
+    .area-card h3 {
       font-size: 0.95rem;
       font-weight: 700;
       color: #0a2c77;
@@ -229,30 +248,6 @@
       font-size: 0.82rem;
       color: #4a5568;
       line-height: 1.5;
-    }
-
-    /* === Wordmark Section === */
-    .wordmark-section {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 2rem 2rem 3rem;
-      border-top: 1px solid #e8ecf0;
-    }
-    .wordmark-section h2 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #718096;
-      margin-bottom: 1rem;
-    }
-    .wordmark-section img {
-      max-width: 400px;
-      width: 100%;
-      height: auto;
-    }
-    .wordmark-section p {
-      font-size: 0.78rem;
-      color: #a0aec0;
-      margin-top: 0.5rem;
     }
 
     /* === Footer === */
@@ -280,7 +275,7 @@
       .hero { padding: 2rem 1.25rem 1.5rem; }
       .hero h1 { font-size: 1.5rem; }
       .areas { padding: 1.5rem 1.25rem; grid-template-columns: 1fr; }
-      .wordmark-section { padding: 1.5rem 1.25rem; }
+      .areas-intro { padding: 1rem 1.25rem 0; }
     }
   </style>
 </head>
@@ -351,30 +346,30 @@
     </div>
   </div>
 
+  <section aria-labelledby="control-planes-title">
+    <div class="areas-intro">
+      <h2 id="control-planes-title">Four control planes, one shared standard</h2>
+      <p>The four blue layers of the O in our wordmark reflect these connected planes: distinct roles, working together through open interfaces.</p>
+    </div>
   <div class="areas">
-    <div class="area-card">
-      <h2>Robot</h2>
+    <div class="area-card area-card--robot">
+      <h3>Robot</h3>
       <p>Agent identity, capability declarations, and VDA 5050 transport binding — the contract between robot and orchestrator.</p>
     </div>
-    <div class="area-card">
-      <h2>Infrastructure</h2>
+    <div class="area-card area-card--infrastructure">
+      <h3>Infrastructure</h3>
       <p>Shared resources — lifts, doors, docks — with authority models, capacity, and time-bound grants.</p>
     </div>
-    <div class="area-card">
-      <h2>Workforce</h2>
+    <div class="area-card area-card--workforce">
+      <h3>Workforce</h3>
       <p>Human agents, availability windows, and cross-allocation with robot fleets under unified priority.</p>
     </div>
-    <div class="area-card">
-      <h2>Task</h2>
+    <div class="area-card area-card--task">
+      <h3>Task</h3>
       <p>Task source contracts, priority scales, chain-of-custody tracking, and compliance event auditing.</p>
     </div>
   </div>
-
-  <div class="wordmark-section">
-    <h2>Our Wordmark</h2>
-    <img src="assets/rocom-wordmark-white.png" alt="ROCOM wordmark — dark letterforms with layered blue interaction detail on the O">
-    <p>The wordmark uses a custom layered O showing the interaction detail — robot, infrastructure, and workforce meeting in the center.</p>
-  </div>
+  </section>
 
   <div class="footer">
     Rocom Specification &copy; 2026 ROCOM (CVR 46774043) &middot;
