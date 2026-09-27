@@ -1,6 +1,6 @@
 # FILE: spec/part-01-overview/ARM.md
 # ARM — Architecture Reference Model
-# Status: DRAFT 0.1 (2026-08-12)
+# Status: ADOPTED 1.0, Edition 2026a
 # License: CC-BY 4.0
 # Scope: Position Rocom against HL7 FHIR, IHE, and VDA 5050.
 # NOTE:  Positioning document. No normative requirements.

@@ -28,8 +28,8 @@ of the same commit as the CP/Sup content.
 | Sup-001 | Orchestrator Service Interface | 2df097b | 2026-08-12 | MERGED |
 | Sup-002 | Annex A — Engineering Practice Notes | e257ab5 | 2026-08-18 | MERGED |
 | Sup-003 | BMS Infrastructure Contract | c75b931 (scope), 1d742df (normative) | 2026-08-21 | MERGED |
-| Sup-004 | Governance Structure: Board and Working Groups | — | 2026-09-26 | DRAFT |
-| Sup-005 | Certification Provider Requirements | — | 2026-09-26 | DRAFT |
+| Sup-004 | Governance Structure: Board and Working Groups | — | 2026-09-26 | ADOPTED |
+| Sup-005 | Certification Provider Requirements | — | 2026-09-26 | ADOPTED |
 | Sup-006 | — | — | — | RESERVED |
 
 ## Numbering Rules

@@ -119,7 +119,7 @@ toc = build_toc(body)
 # Doc-meta block
 meta = ''
 if status and lic:
-    badge = 'DRAFT'
+    badge = "ADOPTED"
     cls = 'badge-draft'
     if any(w in status.lower() for w in ('final', 'published')):
         badge = 'FINAL'
@@ -159,7 +159,7 @@ fi
 [ -f "$REPO_DIR/spec/part-01-overview/OVERVIEW.md" ] && convert_md "$REPO_DIR/spec/part-01-overview/OVERVIEW.md" "part-01-overview.html" && echo "  part-01-overview.html"
 [ -f "$REPO_DIR/spec/part-01-overview/ARM.md" ] && convert_md "$REPO_DIR/spec/part-01-overview/ARM.md" "part-01-arm.html" && echo "  part-01-arm.html"
 [ -f "$REPO_DIR/spec/part-02-conformance/CONFORMANCE.md" ] && convert_md "$REPO_DIR/spec/part-02-conformance/CONFORMANCE.md" "part-02-conformance.html" && echo "  part-02-conformance.html"
-[ -f "$REPO_DIR/spec/part-02-conformance/control-plane-service-levels-DRAFT.md" ] && convert_md "$REPO_DIR/spec/part-02-conformance/control-plane-service-levels-DRAFT.md" "part-02-service-levels-draft.html" && echo "  part-02-service-levels-draft.html"
+[ -f "$REPO_DIR/spec/part-02-conformance/SERVICE-LEVELS.md" ] && convert_md "$REPO_DIR/spec/part-02-conformance/SERVICE-LEVELS.md" "part-02-service-levels.html" && echo "  part-02-service-levels.html"
 [ -f "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" "part-05-transport.html" && echo "  part-05-transport.html"
 [ -f "$REPO_DIR/spec/part-05-transport/PROFILE.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/PROFILE.md" "part-05-transport.html" && echo "  part-05-transport.html"
 [ -f "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" ] && convert_md "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" "principles.html" && echo "  principles.html"
@@ -218,6 +218,8 @@ def sup_status_badge(status_text):
         return 'RESERVED', 'badge-reserved'
     elif s == 'DRAFT':
         return 'DRAFT', 'badge-draft-status'
+    elif s == 'ADOPTED':
+        return 'ADOPTED', 'badge-ratified'
     elif s == 'PROPOSAL':
         return 'PROPOSAL', 'badge-proposal'
     elif s in ('FINAL', 'PUBLISHED'):
@@ -329,6 +331,8 @@ def status_badge(status):
         cls = 'badge-reserved'
     elif s == 'DRAFT':
         cls = 'badge-draft-status'
+    elif s == 'ADOPTED':
+        cls = 'badge-ratified'
     elif s == 'PROPOSAL':
         cls = 'badge-proposal'
     return f'<span class="badge {cls}">{label}</span>', cls

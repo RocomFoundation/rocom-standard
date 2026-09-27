@@ -1,7 +1,7 @@
 # FILE: spec/part-03-information-model/INFORMATION-MODEL.yaml
 # =====================================================================
 # Rocom — Part 3: Information Model
-# Status: DRAFT 0.2 (2026-09-27) — Edition 2026b-draft
+# Status: ADOPTED 1.0, Edition 2026a
 # License: CC-BY 4.0 (see LICENSE-SPEC)
 # Scope: Core data types referenced by Parts 4, 5, 6, 7.
 #        Contracts and profiles MUST use these types verbatim.
@@ -16,13 +16,13 @@
 #
 # Coordinated amendments (Part 2 revision, control-plane service levels):
 #   Location model extended with namespace/identifier (cpl-req-801).
-#   See spec/part-02-conformance/control-plane-service-levels-DRAFT.md §14.1
+#   See spec/part-02-conformance/SERVICE-LEVELS.md §14.1
 # =====================================================================
 
 module: information-model
 part: 3
-version: 0.2-draft
-edition: 2026b-draft
+version: 1.0
+edition: 2026a
 
 # ====================================================================
 # Agent — the canonical agent record (Part 4, Part 5)

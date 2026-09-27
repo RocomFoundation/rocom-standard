@@ -4,7 +4,7 @@
 |-------|-------|
 | **Supplement** | Sup-004 |
 | **Title** | Governance Structure: Board and Working Groups |
-| **Status** | DRAFT |
+| **Status** | ADOPTED (Edition 2026a) |
 | **Edition** | 2026a |
 | **Depends On** | GOVERNANCE.md (ownership, stewardship) |
 | **License** | CC-BY 4.0 |

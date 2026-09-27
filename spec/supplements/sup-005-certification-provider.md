@@ -4,7 +4,7 @@
 |-------|-------|
 | **Supplement** | Sup-005 |
 | **Title** | Certification Provider Requirements |
-| **Status** | DRAFT |
+| **Status** | ADOPTED (Edition 2026a) |
 | **Edition** | 2026a |
 | **Depends On** | Part 2 (Conformance), GOVERNANCE.md (Certification Program), Sup-004 (Governance Structure) |
 | **License** | CC-BY 4.0 |

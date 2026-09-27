@@ -1,22 +1,21 @@
-# Revision proposal — Part 2: Control-plane service levels L0–L3
+# Part 2: Control-plane service levels L0–L3
 
-**Status:** DRAFT PROPOSAL (v0.2) — for review; not an adopted ROCOM requirement.  
-**Version:** 0.2-draft  
+**Status:** ADOPTED (Edition 2026a)  
+**Version:** 1.0  
 **Date:** 27 September 2026.  
+**Adopted by:** ROCOM Foundation (CVR 46774043).  
 **Requested by:** Egil Utheim.  
-**Proposed implementation owner:** Viktor, following specification review.  
-**Baseline:** RocomFoundation/rocom-standard, commit `2ad13a1`.  
 **Primary target:** Part 2 — Conformance.  
 **Also affects:** Parts 3–7, the four control-plane contracts, Sup-001, Sup-003 and certification guidance in Sup-005.  
-**Change mechanism:** Full Part revision, with coordinated amendments to affected Parts. No CP or Supplement number is assigned by this draft.  
-**Suggested repository location:** `spec/part-02-conformance/control-plane-service-levels-DRAFT.md`.
+**Repository location:** `spec/part-02-conformance/SERVICE-LEVELS.md`.
 
 ## Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1-draft | 27 Sept 2026 | Initial proposal: L0–L3 per plane, location model (§5), service quality (§6), tests CPL-T01–22 |
-| 0.2-draft | 27 Sept 2026 | **Integrated specification.** Added: §13 L1 implementation profile with complete example, §14 L2/L3 progression, §15 Part 3/4 alignment notes. Versioned header throughout. |
+| 0.2-draft | 27 Sept 2026 | Integrated specification: §12 L1 profile, §13 L2/L3 progression, §14 Part 3/4 alignment, §15 supplier guide |
+| 1.0 | 27 Sept 2026 | **ADOPTED.** Normative text. All requirements reserved. Declaration schema `control-planes-1.0`. |
 
 ## Executive decision
 
@@ -43,7 +42,7 @@ Today, Part 2 describes levels in terms of deployment scale, while the availabil
 
 The standard defines externally observable contracts and outcomes. Vendor planning algorithms, commercial models, local fleet optimisation and staffing policies remain implementation-defined, subject to the declared contracts and existing requirements.
 
-## 2. Proposed replacement for Part 2 §1–§1.1 — normative on adoption
+## 2. Proposed replacement for Part 2 §1–§1.1 — normative
 
 ### 2.1 Dimensions
 
@@ -89,7 +88,7 @@ The standard defines externally observable contracts and outcomes. Vendor planni
 
 **cpl-req-012 — Auditable decisions, L1–L3.** Evidence SHALL connect requests, relevant observations, applicable policy versions, decisions, acknowledgements and final outcomes. It SHALL distinguish simulation/test evidence from production evidence and apply Part 7's data minimisation and access controls. An integration layer does not gain authority to collect additional personal data merely because its coordination level increases.
 
-## 3. Requirements per control plane — normative on adoption
+## 3. Requirements per control plane — normative
 
 L0 uses the common declaration and manual-handoff requirements. The following rows define the minimum additional capability at each integrated level. Each row applies in addition to the lower-level rows for the same plane.
 
@@ -127,7 +126,7 @@ Lease expiry is not proof that a physical resource is empty. The resulting avail
 | cpl-req-402 | L2 | The interface SHALL publish task progress, authorised amendments, cancellations and exceptions within service-quality bounds. Predefined responses SHALL account for deadlines, readiness, dependencies and applicable evidence requirements. Acceptance, execution and completion SHALL remain distinct states. |
 | cpl-req-403 | L3 | The interface SHALL support event-driven reevaluation and coordinated reassignment/replanning when needs or dependencies change. It SHALL preserve CP-009's priority origin and preemption restrictions, CP-008's resource authority and applicable chain-of-custody. A changed need may trigger a new plan; it SHALL NOT authorise a participant to silently increase priority. |
 
-## 4. Composition across planes — normative on adoption
+## 4. Composition across planes — normative
 
 **cpl-req-501 — Explicit dependencies.** Each workflow profile SHALL declare the plane interfaces on which it depends, their minimum levels, required capabilities, authority boundaries and applicable service-quality profiles. A plane may be omitted only where it is genuinely outside that workflow; the omission and rationale SHALL be recorded.
 
@@ -139,7 +138,7 @@ Lease expiry is not proof that a physical resource is empty. The resulting avail
 
 Example: `Robot L3 · Infrastructure L2 · Workforce L1 · Task L3` is a valid capability description. A workflow using all four planes cannot claim end-to-end L3. A different workflow may have a different set of dependencies, but must declare and test that set explicitly.
 
-## 5. Location model — system-agnostic — normative on adoption
+## 5. Location model — system-agnostic — normative
 
 All four planes must be able to refer to and exchange information about the same physical place. The systems involved may use different identifier schemes, different coordinate systems, and different naming conventions. This section provides a shared location model that is independent of any particular standard, vendor, or region.
 
@@ -219,7 +218,7 @@ The robot receives an order referencing `map-v3:waypoint:dock-pharmacy`. The Inf
 
 If the facility register is revised and the room identifier changes, the mappings are updated and reverified. The robot map waypoint may remain unchanged; the granularity relationship is preserved and reasserted.
 
-## 6. Measurable service-quality profiles — normative on adoption
+## 6. Measurable service-quality profiles — normative
 
 Coordination level expresses supported behaviour. Service-quality profiles express how reliably and how quickly the behaviour is delivered. A contractual SLA can refer to these profiles and add commercial terms; the level itself does not promise a universal response time or uptime percentage.
 
@@ -243,7 +242,7 @@ Coordination level expresses supported behaviour. Service-quality profiles expre
 
 No new universal numeric thresholds are introduced in this proposal. Existing contract defaults, such as Sup-003's door-response deadline and its request-level override mechanism, remain applicable until explicitly revised. The responsible profile owners must approve any additional concrete values for each workflow and deployment class before conformance testing. Missing values are implementation/review blockers, not zero, infinity or a default success.
 
-## 7. Declaration and evidence model — normative on adoption
+## 7. Declaration and evidence model — normative
 
 The next declaration version SHALL add an explicit `coordination` object. The current legacy `parts_declared[].level` field must retain its historical meaning while old declarations remain in circulation.
 
@@ -265,7 +264,7 @@ For an intended but untested integration, `target_level` MAY be L3 while `declar
 The example below deliberately contains **no conformance or certification claim**. The `example` references identify documents to be supplied; they are not operational endpoints or evidence. Viktor should implement the versioned schema and validation before populating evidence-backed declarations.
 
 ```yaml
-schema_version: rocom-conformance/control-planes-0.1-draft
+schema_version: rocom-conformance/control-planes-1.0
 declaration_kind: implementation_target
 specification:
   edition: 2026a-draft
@@ -279,7 +278,7 @@ context:
   sites: [example-hospital]
   domain_profile: Healthcare
 coordination:
-  model: control-plane-levels-0.1-draft
+  model: control-plane-levels-1.0
   interfaces:
     - id: robot-adapter
       plane: robot
@@ -336,7 +335,7 @@ workflows:
 
 The proposed schema shall enumerate provision states `planned`, `provided` and `not_provided`. A conformant L1–L3 claim requires `provided`, complete context/build/profile data and supporting evidence. The abbreviated target example omits those claim-only fields intentionally. Runtime condition is carried separately; it does not rewrite this target declaration.
 
-## 8. Verification and acceptance — normative on adoption
+## 8. Verification and acceptance — normative
 
 Test identifiers below are proposed. Each evidence record must identify the build, profiles, configuration, fixture, stimulus, timestamps and assertions. Simulation can demonstrate contract behaviour; physical deployment claims additionally require evidence for the real interfaces and environment covered by the claim.
 
@@ -367,7 +366,7 @@ Test identifiers below are proposed. Each evidence record must identify the buil
 
 Required integrated demonstration: submit a healthcare transport task with a destination that maps across three namespaces (Task → Infrastructure → Robot); allocate an eligible robot and the required workforce interaction; request shared infrastructure; verify the location mappings carry granularity, source attribution, and validity. Make the intended lift unavailable; propose an allowed alternative; obtain revised commitments; complete or explicitly escalate; reconcile all resource releases and correlated task evidence. Repeat with connection loss, stale occupancy, a human refusal, a building safety override, and a location mapping degraded to `unknown`. Expected outcomes must be asserted from the approved workflow policy, not improvised by the demonstration.
 
-## 9. Migration and publication — normative on adoption
+## 9. Migration and publication — normative
 
 **cpl-req-1001 — No automatic equivalence.** Legacy L1/Pilot, L2/Single Site and L3/Multi-Site SHALL NOT be converted mechanically into new coordination levels. Historical claims SHALL preserve their model, edition, build and scope. New coordination claims require the new declaration model and corresponding evidence.
 
@@ -429,7 +428,7 @@ Use concrete model fields such as `coordination_level` in product APIs; avoid an
 
 These are explicit review decisions. They do not prevent producing an experimental schema, simulator fixtures or a reviewable implementation plan.
 
-## 12. L1 implementation profile — normative on adoption
+## 12. L1 implementation profile — normative
 
 This section defines a concrete L1 starting point for any supplier who wants to deliver a single-plane integration against the specification. It draws requirements from this document, the Part 3 information model, and the Part 4 service contracts. An L1 implementation need not provide location mappings, runtime replanning, or cross-plane coordination — but it must establish identity, capability, explicit acceptance/refusal, and traceable evidence.
 
@@ -476,12 +475,12 @@ The following is a complete, testable L1 integration scenario for the Robot plan
 
 **Declaration:**
 
-```yaml
-schema_version: rocom-conformance/control-planes-0.2-draft
+ ```yaml
+schema_version: rocom-conformance/control-planes-1.0
 declaration_kind: implementation_target
 specification:
-  edition: 2026a-draft
-  revision_status: proposed
+  edition: 2026a
+  revision_status: adopted
 implementer:
   organization: Example hospital
   product: Meal transport robot
@@ -491,7 +490,7 @@ context:
   sites: [example-hospital]
   domain_profile: Healthcare
 coordination:
-  model: control-plane-levels-0.2-draft
+  model: control-plane-levels-1.0
   interfaces:
     - id: robot-adapter
       plane: robot
@@ -624,7 +623,7 @@ L3 builds on L2 by introducing **runtime adaptation without manual reconfigurati
 
 End-to-end L3 requires every participating plane to reach L3 for the relevant operations. See cpl-req-503 for the composition rules. A mixed-level deployment (e.g., Robot L3 · Infrastructure L2 · Workforce L1 · Task L3) is a valid capability description but cannot claim end-to-end L3 for a workflow that uses all four planes.
 
-## 14. Part 3 and Part 4 alignment — normative on adoption
+## 14. Part 3 and Part 4 alignment — normative
 
 This section documents the coordinated amendments required for Parts 3 and 4 when the DRAFT is adopted. These amendments are part of the revision, not standalone corrections.
 
@@ -712,9 +711,9 @@ The availability provider and task source contracts use `agent_id` and define th
 
 ### 14.3 Versioning strategy
 
-When adopted, the declaration schema version becomes `rocom-conformance/control-planes-1.0`. The Part 3 information model edition becomes `2026b`. The Part 4 contracts increment to `v0.2.0`.
+The declaration schema version is `rocom-conformance/control-planes-1.0`. The Part 3 information model is Edition 2026a (v1.0). The Part 4 contracts are v1.0.0.
 
-Legacy declarations using schema version `rocom-conformance/control-planes-0.1-draft` remain valid during the compatibility period defined in cpl-req-1003. The migration adapter must not manufacture missing state or dynamic capability.
+Legacy declarations using schema version `rocom-conformance/control-planes-0.1-draft` or `0.2-draft` remain valid during the compatibility period defined in cpl-req-1003. The migration adapter must not manufacture missing state or dynamic capability.
 
 ## 15. Start at L1 — supplier quick reference — informative
 
@@ -757,7 +756,7 @@ When L2 is stable:
 
 ### 15.5 Version pinning
 
-This document is version `0.2-draft`. Implementation against this version should record the schema version in the declaration (`schema_version: rocom-conformance/control-planes-0.2-draft`). When the specification is adopted, the version will increment to `1.0`. The migration ledger (cpl-req-1002) will document any semantic changes between the draft and adopted version.
+This document is version `1.0`. Implementation should record the schema version in the declaration (`schema_version: rocom-conformance/control-planes-1.0`). The migration ledger (cpl-req-1002) documents any semantic changes between the draft and adopted version.
 
 ## 16. Source basis
 

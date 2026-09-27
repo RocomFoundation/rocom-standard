@@ -1,6 +1,6 @@
 # =====================================================================
 # Rocom OpenSpec v0.2 — Module: data-governance
-# Status: DRAFT 0.1 (2026-08-11)
+# Status: ADOPTED 1.0, Edition 2026a
 # Author: Rocom project (Egil), drafted with Claude
 # Scope: Data classification, egress control and third-country
 #        transfer governance for all data crossing the IT/OT boundary
@@ -13,7 +13,7 @@
 # =====================================================================
 
 module: data-governance
-version: 0.1-draft
+version: 1.0
 spec_parent: rocom-openspec-v0.2
 depends_on: [identity-trust]   # attribution requires machine identity
 

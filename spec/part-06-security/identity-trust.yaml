@@ -1,7 +1,7 @@
 # FILE: spec/part-06-security/identity-trust.yaml
 # =====================================================================
 # Rocom — Part 6: Security (Identity & Trust)
-# Status: DRAFT 0.1 (2026-08-12) — Edition 2026a (draft)
+# Status: ADOPTED 1.0, Edition 2026a
 # License: CC-BY 4.0 (see LICENSE-SPEC)
 # Scope: Machine identity (non-human identity, NHI) and trust
 #        requirements for all agents, adapters, providers and
@@ -15,8 +15,8 @@
 
 module: identity-trust
 part: 6
-version: 0.1-draft
-edition: 2026a-draft
+version: 1.0
+edition: 2026a
 
 terminology:
   orchestrator: >

@@ -1,6 +1,6 @@
 # CP-009 — Priority and Preemption Model
 
-**Status:** MERGED (Edition 2026a draft)
+**Status:** MERGED (Edition 2026a)
 **Target:** Part 4 — Service Contracts
 **Also affects:** Part 3 (Information Model), Part 7 (Data Governance),
 Sup-003 (BMS Infrastructure Contract)

@@ -1,6 +1,6 @@
 # FILE: spec/supplements/Sup-002-Annex-A-Engineering-Practice.md
 # Sup-002 — Annex A: Engineering Practice Notes
-# Status: Published (2026a draft)
+# Status: Published (Edition 2026a)
 # License: CC-BY 4.0
 # Scope: Informative — how the Rocom specification and its reference tooling are produced, and what evidence exists
 

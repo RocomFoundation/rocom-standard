@@ -4,7 +4,7 @@
 # to feed work requests into the orchestrator allocation engine.
 #
 # Coordinated with Part 2 revision (control-plane service levels).
-# L0-L3 conformance aligned to DRAFT v0.2 §3.4 Task plane.
+# L0-L3 conformance aligned to SERVICE-LEVELS v1.0 §3.4 Task plane.
 # zone extended with namespace/identifier (Part 3 amendment).
 #
 # Implementations:
@@ -15,7 +15,7 @@
 
 contract:
   name: "Task Source Interface"
-  version: "0.2.0"
+  version: "1.0.0"
   description: >-
     Source-agnostic contract for feeding task requests into the orchestrator
     allocation engine. Any enterprise system (ERP, BMS, turnus, manual entry)

@@ -1,6 +1,6 @@
 # FILE: spec/supplements/Sup-001-Orchestrator-Service-Interface.md
 # Sup-001 — Orchestrator Service Interface
-# Status: MERGED (Edition 2026a draft)
+# Status: MERGED (Edition 2026a)
 # License: CC-BY 4.0
 # Scope: Define the normative orchestrator service interface by splitting
 #        a management system product API into standard and product-specific endpoints.

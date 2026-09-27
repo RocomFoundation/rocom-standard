@@ -1,7 +1,7 @@
 # FILE: spec/part-01-overview/OVERVIEW.md
 # =====================================================================
 # Rocom — Part 1: Overview and Scope
-# Status: DRAFT 0.1 (2026-08-12) — Edition 2026a (draft)
+# Status: ADOPTED 1.0, Edition 2026a
 # License: CC-BY 4.0 (see LICENSE-SPEC)
 # =====================================================================
 
