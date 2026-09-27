@@ -1,11 +1,9 @@
-# FILE: spec/part-01-architecture-reference-model/ARM.md
+# FILE: spec/part-01-overview/ARM.md
 # ARM — Architecture Reference Model
 # Status: DRAFT 0.1 (2026-08-12)
 # License: CC-BY 4.0
-# Scope: Position Rocom within the broader healthcare interoperability
-#        landscape by mapping Rocom's architecture layers against
-#        established reference models (HL7 FHIR, IHE, VDA 5050).
-# NOTE:  This is a positioning document. No normative requirements.
+# Scope: Position Rocom against HL7 FHIR, IHE, and VDA 5050.
+# NOTE:  Positioning document. No normative requirements.
 
 ## Purpose
 

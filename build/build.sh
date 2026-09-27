@@ -38,7 +38,7 @@ for line in raw.splitlines():
 
 # Strip comment-header lines, pandoc convert
 clean = raw
-for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*']:
+for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*', r'^# Scope:.*', r'^# NOTE:.*']:
     clean = re.sub(pat, '', clean, flags=re.M)
 clean = re.sub(r'\n{3,}', '\n\n', clean)
 try:
@@ -188,19 +188,23 @@ for yp in sorted(glob.glob(os.path.join(repo_dir, 'spec', 'part-*', '*.yaml'))):
     clean = raw
     for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*', r'^# Scope:.*', r'^# NOTE:.*']:
         clean = re.sub(pat, '', clean, flags=re.M)
-    # Try to render intro text via pandoc
+    # Try to render intro text via pandoc (full content, not truncated)
     intro = ''
     try:
         result = subprocess.run(['pandoc', '-f', 'markdown', '-t', 'html', '--wrap=none'],
-            input=clean[:500], capture_output=True, text=True, check=True)
+            input=clean, capture_output=True, text=True, check=True)
         intro = result.stdout.strip()
     except:
         pass
-    # Parse YAML for tables
+    # Parse YAML for tables — fail loudly on parse errors
     import yaml
     try:
         data = yaml.safe_load(raw)
-    except:
+        if data is None:
+            print(f"  WARNING: {yn} parsed as empty YAML — no tables rendered")
+            data = {}
+    except yaml.YAMLError as e:
+        print(f"  ERROR: {yn} YAML parse failed: {e}")
         data = {}
     content += f'<h2>{html_esc(lp)}: {html_esc(yn)}</h2>\n'
     if intro:
@@ -241,7 +245,53 @@ import sys, os, glob, re, subprocess
 repo_dir, output_dir, template = sys.argv[1:]
 
 supps = sorted([s for s in glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md'))
-                     if not os.path.basename(s).startswith('archived-')])
+                      if not os.path.basename(s).startswith('archived-')])
+
+# Build registry-based status lookup for supplements
+def parse_sup_registry(path):
+    sups = {}
+    if not os.path.exists(path):
+        return sups
+    with open(path) as f:
+        text = f.read()
+    in_section = False
+    for line in text.splitlines():
+        if line.strip() == '## Supplements':
+            in_section = True
+            continue
+        elif line.startswith('## '):
+            in_section = False
+            continue
+        if not in_section:
+            continue
+        m = re.match(r'^\|(.*)\|$', line.strip())
+        if not m:
+            continue
+        cells = [c.strip() for c in m.group(1).split('|')]
+        if len(cells) < 5 or cells[0] in ('Sup', '-----'):
+            continue
+        sups[cells[0].lower()] = cells[4]  # status column
+    return sups
+
+sup_registry = parse_sup_registry(os.path.join(repo_dir, 'spec', 'cp-registry.md'))
+
+def sup_status_badge(status_text):
+    s = status_text.upper().strip()
+    # Normalize: MERGED (Edition 2026a draft) -> MERGED
+    s = re.split(r'\s', s)[0] if s else ''
+    if s in ('RATIFIED', 'MERGED'):
+        return 'RATIFIED', 'badge-ratified'
+    elif s == 'SUPERSEDED':
+        return 'SUPERSEDED', 'badge-superseded'
+    elif s == 'RESERVED':
+        return 'RESERVED', 'badge-reserved'
+    elif s in ('DRAFT',):
+        return 'DRAFT', 'badge-draft-status'
+    elif s == 'PROPOSAL':
+        return 'PROPOSAL', 'badge-proposal'
+    elif s in ('FINAL', 'PUBLISHED'):
+        return 'FINAL', 'badge-final'
+    return s, 'badge-draft'
 
 # Build index page
 content = "<div class='doc-meta'><strong>Supplementary Documents</strong></div><div class='content'>"
@@ -273,11 +323,17 @@ for sp in supps:
     clean = re.sub(r'\n{3,}', '\n\n', clean)
 
     # Extract metadata from comment headers
-    status = ''
-    lic = ''
+    file_status = ''
+    file_lic = ''
     for line in raw.splitlines():
-        if line.startswith('# Status:'): status = line[len('# Status:'):].strip()
-        if line.startswith('# License:'): lic = line[len('# License:'):].strip()
+        if line.startswith('# Status:'): file_status = line[len('# Status:'):].strip()
+        if line.startswith('# License:'): file_lic = line[len('# License:'):].strip()
+
+    # Prefer registry status over file header
+    sup_id_match = re.match(r'(?:Sup-|sup-)(\d+)', sn)
+    sup_id = f"sup-{sup_id_match.group(1)}" if sup_id_match else sn.lower()
+    status = sup_registry.get(sup_id, file_status)
+    lic = file_lic
 
     # Title from comment header (# Sup-001 ...) or filename with dashes replaced
     title = sn.replace('-', ' ').title()
@@ -286,14 +342,10 @@ for sp in supps:
             title = line[2:].strip()
             break
 
-    # Doc-meta
+    # Doc-meta — badge from status text (MERGED/DRAFT/PROPOSAL)
     meta = ''
     if status and lic:
-        badge = 'PROPOSAL'
-        cls = 'badge-draft'
-        if any(w in status.lower() for w in ('final', 'published')):
-            badge = 'FINAL'
-            cls = 'badge-final'
+        badge, cls = sup_status_badge(status)
         meta = (
             f"<div class='doc-meta'>"
             f"<strong>Document:</strong> {title} &nbsp;"
@@ -406,6 +458,18 @@ def infer_part(title):
 # Parse registry
 cps, sups = parse_registry(os.path.join(repo_dir, 'spec', 'cp-registry.md'))
 
+# Build supplement ID -> output filename mapping
+sup_id_to_file = {}
+for sp in glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md')):
+    bn = os.path.basename(sp)
+    if bn.startswith('archived-'):
+        continue
+    sn = bn.replace('.md', '')
+    # Extract sup ID (e.g., "Sup-001-Orchestrator..." -> "sup-001")
+    m_sup = re.match(r'(?:Sup-|sup-)(\d+)', sn)
+    if m_sup:
+        sup_id_to_file[f"sup-{m_sup.group(1)}"] = f"supplement-{sn}.html"
+
 # Build registry_id -> filename mapping from actual CP files
 cp_files = sorted(glob.glob(os.path.join(repo_dir, 'spec', 'cp-*.md')))
 cp_id_to_file = {}
@@ -465,8 +529,9 @@ content += """</tbody></table>
 
 for sup in sups:
     badge, _ = status_badge(sup['status'])
-    sup_slug = sup['id'].lower()
-    link = f'<a href="supplement-{sup_slug}.html">{html_esc(sup["id"])}</a>'
+    sup_key = sup['id'].lower()
+    sup_filename = sup_id_to_file.get(sup_key, f"supplement-{sup_key}.html")
+    link = f'<a href="{sup_filename}">{html_esc(sup["id"])}</a>'
     content += f'<tr><td>{link}</td><td>{html_esc(sup["title"])}</td><td>{badge}</td><td>{html_esc(sup["date"])}</td></tr>\n'
 
 content += '</tbody></table></div>'
@@ -477,23 +542,26 @@ html = tpl.replace('{{TITLE}}', 'Changes — Correction Proposals &amp; Suppleme
 with open(os.path.join(output_dir, 'changes.html'), 'w') as f:
     f.write(html)
 
-# Individual CP pages
+# Individual CP pages — status from registry, not file header
 for cp_path in cp_files:
     bn = os.path.basename(cp_path).replace('.md', '')
     with open(cp_path) as f:
         raw = f.read()
-    file_status = 'PROPOSAL'
-    for line in raw.splitlines():
-        m = re.match(r'^\*\*Status:\*\*\s*(.+)', line)
-        if m:
-            file_status = m.group(1).strip()
-            break
+    # Get status from registry — match by CP-ID (e.g., "CP-007")
+    cp_id_match = re.match(r'(cp-\d+)', bn, re.I)
+    cp_status = 'PROPOSAL'  # fallback
+    if cp_id_match:
+        cp_id = cp_id_match.group(1).upper()  # "CP-007"
+        for cp_entry in cps:
+            if cp_entry['id'] == cp_id:
+                cp_status = cp_entry['status']
+                break
     title = bn
     for line in raw.splitlines():
         if line.startswith('# '):
             title = line[2:].strip()
             break
-    badge, _ = status_badge(file_status)
+    badge, _ = status_badge(cp_status)
     status_meta = f"<div class='doc-meta'><strong>Correction Proposal: {html_esc(bn)}</strong> &nbsp; {badge}</div>"
     clean = re.sub(r'^\*\*Status:\*\*.*$', '', raw, flags=re.M)
     clean = re.sub(r'\n{3,}', '\n\n', clean)

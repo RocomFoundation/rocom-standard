@@ -1,12 +1,8 @@
 # FILE: docs/principles-and-architecture/PRINCIPLES.md
-# =====================================================================
 # Rocom — Principles and Architecture
 # Status: DRAFT 0.1 (2026-08-12) — Edition 2026a (draft)
 # License: CC-BY 4.0 (see LICENSE-SPEC)
-# Scope: Architectural principles, security-by-design philosophy,
-#        data governance model, and regulatory alignment for
-#        healthcare robot orchestration.
-# =====================================================================
+# Scope: Security-by-design, data governance, regulatory alignment.
 
 ## The Pattern: Open Protocol, Profile on Top
 
