@@ -51,8 +51,16 @@
       color: #fff;
       text-decoration: none;
       letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
     }
     .topnav-brand span { color: #7eb8da; }
+    .topnav-logo {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
 
     /* Grouped nav with dropdowns */
     .topnav-links { display: flex; gap: 0; align-items: center; }
@@ -339,7 +347,10 @@
 
   <div class="topnav">
     <div class="topnav-inner">
-      <a href="index.html" class="topnav-brand">R<span>ocom</span> Specification</a>
+      <a href="index.html" class="topnav-brand">
+        <img src="assets/rocom-wordmark-white.png" alt="ROCOM" class="topnav-logo">
+        <span>Specification</span>
+      </a>
       <nav class="topnav-links">
         <!-- Specification Parts -->
         <div class="nav-group has-dropdown">

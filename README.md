@@ -46,6 +46,13 @@ does not certify its own implementations. During the transition period
 before providers are appointed, self-declaration of conformance is
 available per Part 2. See [Governance](governance.html) and Sup-005.
 
+## Our Wordmark
+
+The ROCOM wordmark brings separate layers into one shared form. The coloured
+O reflects the standard’s purpose: enabling robots, people, task systems
+and building infrastructure to work together through open interfaces.
+Balanced lettering and a blue palette give the mark a clear, coherent identity.
+
 ## Licensing
 
 - **Specifications:** Creative Commons Attribution 4.0 (CC-BY 4.0)

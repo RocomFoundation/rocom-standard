@@ -515,6 +515,12 @@ for cp_path in cp_files:
 PYEOF
 echo "  changes.html"
 
+# Static brand assets
+if [ -d "$REPO_DIR/build/assets" ]; then
+  cp -R "$REPO_DIR/build/assets" "$OUTPUT_DIR/assets"
+  echo "  assets (brand files)"
+fi
+
 # CNAME for custom domain
 if [ -f "$REPO_DIR/build/CNAME" ]; then
   cp "$REPO_DIR/build/CNAME" "$OUTPUT_DIR/CNAME"
