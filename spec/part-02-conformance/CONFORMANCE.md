@@ -8,13 +8,30 @@
 
 A system claiming Rocom conformance declares a level per Part. Levels
 are cumulative: a system at L2 satisfies all L1 requirements of that
-Part.
+Part. Healthcare-specific requirements (chain of custody, restricted
+zone enforcement) may apply at any level — they are a profile
+dimension, not a level dimension.
 
 | Level | Name | Scope |
 |-------|------|-------|
-| L1 | Pilot / Lab | Minimal conformance for proof-of-concept and controlled evaluation. |
-| L2 | Production — Single Site | Full production readiness for a single deployment (hospital or municipality). |
-| L3 | Production — Multi-Site / Regional | Federated operations across multiple deployments; automatic lifecycle management. |
+| L1 | Pilot | Minimal conformance for proof-of-concept and controlled evaluation. |
+| L2 | Single Site | Full production readiness for a single deployment (hospital or municipality). |
+| L3 | Multi-Site | Federated operations across multiple deployments; automatic lifecycle management. |
+
+## 1.1 Dimensions
+
+Conformance has two independent dimensions:
+
+1. **Level** (L1–L3): scope of operational complexity — from pilot to
+   multi-site federated operations.
+2. **Profile** (General / Healthcare): domain-specific requirements.
+   The Healthcare profile adds chain-of-custody, restricted zone
+   enforcement, and compliance event reporting. These requirements may
+   be declared at any level.
+
+A system declaring the Healthcare profile at L1 satisfies all L1
+General requirements plus the Healthcare profile additions. This avoids
+the previous conflict where Part 5 treated Healthcare as L3-only.
 
 # 2. Conformance Declaration
 

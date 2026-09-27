@@ -240,7 +240,8 @@ python3 - "$REPO_DIR" "$OUTPUT_DIR" "$TEMPLATE" << 'PYEOF'
 import sys, os, glob, re, subprocess
 repo_dir, output_dir, template = sys.argv[1:]
 
-supps = sorted(glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md')))
+supps = sorted([s for s in glob.glob(os.path.join(repo_dir, 'spec', 'supplements', '*.md'))
+                     if not os.path.basename(s).startswith('archived-')])
 
 # Build index page
 content = "<div class='doc-meta'><strong>Supplementary Documents</strong></div><div class='content'>"

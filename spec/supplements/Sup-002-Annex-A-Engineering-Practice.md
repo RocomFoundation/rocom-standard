@@ -92,7 +92,7 @@ says so.
 | 3 | Model access, identity, logging and security as shared technical layers | Identity and trust (Part 6) and data governance (Part 7) defined as layers of the standard, not per system; immutable audit trail | Parts 6 and 7 published | Met |
 | 4 | The business must make itself legible to AI; tacit knowledge into a reliable reference model | EPF plus memory journal as the machine-readable model the agents actually work against, updated at each decision | Framework in active use; decision log for the period | Met |
 | 5 | AI needs a controlled picture of reality (retrieval quality) | One canonical source per item — reference, never duplicate; explicit rules for what is internal and what is public | Single-source rule; submodule architecture; per-commit review of what may be published | Met |
-| 6 | Representative test sets; evaluations repeated on change | Conformance suite per Part with graded levels; re-test on new versions is part of the certification regime | Part 2 defines levels and the conformance statement format; executable suite exists in a separate public repository | **Partial — 2 of 20 registered requirements have executable tests** |
+| 6 | Representative test sets; evaluations repeated on change | Conformance suite per Part with graded levels; re-test on new versions is part of the certification regime | Part 2 defines levels and the conformance statement format; executable suite exists in a separate public repository | **Partial — 2 of 20 registered requirements have executable tests** (as of 2026-08-22, commit `26a2cdd`) |
 | 7 | New control mechanisms for variable output | Oracle and invariant testing of agent-produced work; independent verification as a fixed role — agent reports, an independent party checks, a human approves | "Done means a commit URL on origin"; independent fetch verification of every delivery in the period | Met |
 | 8 | **Cognitive debt**: AI produces code faster than humans can review it | See A.4. Two instances, both caught by independent verification, neither by reading | Build status report; downgraded belief records | **Two deviations found; rules introduced** |
 | 9 | Code and workflows need human owners | Toolchain ownership assigned to the engineering lead; change proposals ratified by the maintainer; moving the boundary between open and closed requires explicit human approval | Ownership assignment; change-proposal issues; approval gate | Met — ongoing |
@@ -160,7 +160,8 @@ has been renamed to match.
 
 ## A.5 What we cannot claim
 
-- **Conformance coverage is 2 of 20 registered requirements.** Both have a
+- **Conformance coverage is 2 of 20 registered requirements** (as of 2026-08-22,
+  commit `26a2cdd` in `rocom-conformance`). Both have a
   negative fixture, and one has a published mutation proof: an assertion was
   deliberately inverted, the test went red, and both the green and red run
   reports are committed. The remaining 18 have no executable test.

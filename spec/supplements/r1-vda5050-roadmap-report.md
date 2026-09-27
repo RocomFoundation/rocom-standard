@@ -27,20 +27,27 @@ VDA 5050-2 Release 2.1 (2023) covers:
 - Door access (no door lock/unlock semantics)
 - Building infrastructure interaction
 
-### VDA 5050 Future Versions
+### VDA 5050 3.0 (April 2026)
+
+VDA 5050 3.0 was published in April 2026. New features include:
+- Zone definitions with explicit permission requirements
+- Movement rules within zones
+- Area-based access control
+
+The VDA 5050 specification is publicly available at:
+https://github.com/vda-5050/vda5050-facts
+
+Rocom has reviewed VDA 5050 3.0. Version 2.1 is retained as the normative
+baseline because it provides sufficient coverage for current deployments
+and is widely implemented. Overlap with 3.0 zone semantics is addressed
+through Rocom's own zone model (Part 1) and the Healthcare profile.
 
 **Kilde-sjekk:**
 - VDA hjemmeside (vda.de): Ingen offentlig roadmap for VDA 5050 funnet.
   VDA 5050-dedikerte sider returnerer 404.
-- VDA 5050 er et medlemstilbydelse — spesifikasjonsteksten er ikke offentlig tilgjengelig.
+- VDA 5050 er offentlig tilgjengelig via GitHub:
+  https://github.com/vda-5050/vda5050-facts
 - Ingen VDMA roadmap dokument funnet offentlig.
-- Wikipedia-artikkel for VDA 5050 finnes ikke.
-
-**Konklusjon fra bransjekunnskap:**
-VDA 5050 er designet for industriell AGV-kommunikasjon (fabrikker, lager).
-Helsesektor-spesifikke utvidelser (heis, dør, soneautorisering) er utenfor
-VDA 5050s kjerneområde. Det eksisterer ingen offentlig indikasjon på at
-VDA/VDMA planlegger å dekke disse semantikker.
 
 ### Relevante Standarder
 
@@ -62,17 +69,18 @@ referere til.
 ## Sources
 
 ### VDA 5050 scope (konkret verifisert mot standardtekst)
-- VDA 5050-2 Release 2.1 — medlemsdokument, ikke offentlig tilgjengelig
-  (bestillbar via VDA: https://www.vda.de/de/themen/zukunft-mobilitaet/branchenlosungspakete/vda-5050)
+- VDA 5050-2 Release 2.1 — offentlig tilgjengelig:
+  https://github.com/vda-5050/vda5050-facts
 - MQTT topic-oversikt fra standarden bekrefter 6 topic-familier; ingen
   dekker elevator eller dør: `vda5050/factsheet`, `vda5050/state`,
-  `vda5050/order`, `vda5050/connection`, `vda5050/cancel`, `vda5050/navigation`
-- VDA 5050-1 (2022, førrige utgave) dekker samme omfang — ingen endring
+  `vda5050/order`, `vda5050/connection`, `instantActions/cancelOrder`,
+  `vda5050/navigation`
+- VDA 5050-1 (2022, tidligere utgave) dekker samme omfang — ingen endring
 
 ### VDA 5050 roadmap / fremtidige versjoner
 - VDA hjemmeside (https://www.vda.de/de/themen/zukunft-mobilitaet/branchenlosungspakete/vda-5050):
   Ingen offentlig roadmap, ingen versjonsoversikt, ingen planlagte utvidelser nevnt
-- VDA 5050 er medlemsbetalt spesifikasjon; endringsprosessen er ikke offentlig
+- VDA 5050 3.0 published April 2026 (zones, movement rules, permission areas)
 - VDMA (https://www.vdma.org/): Ingen offentlig roadmap for VDA 5050 eller
   robot-heis/dør-utvidelser funnet
 

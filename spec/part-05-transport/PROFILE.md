@@ -16,10 +16,21 @@ This profile is based on **VDA 5050 version 2.1** (VDA 5050-2, Release 2.1, 2023
 All references to "VDA 5050" in this profile refer to this specific version unless
 explicitly stated otherwise.
 
-The VDA 5050 topic namespace `vda5050/` and message schemas defined in VDA 5050 v2.1
-are used without modification. Rocom extensions use the separate `rocom/v0/` namespace.
+VDA 5050 3.0 was published in April 2026 and introduces zones, movement
+rules, and areas requiring explicit permission. Rocom has reviewed these
+changes. Version 2.1 is retained as the normative baseline because it
+provides sufficient coverage for current deployments and is widely
+implemented. Overlap with 3.0 features (notably zone semantics) is
+addressed through Rocom's own zone model (Part 1) and the Healthcare
+profile, rather than by depending on a newer VDA release.
+
+The VDA 5050 specification is publicly available:
+https://github.com/vda-5050/vda5050-facts
 
 ## 2. Conformance Levels
+
+Levels follow Part 2 (L1 = Pilot, L2 = Single Site, L3 = Multi-Site).
+The Healthcare profile adds domain-specific requirements at every level.
 
 ### Level 1 — VDA 5050 Baseline
 The system SHALL:
@@ -27,7 +38,8 @@ The system SHALL:
 - [P-2.1.2] Publish periodic state updates on `vda5050/state/<serialNumber>`.
 - [P-2.1.3] Accept orders on `vda5050/order/<serialNumber>` and execute node sequences.
 - [P-2.1.4] Publish connection state on `vda5050/connection/<serialNumber>`.
-- [P-2.1.5] Support order cancellation on `vda5050/cancel/<serialNumber>`.
+- [P-2.1.5] Support order cancellation via `instantActions` with `cancelOrder`
+  as defined in VDA 5050 2.1 (topic: `vda5050/instantActions/<serialNumber>`).
 
 ### Level 2 — Rocom Core
 The system SHALL additionally:
@@ -36,8 +48,13 @@ The system SHALL additionally:
 - [P-2.2.3] Declare Rocom-profile capabilities on `rocom/v0/capability/declare` using keys from the capability registry.
 - [P-2.2.4] Report `complianceStatus` as `passed`, `failed`, or `exception` for each zone transition.
 
-### Level 3 — Rocom Healthcare
+### Level 3 — Multi-Site Transport
 The system SHALL additionally:
+- [P-2.3.5] Support federated connection state: publish `rocom/v0/connection/federated`
+  with cross-site routing information when operating across multiple deployment sites.
+
+### Healthcare Profile (any level)
+When the Healthcare profile is declared, the system SHALL additionally:
 - [P-2.3.1] Publish chain-of-custody events on `rocom/v0/chainOfCustody/event` for tasks requiring chain-of-custody (`chainOfCustody: true` in capability params).
 - [P-2.3.2] Enforce restricted-zone access: robot MUST publish a `restricted_zone_check` compliance event before entering a restricted zone, and SHALL NOT proceed if `complianceStatus` is `failed`.
 - [P-2.3.3] Ensure chain-of-custody event completeness: every `picked_up` action MUST have a corresponding `delivered` or `handed_off` action within the task lifetime.

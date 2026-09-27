@@ -1,10 +1,10 @@
 # FILE: spec/supplements/Sup-001-Orchestrator-Service-Interface.md
 # Sup-001 — Orchestrator Service Interface
-# Status: PROPOSAL (2026-08-12)
+# Status: MERGED (Edition 2026a draft)
 # License: CC-BY 4.0
 # Scope: Define the normative orchestrator service interface by splitting
 #        a management system product API into standard and product-specific endpoints.
-# NOTE:  This is a scope proposal. No normative text until approved.
+# NOTE:  Incorporated into Edition 2026a draft as normative text.
 
 ## Purpose
 
@@ -96,8 +96,10 @@ approach among many.
 
 ## Pending Approval
 
-This supplement is a PROPOSAL. No normative text is created until Egil
-reviews and approves the split. After approval:
-- Part 8 is drafted as OpenAPI spec (vendor-neutral, "orchestrator")
-- Conformance Postman collection is generated
-- The management system's collection is updated to reference the standard via submodule
+This supplement is MERGED into Edition 2026a draft. The 13 normative
+endpoints are incorporated as the orchestrator service interface
+requirement. After full Edition publication:
+- OpenAPI spec is published as a standalone machine-readable artifact
+- Conformance Postman collection is generated from the OpenAPI spec
+- Implementations reference the standard via submodule and extend with
+  product-specific endpoints
