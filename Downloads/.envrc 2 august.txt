@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "🚀 Loading Humatopia environment..."
+
+# Load Terraform outputs into a temporary file
+terraform -chdir=./terraform output -json > tf_outputs.json
+
+# Export core variables
+export PROJECT_ID=$(jq -r '.project_id.value' tf_outputs.json)
+export REGION=$(jq -r '.region.value' tf_outputs.json)
+export BUCKET_URL=$(jq -r '.bucket_url.value' tf_outputs.json)
+
+# Fetch and export secrets
+echo "🔑 Fetching API secrets..."
+export FROST_CLIENT_ID=$(gcloud secrets versions access latest --secret="FROST_API_CLIENT_ID" --project="$PROJECT_ID")
+export ENTSOE_TOKEN=$(gcloud secrets versions access latest --secret="ENTSOE_SECURITY_TOKEN" --project="$PROJECT_ID")
+
+# Clean up temporary file
+rm tf_outputs.json
+
+echo "✅ Environment ready. Project: $PROJECT_ID, Region: $REGION"
+echo "   Run 'direnv allow' to export these variables into your shell."

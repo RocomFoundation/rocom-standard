@@ -1,0 +1,17 @@
+"04727: Fjernvarmebalanse (GWh), etter fjernvarme, statistikkvariabel og år"
+"fjernvarme";"Fjernvarmebalanse 2012";"Fjernvarmebalanse 2013";"Fjernvarmebalanse 2014";"Fjernvarmebalanse 2015";"Fjernvarmebalanse 2016";"Fjernvarmebalanse 2017";"Fjernvarmebalanse 2018";"Fjernvarmebalanse 2019";"Fjernvarmebalanse 2020";"Fjernvarmebalanse 2021";"Fjernvarmebalanse 2022";"Fjernvarmebalanse 2023";"Fjernvarmebalanse 2024"
+"Bruttoproduksjon av varmt vann og damp";5226;5816;5570;6000;6409;6689;6949;7149;6637;7899;7543;8338;8032
+"¬ Levert til produksjon av elektrisitet";431;464;473;484;436;471;404;480;474;448;472;485;463
+"Nettoproduksjon av fjernvarme";4794;5351;5097;5516;5973;6218;6545;6669;6163;7450;7071;7853;7568
+"¬ Tap i fordelingsnett";510;593;569;623;671;676;738;735;735;778;771;808;759
+"Levert til forbruker";4284;4759;4527;4893;5302;5543;5808;5934;5428;6672;6300;7045;6810
+"¬ Husholdninger";950;1083;1000;1037;1212;1365;1408;1548;1467;1716;1652;1925;1855
+"¬ Industri m.m";482;581;616;847;870;854;801;765;796;1055;982;1060;1067
+"¬ Bygg og anlegg";..;..;..;..;..;65;117;130;114;131;148;148;124
+"¬ Tjenesteyting";2852;3095;2912;3008;3221;3181;3397;3393;2951;3633;3427;3806;3660
+"¬¬ Undervisning";331;338;334;307;359;..;..;..;..;..;..;..;..
+"¬¬ Varehandel";196;214;204;205;328;..;..;..;..;..;..;..;..
+"¬¬ Hotell og restaurant";111;115;108;120;151;..;..;..;..;..;..;..;..
+"¬¬ Annen tjenesteyting";2213;2428;2266;2377;2383;..;..;..;..;..;..;..;..
+"Annet";..;..;..;..;..;78;85;97;101;138;90;105;103
+"Memo: Avkjølt mot luft";674;705;1004;828;907;981;870;832;945;844;966;831;780
