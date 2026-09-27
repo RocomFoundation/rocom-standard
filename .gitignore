@@ -5,3 +5,5 @@ package.json
 package-lock.json
 /.vibe
 __pycache__/
+Downloads/
+*.py
