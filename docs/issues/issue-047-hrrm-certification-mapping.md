@@ -29,7 +29,7 @@ Control plane audit ensures every implementation respects the shared rules that 
 
 ---
 
-## Certification Providers (Approved by ROCOM Board)
+## Certification Providers (Evaluated Candidates — Pending Board Selection)
 
 | Role | Provider | Country | Scope |
 |------|----------|---------|-------|
@@ -39,7 +39,11 @@ Control plane audit ensures every implementation respects the shared rules that 
 | Toolchain | **Ferrous Systems / Ferrocene** | Germany | Ferrocene compiler, Supply Chain (libraries, vulnerabilities, air-gapped) |
 | API Testing | **Escape** | France | Language-agnostic API and application testing |
 
-**Snyk excluded** — Boston HQ, fails European requirement (Sup-005 IND-REQ-03).
+**Snyk excluded** — Boston HQ, not aligned with ROCOM's European operational focus.
+
+> **Note:** This issue is a product-specific implementation document for HRRM.
+> Provider selection and contracts are managed by the ROCOM Board per Sup-005.
+> Candidate evaluation does not constitute Board approval.
 
 ---
 

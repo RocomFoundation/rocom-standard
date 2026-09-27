@@ -37,7 +37,7 @@ contract:
 
     - name: priority
       type: "Integer"
-      description: "Numeric priority (higher = more urgent). Range 0–9 per Part 5 §3."
+      description: "Priority level per Part 3 (CP-009): immediate, expedited, routine, deferred."
       example: "7"
 
     - name: source_id
@@ -73,7 +73,7 @@ contract:
 
     - name: chain_of_custody
       type: "Optional[Boolean]"
-      description: "Whether chain-of-custody tracking is required (Part 5, L3)."
+      description: "Whether chain-of-custody tracking is required. Healthcare profile requirement at any level (not L3-only)."
       example: "true"
 
     # --- Compliance ---
@@ -113,21 +113,21 @@ contract:
     rate_limit: "50 req/min per source"
 
   conformance_levels:
-    - level: "bronze"
+    - level: "L1"
       name: "Basic Task Submission"
       requirement: >-
         Source provides task_id, description, required_capability, and priority.
         Sufficient for on-demand allocation with no advance planning.
       example_implementations: ["Manual cockpit entry", "Simple script"]
 
-    - level: "silver"
+    - level: "L2"
       name: "Scheduled + Constraint-Aware"
       requirement: >-
         Bronze + deadline, constraints, and zone. Enables planned allocation
         with zone-restricted and chain-of-custody tasks.
       example_implementations: ["SAP ERP production orders", "Columna Flow task management"]
 
-    - level: "gold"
+    - level: "L3"
       name: "Full Allocation Ready"
       requirement: >-
         Silver + chain_of_custody, compliance_flags, real-time push events.

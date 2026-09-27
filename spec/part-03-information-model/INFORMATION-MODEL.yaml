@@ -22,28 +22,80 @@ edition: 2026a-draft
 
 # ====================================================================
 # Agent — the canonical agent record (Part 4, Part 5)
+# CP-007 incorporated: agent_identity replaces flat agent_id/hr_ref model
 # ====================================================================
 agent:
   description: >
     Any entity allocatable to tasks: human staff, robot, or
     human-in-the-loop operator station.
   required_fields:
-    - agent_id
+    - agent_identity
     - agent_type
     - availability_status
   fields:
     agent_id:
       type: string
-      description: Canonical identifier. Stable across availability updates.
+      description: >
+        Deprecated (CP-007). Use agent_identity instead.
+        Retained for backward compatibility; must be derived from
+        agent_identity.access_key when present.
       example: "robot-EVE-001"
+    agent_identity:
+      description: >
+        Three-layer identity model (CP-007). Distinguishes
+        how the agent is accessed, what device it is, and
+        what production unit it represents. Supports
+        issuer-agnostic resolution and UDI alignment for
+        medical devices.
+      type: object
+      required_fields:
+        - access_key
+      fields:
+        access_key:
+          type: string
+          description: >
+            Orchestrator-assigned identifier for addressing
+            this agent. Stable across software updates.
+          example: "agt-hosp1-eve-001"
+        device_identifier:
+          type: string
+          description: >
+            Manufacturer-assigned unique identifier (serial number
+            or UDI-DI for medical devices). Distinguishes the
+            physical unit.
+          example: "SN-2026-EVE-00142"
+        production_identifier:
+          type: string
+          description: >
+            Type and configuration: model, firmware version,
+            and capability profile. Two agents with the same
+            production_identifier are the same model/software.
+          example: "EVE-v2.1-transport"
+        issuer:
+          type: string
+          description: >
+            Entity that issued this identity (orchestrator,
+            manufacturer, or regulatory body). Enables
+            issuer-agnostic resolution.
+          example: "rocom-orchestrator-hosp1"
+        udi:
+          type: string
+          description: >
+            Unique Device Identification data for regulated
+            medical devices. Populated when agent_type is
+            'robot' and the device is subject to MDR/IVDR.
+          required: false
     agent_type:
       type: string
       enum: [human, robot, cockpit]
       description: Agent category. Determines applicable allocation rules.
     hr_ref:
       type: string
-      description: Reference to HR system record (employee ID or serial number).
-      required: true
+      description: >
+        Deprecated (CP-007). Reference to HR system record
+        (employee ID or serial number). Use
+        agent_identity.device_identifier instead.
+      required: false
     provider_id:
       type: string
       description: Source provider that registered this agent.
@@ -71,6 +123,13 @@ capability:
     level:
       type: string
       enum: [basic, intermediate, expert]
+      description: >
+        Proficiency level. 'basic' covers standard operation.
+        'intermediate' adds contextual adaptation. 'expert'
+        covers supervised autonomous operation in complex
+        environments. Note: Part 5 capability registry uses
+        the same values; 'advanced' and 'certified' are not
+        standard capability levels.
     certified:
       type: boolean
       description: Whether the capability has passed certification testing.
@@ -116,6 +175,64 @@ location:
         x: { type: number }
         y: { type: number }
         map_id: { type: string }
+
+# ====================================================================
+# Resource Authority — shared resource access (CP-008)
+# ====================================================================
+resource_authority:
+  description: >
+    Explicit model of shared resources agents compete for:
+    space, doors, lifts, docks, and tasks. Grants are
+    time-bound with explicit release and capacity modeling.
+    Agents that lose contact have defined obligations.
+  required_fields:
+    - resource_id
+    - resource_type
+    - grant_holders
+  fields:
+    resource_id:
+      type: string
+      description: Unique identifier for the shared resource.
+      example: "door-3B-01"
+    resource_type:
+      type: string
+      enum: [door, lift, dock, zone, task]
+      description: Type of shared resource.
+    capacity:
+      type: integer
+      description: >
+        Maximum concurrent holders. 1 for exclusive resources
+        (doors). >1 for shared resources (lifts).
+      default: 1
+    grant_holders:
+      type: array
+      items: object
+      description: >
+        Current agents holding access grants. Each grant has
+        an explicit lifetime with expiry.
+      properties:
+        agent_id:
+          type: string
+          description: Agent holding this grant.
+        granted_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          description: >
+            Grant expiry. Grants MUST expire — no indefinite
+            grants. Agent must explicitly release or request
+            renewal before expiry.
+    communication_loss_policy:
+      type: string
+      enum: [auto_release, hold_until_timeout, escalate]
+      description: >
+        Behavior when grant holder loses contact.
+        'auto_release' releases immediately.
+        'hold_until_timeout' holds for a configurable period.
+        'escalate' notifies orchestrator for manual resolution.
+      default: hold_until_timeout
 
 # ====================================================================
 # Cost Model (Part 4)
@@ -167,8 +284,23 @@ task:
       type: string
       description: Capability key matching the capability registry.
     priority:
-      type: integer
-      description: "Numeric priority (higher = more urgent)."
+      type: string
+      enum: [immediate, expedited, routine, deferred]
+      description: >
+        Priority level (CP-009). 'immediate' for life-safety
+        tasks. 'expedited' for time-critical but non-emergency.
+        'routine' for standard operations. 'deferred' for
+        background work. Replaces numeric 0–9 scale; numeric
+        values are implementation-specific and must map to
+        these levels.
+      default: routine
+    priority_origin:
+      type: string
+      description: >
+        Entity authorized to set this priority (CP-009).
+        Only the clinical lead, BMS (fire/evacuation), or
+        orchestrator (system policy) may set 'immediate'.
+      required: false
     status:
       type: string
       enum: [pending, assigned, in_progress, completed, cancelled]
@@ -234,7 +366,7 @@ destination:
       required: false
 
 # ====================================================================
-# Compliance Event (Part 5)
+# Compliance Event (Part 5, Healthcare profile)
 # ====================================================================
 compliance_event:
   description: Published on zone transitions (Part 5, rocom/v0/compliance/event).
@@ -244,6 +376,8 @@ compliance_event:
     - agent_id
     - zone
     - event_type
+    - compliance_status
+    - audit_correlation_id
   fields:
     event_id:
       type: string
@@ -262,7 +396,54 @@ compliance_event:
     compliance_status:
       type: string
       enum: [passed, failed, exception]
+      description: REQUIRED per Part 5 (P-2.2.4).
     audit_correlation_id:
       type: string
       format: uuid
-      description: Links to the orchestrator audit trail.
+      description: REQUIRED per Part 5 (P-2.2.2). Links to orchestrator audit trail.
+
+# ====================================================================
+# Chain of Custody Event (Part 5, Healthcare profile — any level)
+# ====================================================================
+chain_of_custody_event:
+  description: >
+    Published on rocom/v0/chainOfCustody/event for tasks
+    requiring chain-of-custody tracking. Healthcare profile
+    requirement (any level, not L3-only).
+  required_fields:
+    - event_id
+    - task_id
+    - item_type
+    - agent_id
+    - action
+    - timestamp
+    - audit_correlation_id
+  fields:
+    event_id:
+      type: string
+      format: uuid
+    task_id:
+      type: string
+      format: uuid
+    item_type:
+      type: string
+      enum: [medication, sample, meal, waste, linen]
+    agent_id:
+      type: string
+      format: uuid
+    action:
+      type: string
+      enum: [picked_up, in_transit, delivered, handed_off]
+    custody_signature:
+      type: string
+      description: Cryptographic hash of custody state.
+      required: false
+    timestamp:
+      type: string
+      format: date-time
+    audit_correlation_id:
+      type: string
+      format: uuid
+      description: >
+        REQUIRED per Part 5. Links to orchestrator audit trail
+        for end-to-end chain-of-custody traceability.

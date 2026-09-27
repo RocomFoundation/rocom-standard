@@ -168,21 +168,21 @@ contract:
     rate_limit: "10 req/min per provider"
 
   conformance_levels:
-    - level: "bronze"
+    - level: "L1"
       name: "Basic Availability"
       requirement: >-
         Provider supplies agent_id, agent_type, availability_status, and cost_model.
         Sufficient for on-demand allocation with no advance planning.
       example_implementations: ["Simple robot fleet adapter", "Manual availability form"]
 
-    - level: "silver"
+    - level: "L2"
       name: "Scheduled + Capability-Aware"
       requirement: >-
         Bronze + availability_windows (with recurrence) and capabilities.
         Enables shift planning and capability-based task matching.
       example_implementations: ["Columna Flow Task Management", "GAT/MinGat", "Workday"]
 
-    - level: "gold"
+    - level: "L3"
       name: "Full Cross-Allocation Ready"
       requirement: >-
         Silver + current_location, compliance_flags, real-time push events.

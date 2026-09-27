@@ -1,6 +1,6 @@
 # CP-007 — Agent Identity Model (issuer-agnostic, UDI-aligned)
 
-**Status:** PROPOSAL
+**Status:** MERGED (Edition 2026a draft)
 **Target:** Part 3 — Information Model (Edition 2026a, draft)
 **Also affects:** Part 4 (Service Contracts), Part 5 (Transport Profile),
 Sup-001 (Orchestrator Service Interface)

@@ -1,5 +1,5 @@
 {
-    "version": "0.1",
-    "phrases": ["TODO", "Ask Egil", "FIXME", "do not invent", "spørg Egil"],
-    "vendors": ""
+    "version": "0.2",
+    "phrases": ["Ask Egil", "spørg Egil", "do not invent"],
+    "note": "TODO and FIXME are allowed in YAML templates and conformance statement examples. This check targets phrases that indicate unresolved governance decisions or missing vendor evaluation."
 }

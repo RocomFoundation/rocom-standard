@@ -45,9 +45,13 @@ channels:
     address: vda5050/order/+/{serialNumber}
     description: Standard VDA 5050 order dispatch
 
-  vda5050-cancel:
-    address: vda5050/cancel/+/{serialNumber}
-    description: Order cancellation
+  vda5050-instantActions:
+    address: vda5050/instantActions/+/{serialNumber}
+    description: >
+      VDA 5050 instant actions — including cancelOrder.
+      Per VDA 5050 2.1.0, order cancellation is sent as an
+      instantAction with action: "cancelOrder" on the
+      vda5050/instantActions/<serialNumber> topic.
 
   rocom-compliance-event:
     address: rocom/v0/compliance/event
@@ -104,14 +108,18 @@ operations:
     messages:
       - $ref: '#/components/messages/OrderMessage'
 
-  sendCancel:
+  sendInstantActions:
     action: send
     channel:
-      $ref: '#/channels/vda5050-cancel'
-    summary: Gateway sends order cancellation
-    description: Orchestrator sends a cancellation for an active order
+      $ref: '#/channels/vda5050-instantActions'
+    summary: Gateway sends instant actions (cancelOrder, etc.)
+    description: >
+      Orchestrator sends instant actions per VDA 5050 2.1.0.
+      Payload is {"message": {"serialNumber": "...",
+      "timestamp": "..."}, "actions": [{"action": "cancelOrder",
+      "order": {"serialNumber": "<orderId>"}}]}.
     messages:
-      - $ref: '#/components/messages/CancelMessage'
+      - $ref: '#/components/messages/InstantActionsMessage'
 
   receiveComplianceEvent:
     action: receive
@@ -215,18 +223,45 @@ components:
             type: string
             format: date-time
 
-    CancelMessage:
+    InstantActionsMessage:
       payload:
         type: object
-        required: [orderId]
+        required: [message, actions]
+        description: >
+          VDA 5050 2.1.0 instantActions message structure.
+          For order cancellation, the actions array contains
+          {"action": "cancelOrder", "order": {"serialNumber": "<orderId>"}}.
         properties:
-          orderId:
-            type: string
+          message:
+            type: object
+            required: [serialNumber, timestamp]
+            properties:
+              serialNumber:
+                type: string
+                description: Robot serial number being addressed.
+              timestamp:
+                type: string
+                format: date-time
+          actions:
+            type: array
+            items:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [cancelOrder, stop, resume]
+                order:
+                  type: object
+                  properties:
+                    serialNumber:
+                      type: string
+                      description: Order ID to cancel.
 
     ComplianceEvent:
       payload:
         type: object
-        required: [eventId, taskId, agentId, zone, eventType, timestamp]
+        required: [eventId, taskId, agentId, zone, eventType, complianceStatus, auditCorrelationId, timestamp]
         properties:
           eventId:
             type: string
@@ -245,10 +280,11 @@ components:
           complianceStatus:
             type: string
             enum: [passed, failed, exception]
+            description: REQUIRED per Part 5 (P-2.2.4).
           auditCorrelationId:
             type: string
             format: uuid
-            description: Links back to the orchestrator AuditEvent
+            description: REQUIRED per Part 5 (P-2.2.2). Links to orchestrator AuditEvent.
           timestamp:
             type: string
             format: date-time
@@ -271,7 +307,7 @@ components:
                   description: Capability key from capability-registry.yaml
                 level:
                   type: string
-                  enum: [basic, advanced, certified]
+                  enum: [basic, intermediate, expert]
                 certified:
                   type: boolean
                 expirationDate:
@@ -281,7 +317,7 @@ components:
     ChainOfCustodyEvent:
       payload:
         type: object
-        required: [eventId, taskId, itemType, agentId, action, timestamp]
+        required: [eventId, taskId, itemType, agentId, action, timestamp, auditCorrelationId]
         properties:
           eventId:
             type: string
@@ -300,10 +336,15 @@ components:
             enum: [picked_up, in_transit, delivered, handed_off]
           custodySignature:
             type: string
-            description: Cryptographic hash of custody state
+            description: Cryptographic hash of custody state.
+            required: false
           timestamp:
             type: string
             format: date-time
+          auditCorrelationId:
+            type: string
+            format: uuid
+            description: REQUIRED per Part 5. Links to orchestrator audit trail.
 
   schemas:
     NavigationNode:

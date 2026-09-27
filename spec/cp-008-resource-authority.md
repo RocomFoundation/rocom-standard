@@ -1,6 +1,6 @@
 # CP-008 — Resource Authority Model
 
-**Status:** PROPOSAL
+**Status:** MERGED (Edition 2026a draft)
 **Target:** Part 4 — Service Contracts
 **Also affects:** Part 3 (Information Model), Part 5 (Transport Profile),
 Sup-003 (BMS Infrastructure Contract)
