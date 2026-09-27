@@ -1,7 +1,7 @@
 # FILE: spec/part-03-information-model/INFORMATION-MODEL.yaml
 # =====================================================================
 # Rocom — Part 3: Information Model
-# Status: DRAFT 0.1 (2026-08-12) — Edition 2026a (draft)
+# Status: DRAFT 0.2 (2026-09-27) — Edition 2026b-draft
 # License: CC-BY 4.0 (see LICENSE-SPEC)
 # Scope: Core data types referenced by Parts 4, 5, 6, 7.
 #        Contracts and profiles MUST use these types verbatim.
@@ -13,12 +13,16 @@
 #     Status: MERGED. See spec/cp-008-resource-authority.md
 #   CP-009 — Priority and Preemption Model
 #     Status: MERGED. See spec/cp-009-priority-preemption.md
+#
+# Coordinated amendments (Part 2 revision, control-plane service levels):
+#   Location model extended with namespace/identifier (cpl-req-801).
+#   See spec/part-02-conformance/control-plane-service-levels-DRAFT.md §14.1
 # =====================================================================
 
 module: information-model
 part: 3
-version: 0.1-draft
-edition: 2026a-draft
+version: 0.2-draft
+edition: 2026b-draft
 
 # ====================================================================
 # Agent — the canonical agent record (Part 4, Part 5)
@@ -221,16 +225,57 @@ time_window:
 
 # ====================================================================
 # Location (Part 4, Part 5)
+# Extended: namespace/identity model per cpl-req-801, 803
+# Backward compat: ward_or_zone retained as deprecated
 # ====================================================================
 location:
-  description: Physical position of an agent within a deployment.
+  description: >
+    Physical place within a deployment. The namespace/identifier pair
+    provides stable identity (cpl-req-801, 803). Name, hierarchy, and
+    coordinates are informational. State is carried separately.
+  required_fields:
+    - namespace
+    - identifier
   fields:
+    namespace:
+      type: string
+      description: >
+        The identification system or registry that defines the
+        identifier format and scope. Examples: GS1, internal,
+        vda5050, uniclass, operator-defined.
+      example: "GS1"
+    identifier:
+      type: string
+      description: >
+        The value unique within its namespace. Does not change
+        with state or occupancy (cpl-req-803).
+      example: "701234567890123"
+    name:
+      type: string
+      description: >
+        Human-readable label. Locale-dependent. SHALL NOT serve
+        as the sole basis for automated identification (cpl-req-804).
+      required: false
+      example: "Pharmacy receiving area"
+    parent:
+      type: string
+      description: >
+        Reference to the containing location (format: namespace:identifier).
+        Supports hierarchy: building → floor → ward → room.
+      required: false
+      example: "internal:urn:facility:pharmacy"
     ward_or_zone:
       type: string
+      description: >
+        DEPRECATED. Preserved for backward compatibility with
+        existing Part 4 contracts. New implementations SHALL use
+        namespace and identifier.
+      required: false
       example: "Ward 3B"
     coordinates:
       type: object
       required: false
+      description: Position within a spatial reference frame.
       properties:
         x: { type: number }
         y: { type: number }

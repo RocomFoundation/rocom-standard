@@ -1,7 +1,12 @@
 # FILE: availability_provider_contract.yaml
-# Availability Provider Contract — Rocom v0.1
+# Availability Provider Contract — Rocom v0.2
 # Defines the interface any workforce data source must implement
 # to feed agent availability into the orchestrator cross-allocation engine.
+#
+# Coordinated with Part 2 revision (control-plane service levels).
+# L0-L3 conformance aligned to DRAFT v0.2 §3.3 Workforce plane.
+# agent_id deprecated in favor of agent_identity (CP-007).
+# location extended with namespace/identifier (Part 3 amendment).
 #
 # Implementations:
 #   - rocom-core/src/providers/columna_flow.rs  (Columna Flow API)
@@ -11,7 +16,7 @@
 
 contract:
   name: "Availability Provider Interface"
-  version: "0.1.0"
+  version: "0.2.0"
   description: >-
     Source-agnostic contract for feeding human and robot agent availability
     into the orchestrator cross-allocation engine. Any workforce system (Columna Flow,
@@ -168,24 +173,34 @@ contract:
     rate_limit: "10 req/min per provider"
 
   conformance_levels:
+    # Aligned to Part 2 control-plane service levels (cpl-req-301, 302, 303)
     - level: "L1"
-      name: "Basic Availability"
+      name: "Static integration"
       requirement: >-
-        Provider supplies agent_id, agent_type, availability_status, and cost_model.
+        Provider supplies agent_identity (CP-007), agent_type, declared
+        capabilities, configured availability and allocation constraints.
+        Supports predefined allocation and explicit acceptance or refusal.
+        Location references carry namespace (cpl-req-801).
         Sufficient for on-demand allocation with no advance planning.
       example_implementations: ["Simple robot fleet adapter", "Manual availability form"]
 
     - level: "L2"
-      name: "Scheduled + Capability-Aware"
+      name: "State-aware coordination"
       requirement: >-
-        L1 + availability_windows (with recurrence) and capabilities.
+        L1 + availability_windows (with recurrence), capability changes,
+        current_location (extended location type with namespace/identifier).
+        Availability, eligibility, and workload changes are reflected within
+        service-quality bounds. Predefined allocation policies use current state.
         Enables shift planning and capability-based task matching.
       example_implementations: ["Columna Flow Task Management", "GAT/MinGat", "Workday"]
 
     - level: "L3"
-      name: "Full Cross-Allocation Ready"
+      name: "Fully dynamic coordination"
       requirement: >-
-        L2 + current_location, compliance_flags, real-time push events.
+        L2 + compliance_flags, real-time push events, dynamic offers,
+        acceptance/refusal, release and reassignment. Respects competence,
+        working-time constraints, consent, and reserved human decisions.
+        A person may decline; L3 handles that outcome dynamically.
         Enables fully automated cross-allocation with compliance verification.
       example_implementations: ["Columna Flow + Rocom adapter", "GAT + Rocom fleet integration"]
 

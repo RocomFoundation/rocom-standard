@@ -1,7 +1,11 @@
 # FILE: part-04-services/task_source_contract.yaml
-# Task Source Contract — Rocom v0.1
+# Task Source Contract — Rocom v0.2
 # Defines the interface any task-generating system must implement
 # to feed work requests into the orchestrator allocation engine.
+#
+# Coordinated with Part 2 revision (control-plane service levels).
+# L0-L3 conformance aligned to DRAFT v0.2 §3.4 Task plane.
+# zone extended with namespace/identifier (Part 3 amendment).
 #
 # Implementations:
 #   - Management system allocation engine receives tasks via POST /tasks (Sup-001)
@@ -11,7 +15,7 @@
 
 contract:
   name: "Task Source Interface"
-  version: "0.1.0"
+  version: "0.2.0"
   description: >-
     Source-agnostic contract for feeding task requests into the orchestrator
     allocation engine. Any enterprise system (ERP, BMS, turnus, manual entry)
@@ -113,25 +117,37 @@ contract:
     rate_limit: "50 req/min per source"
 
   conformance_levels:
+    # Aligned to Part 2 control-plane service levels (cpl-req-401, 402, 403)
     - level: "L1"
-      name: "Basic Task Submission"
+      name: "Static integration"
       requirement: >-
-        Source provides task_id, description, required_capability, and priority.
-        Sufficient for on-demand allocation with no advance planning.
+        Source provides task_id, description, required_capability, priority
+        (CP-009 values with authorised origin), origin/destination location
+        references (namespace declared per cpl-req-801). Standardised task
+        submissions with lifecycle outcomes. Predefined assignment rules may
+        be used. Sufficient for on-demand allocation.
       example_implementations: ["Manual cockpit entry", "Simple script"]
 
     - level: "L2"
-      name: "Scheduled + Constraint-Aware"
+      name: "State-aware coordination"
       requirement: >-
-        L1 + deadline, constraints, and zone. Enables planned allocation
-        with zone-restricted and chain-of-custody tasks.
+        L1 + deadline, constraints, zone (extended location type), task
+        progress, authorised amendments, cancellations and exceptions within
+        service-quality bounds. Predefined responses account for deadlines,
+        readiness, dependencies and evidence requirements. Acceptance,
+        execution and completion remain distinct states. Enables planned
+        allocation with zone-restricted and chain-of-custody tasks.
       example_implementations: ["SAP ERP production orders", "Columna Flow task management"]
 
     - level: "L3"
-      name: "Full Allocation Ready"
+      name: "Fully dynamic coordination"
       requirement: >-
-        L2 + chain_of_custody, compliance_flags, real-time push events.
-        Enables fully automated allocation with compliance verification.
+        L2 + chain_of_custody, compliance_flags, real-time push events,
+        event-driven reevaluation and coordinated reassignment/replanning
+        when needs or dependencies change. Preserves CP-009 priority origin
+        and preemption restrictions, CP-008 resource authority and applicable
+        chain-of-custody. Enables fully automated allocation with compliance
+        verification.
       example_implementations: ["SAP + Rocom adapter", "BMS maintenance integration"]
 
 # ============================================================

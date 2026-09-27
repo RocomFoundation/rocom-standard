@@ -1,14 +1,22 @@
 # Revision proposal — Part 2: Control-plane service levels L0–L3
 
-**Status:** DRAFT PROPOSAL — for review; not an adopted ROCOM requirement.  
+**Status:** DRAFT PROPOSAL (v0.2) — for review; not an adopted ROCOM requirement.  
+**Version:** 0.2-draft  
 **Date:** 27 September 2026.  
 **Requested by:** Egil Utheim.  
 **Proposed implementation owner:** Viktor, following specification review.  
-**Baseline:** RocomFoundation/rocom-standard, commit `ff6803dd9176d9875511cbf5134bdcf6b704f0e6`.  
+**Baseline:** RocomFoundation/rocom-standard, commit `2ad13a1`.  
 **Primary target:** Part 2 — Conformance.  
 **Also affects:** Parts 3–7, the four control-plane contracts, Sup-001, Sup-003 and certification guidance in Sup-005.  
 **Change mechanism:** Full Part revision, with coordinated amendments to affected Parts. No CP or Supplement number is assigned by this draft.  
 **Suggested repository location:** `spec/part-02-conformance/control-plane-service-levels-DRAFT.md`.
+
+## Change log
+
+| Version | Date | Changes |
+|---|---|---|
+| 0.1-draft | 27 Sept 2026 | Initial proposal: L0–L3 per plane, location model (§5), service quality (§6), tests CPL-T01–22 |
+| 0.2-draft | 27 Sept 2026 | **Integrated specification.** Added: §13 L1 implementation profile with complete example, §14 L2/L3 progression, §15 Part 3/4 alignment notes. Versioned header throughout. |
 
 ## Executive decision
 
@@ -421,19 +429,350 @@ Use concrete model fields such as `coordination_level` in product APIs; avoid an
 
 These are explicit review decisions. They do not prevent producing an experimental schema, simulator fixtures or a reviewable implementation plan.
 
-## 12. Source basis
+## 12. L1 implementation profile — normative on adoption
 
-Source links below are pinned to the reviewed baseline. The proposal introduces new requirements; it does not claim that those requirements already exist in these sources.
+This section defines a concrete L1 starting point for any supplier who wants to deliver a single-plane integration against the specification. It draws requirements from this document, the Part 3 information model, and the Part 4 service contracts. An L1 implementation need not provide location mappings, runtime replanning, or cross-plane coordination — but it must establish identity, capability, explicit acceptance/refusal, and traceable evidence.
 
-- [Part 2 — Conformance](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/part-02-conformance/CONFORMANCE.md): current level definitions, profile, provenance, deviations and certification.
-- [Contributing](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/CONTRIBUTING.md): revision route for new conformance levels.
-- [CP/Supplement registry](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/cp-registry.md): authoritative numbering and source status.
-- [CP-007 — Agent identity](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/cp-007-agent-identity.md): type/configuration/individual identity and issuer handling.
-- [CP-008 — Resource authority](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/cp-008-resource-authority.md): grants, expiry, release, delegated autonomy and commitments.
-- [CP-009 — Priority and preemption](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/cp-009-priority-preemption.md): priority origin, limits, preemption and starvation reporting.
-- [Availability provider contract](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/part-04-services/availability_provider_contract.yaml) and [Task source contract](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/part-04-services/task_source_contract.yaml): existing interface-specific L1–L3 structures.
-- [Sup-003 — BMS infrastructure](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/supplements/sup-003.md): infrastructure authority and safety boundary.
-- [Sup-005 — Certification provider requirements](https://github.com/RocomFoundation/rocom-standard/blob/ff6803dd9176d9875511cbf5134bdcf6b704f0e6/spec/supplements/sup-005-certification-provider.md): draft provider/evidence framework; its draft status is preserved.
+### 12.1 What L1 provides
+
+An L1 integration supports **predefined exchanges** between a task source and the participating plane interface. The exchanges are static: identity, declared capabilities, configured availability, and explicit task acceptance or refusal. No runtime state observation, replanning, or dynamic reassignment is required.
+
+### 12.2 Required elements per plane
+
+The table below maps each plane's L1 requirement to the supporting data structures and contracts. A supplier implementing L1 for the Robot plane, for example, needs the agent identity model (CP-007), the task submission interface (CP-009), and the correlation lifecycle (cpl-req-009).
+
+| Element | Robot (cpl-req-101) | Infrastructure (cpl-req-201) | Workforce (cpl-req-301) | Task (cpl-req-401) |
+|---|---|---|---|---|
+| **Identity** | `agent_identity` (CP-007): access_key, device_identifier, production_identifier | `resource_authority.resource_id`, `resource_type` | `agent_identity` (CP-007); `agent_type: human` or `cockpit` | `task.source_id`; `task.task_id` |
+| **Capabilities** | `capability[]`: capability_id, name, level | `resource_authority.capacity` (configured maximum) | Declared roles/capabilities; allocation constraints | `task.required_capability`; task constraints |
+| **Location references** | Robot map ID (namespace declared per cpl-req-801) | Facility identifier (namespace declared per cpl-req-801) | Organisational zone/ward (namespace declared per cpl-req-801) | Origin/destination identifiers; MUST be resolvable if workflow depends on Infrastructure |
+| **Acceptance/Refusal** | Accept or refuse each task/order | Grant or refuse each access request (CP-008, Sup-003) | Accept or decline each allocation | Acknowledge task submission; explicit refusal of unhandled capability |
+| **Priority** | Receives task priority from Task interface | Not directly applicable | Receives allocation priority | CP-009 values (`immediate`, `expedited`, `routine`, `deferred`); `priority_origin` |
+| **Correlation** | cpl-req-009: task ID, agent identity, request ID | cpl-req-009: resource ID, request ID, grant ID | cpl-req-009: allocation ID, agent identity | cpl-req-009: task lifecycle states; distinct acceptance, execution, completion |
+| **Evidence** | cpl-req-012: acceptance, result, refusal | cpl-req-012: grant, refusal, resource state | cpl-req-012: allocation, acceptance, decline | cpl-req-012: submission, lifecycle, outcome |
+| **Service profile** | cpl-req-901: request acknowledgement, availability, evidence visibility | cpl-req-901: request acknowledgement, availability, evidence visibility | cpl-req-901: request acknowledgement, availability, evidence visibility | cpl-req-901: request acknowledgement, availability, evidence visibility |
+
+### 12.3 Common L1 requirements
+
+All L1 interfaces must additionally satisfy:
+
+| Requirement | ID | Applicability |
+|---|---|---|
+| Declaration scope | cpl-req-001 | All planes |
+| Cumulative levels | cpl-req-002 | N/A (L1 is base) |
+| Versioned context | cpl-req-005 | All planes |
+| Existing assurance | cpl-req-006 | All planes |
+| Correlation and lifecycle | cpl-req-009 | All planes |
+| Auditable decisions | cpl-req-012 | All planes |
+| Namespace declaration (locations) | cpl-req-801 | All planes using location references |
+| Service profile | cpl-req-901 | All planes |
+| Measurement validity | cpl-req-902 | All planes |
+
+### 12.4 Complete L1 example — Robot plane
+
+The following is a complete, testable L1 integration scenario for the Robot plane. A supplier should be able to implement and test this against the specification.
+
+**Scenario:** A hospital deploys a single robot type for meal transport. The robot fleet adapter provides L1 integration: identity, declared capabilities, task acceptance and results. Predefined assignment is used; no runtime state observation or replanning.
+
+**Declaration:**
+
+```yaml
+schema_version: rocom-conformance/control-planes-0.2-draft
+declaration_kind: implementation_target
+specification:
+  edition: 2026a-draft
+  revision_status: proposed
+implementer:
+  organization: Example hospital
+  product: Meal transport robot
+context:
+  deployment_stage: evaluation
+  deployment_scope: single_site
+  sites: [example-hospital]
+  domain_profile: Healthcare
+coordination:
+  model: control-plane-levels-0.2-draft
+  interfaces:
+    - id: robot-adapter
+      plane: robot
+      provision: provided
+      target_level: L1
+      declared_level: L1
+      verification_status: conformant
+      service_profile_ref: urn:example:robot-l1-profile:0.1
+      requirement_ids: [cpl-req-101, cpl-req-001, cpl-req-005, cpl-req-006, cpl-req-009, cpl-req-012, cpl-req-901, cpl-req-902]
+      evidence_refs: [CPL-T04-L1, CPL-T09, CPL-T12, CPL-T16]
+assurance:
+  requirement_set_ref: urn:example:healthcare-l1-profile:0.1
+  verification_status: conformant
+  evidence_refs: [CPL-T03]
+workflows:
+  - id: meal-transport-l1
+    requirements:
+      - interface: robot-adapter
+        minimum_level: L1
+    target_end_to_end_level: L1
+    verified_end_to_end_level: L1
+    degraded_mode_policy_ref: urn:example:meal-fallback:0.1
+    integration_evidence_refs: [CPL-T04-L1]
+```
+
+**Agent identity (CP-007):**
+
+```yaml
+agent_identity:
+  access_key:
+    issuing_entity: internal
+    value: EVE-transport-2026
+  device_identifier:
+    issuing_entity: internal
+    value: SN-2026-EVE-00142
+    software_version: "2.1.0"
+  production_identifier:
+    serial_number: "EVE-00142"
+agent_type: robot
+provider_id: example-fleet-adapter
+availability_status: available
+```
+
+**Capabilities:**
+
+```yaml
+capabilities:
+  - capability_id: transport.meal
+    name: Meal transport between wards
+    level: basic
+    certified: false
+```
+
+**Task submission (CP-009):**
+
+```yaml
+task_id: "550e8400-e29b-41d4-a716-446655440000"
+description: Deliver lunch to Ward 3B, Room 12
+required_capability: transport.meal
+priority: routine
+priority_origin: task-scheduling-system
+source_id: hospital-task-system
+status: pending
+```
+
+**Acceptance response:**
+
+```yaml
+task_id: "550e8400-e29b-41d4-a716-446655440000"
+status: assigned
+assigned_agent_id: "EVE-00142"
+correlation_id: "req-001-accept"
+timestamp: "2026-09-27T11:30:00Z"
+```
+
+**Result evidence:**
+
+```yaml
+task_id: "550e8400-e29b-41d4-a716-446655440000"
+status: completed
+completed_by: "EVE-00142"
+completed_at: "2026-09-27T11:45:00Z"
+correlation_id: "req-001-complete"
+```
+
+### 12.5 Testable acceptance criteria — L1
+
+A supplier's L1 implementation is testable when the following conditions are met:
+
+| Criterion | Test | Pass condition |
+|---|---|---|
+| Identity established | CPL-T04 (L1 subset) | Robot registers with three-layer identity; individual unit is distinguishable from same-type peers |
+| Capability declared | CPL-T04 (L1 subset) | Declared capabilities match task requirements; unsupported capability is refused |
+| Task accepted or refused | CPL-T09 | Each task produces at most one accepted assignment; retries do not create duplicates |
+| Priority preserved | CPL-T07 (L1 subset) | Default `routine` priority applied; explicit priority from authorised origin preserved |
+| Evidence traceable | CPL-T12 (L1 subset) | Request, acceptance, and outcome are correlated; evidence accessible to authorised inspection |
+| Service profile met | CPL-T16 (L1 subset) | Request acknowledgement, availability, and evidence visibility bounds are measurable |
+| Location namespace declared | CPL-T19 (L1 subset) | Any location reference used carries namespace; bare string is rejected |
+| Assurance not waived | CPL-T03 | L1 coordination does not bypass applicable security or domain requirements |
+
+## 13. L2 and L3 — what they add — informative
+
+### 13.1 L2: State-aware coordination
+
+L2 builds on L1 by introducing **observable state within declared bounds**. The interface reports and manages deviations from a plan, without requiring runtime replanning.
+
+| What L2 adds | Robot (cpl-req-102) | Infrastructure (cpl-req-202) | Workforce (cpl-req-302) | Task (cpl-req-402) |
+|---|---|---|---|---|
+| **State reporting** | Execution state, availability changes, faults | Resource availability, occupancy, building modes | Availability, eligibility, workload changes | Task progress, amendments, cancellations |
+| **Predefined responses** | Current state used for policy decisions | Access rules use grant expiry, occupancy | Allocation uses current availability | Responses use deadlines, readiness, dependencies |
+| **Freshness** | cpl-req-010: source, time, version info | cpl-req-010: stale state exposed | cpl-req-010: stale state exposed | cpl-req-010: stale state exposed |
+| **Tests added** | CPL-T04 (L2), CPL-T10 | CPL-T05 (L2), CPL-T10 | CPL-T06 (L2), CPL-T10 | CPL-T07 (L2), CPL-T10 |
+
+**Key difference from L1:** The interface must report when state changes and ensure that those changes affect decisions. Missing state is not treated as availability. An unavailable participant cannot remain eligible solely because an earlier schedule lists them.
+
+### 13.2 L3: Fully dynamic coordination
+
+L3 builds on L2 by introducing **runtime adaptation without manual reconfiguration**. Participants can be added, removed, or reassigned during operation. The system handles routine in-scope changes dynamically, including replanning across planes.
+
+| What L3 adds | Robot (cpl-req-103) | Infrastructure (cpl-req-203) | Workforce (cpl-req-303) | Task (cpl-req-403) |
+|---|---|---|---|---|
+| **Dynamic coordination** | Runtime proposals to allocate/revise/transfer/release | Runtime resource registration, renewal, amendment | Dynamic offers, acceptance, reassignment | Event-driven reevaluation, replanning |
+| **Bounded resolution** | cpl-req-011: finite negotiation, no oscillation | cpl-req-011: bounded commitment decisions | cpl-req-011: bounded reassignment | cpl-req-011: bounded replanning |
+| **Authority preservation** | Fleet retains local control | BMS/access-control authority preserved | Human decisions, consent, working-time constraints | Priority origin, preemption, chain-of-custody |
+| **Tests added** | CPL-T04 (L3), CPL-T11, CPL-T15 | CPL-T05 (L3), CPL-T11, CPL-T15 | CPL-T06 (L3), CPL-T11, CPL-T15 | CPL-T07 (L3), CPL-T11, CPL-T15 |
+
+**Key difference from L2:** The system must handle changes during operation — not just report them. A changed need triggers a new plan. A declined offer triggers reassignment. A degraded dependency triggers escalation. None of this requires manual reconfiguration for routine in-scope changes.
+
+### 13.3 Composition at L3
+
+End-to-end L3 requires every participating plane to reach L3 for the relevant operations. See cpl-req-503 for the composition rules. A mixed-level deployment (e.g., Robot L3 · Infrastructure L2 · Workforce L1 · Task L3) is a valid capability description but cannot claim end-to-end L3 for a workflow that uses all four planes.
+
+## 14. Part 3 and Part 4 alignment — normative on adoption
+
+This section documents the coordinated amendments required for Parts 3 and 4 when the DRAFT is adopted. These amendments are part of the revision, not standalone corrections.
+
+### 14.1 Part 3 — Information Model: location extension
+
+The existing `location` type in Part 3 is minimal (`ward_or_zone` string + optional coordinates). The location model defined in §5 of this document requires namespace, identifier, and hierarchical structure. The following extension preserves backward compatibility:
+
+```yaml
+# Part 3 amendment: location model extension
+# Supersedes the flat location type while preserving ward_or_zone for backward compatibility
+
+location:
+  description: >
+    Physical place within a deployment. The namespace/identifier pair
+    provides stable identity (cpl-req-801, 803). The name, hierarchy,
+    and coordinates are informational. State is carried separately.
+  required_fields:
+    - namespace
+    - identifier
+  fields:
+    namespace:
+      type: string
+      description: >
+        The identification system or registry that defines the
+        identifier format and scope. Examples: GS1, internal,
+        vda5050, uniclass, operator-defined.
+      example: "GS1"
+    identifier:
+      type: string
+      description: >
+        The value unique within its namespace. Does not change
+        with state or occupancy (cpl-req-803).
+      example: "701234567890123"
+    name:
+      type: string
+      description: >
+        Human-readable label. Locale-dependent. SHALL NOT serve
+        as the sole basis for automated identification (cpl-req-804).
+      required: false
+      example: "Pharmacy receiving area"
+    parent:
+      type: string
+      description: >
+        Reference to the containing location (namespace + identifier).
+        Supports hierarchy: building → floor → ward → room.
+      required: false
+      format: "namespace:identifier"
+      example: "internal:urn:facility:pharmacy"
+    ward_or_zone:
+      type: string
+      description: >
+        DEPRECATED. Preserved for backward compatibility with
+        existing Part 4 contracts. New implementations SHALL use
+        namespace and identifier.
+      required: false
+      example: "Ward 3B"
+    coordinates:
+      type: object
+      required: false
+      description: Position within a spatial reference frame.
+      properties:
+        x: { type: number }
+        y: { type: number }
+        map_id: { type: string }
+```
+
+The `ward_or_zone` field is deprecated but retained. Existing Part 4 contracts that reference `location.ward_or_zone` continue to function. New implementations must provide `namespace` and `identifier`.
+
+### 14.2 Part 4 — Contract alignment
+
+The availability provider and task source contracts use `agent_id` and define their own L1–L3 conformance levels. These must be aligned:
+
+**Availability Provider Contract:**
+- `agent_id` → reference `agent_identity.production_identifier.serial_number` (CP-007)
+- `current_location` → reference extended `location` type (Part 3 amendment above)
+- L1 conformance: add `agent_identity`, `location` (namespace-declared) to required fields
+- L2 conformance: unchanged (availability_windows, capabilities already align)
+- L3 conformance: unchanged (current_location, compliance_flags, push events already align)
+
+**Task Source Contract:**
+- `zone` → reference extended `location` type (Part 3 amendment above)
+- L1 conformance: `zone` requires namespace declaration (cpl-req-801)
+- L2 conformance: unchanged (zone, deadline, constraints already align)
+- L3 conformance: unchanged (chain_of_custody, compliance_flags already align)
+
+### 14.3 Versioning strategy
+
+When adopted, the declaration schema version becomes `rocom-conformance/control-planes-1.0`. The Part 3 information model edition becomes `2026b`. The Part 4 contracts increment to `v0.2.0`.
+
+Legacy declarations using schema version `rocom-conformance/control-planes-0.1-draft` remain valid during the compatibility period defined in cpl-req-1003. The migration adapter must not manufacture missing state or dynamic capability.
+
+## 15. Start at L1 — supplier quick reference — informative
+
+This section is designed for suppliers and integrators who want to begin implementation against a specific draft version. It summarises the minimum required elements, the test path, and the progression to L2 and L3.
+
+### 15.1 What to implement first
+
+1. **Identity model** — CP-007 three-layer identity for every agent. No flat `agent_id`.
+2. **Location namespace** — Every location reference carries a namespace (cpl-req-801). Bare strings are rejected.
+3. **Task/priority model** — CP-009 priority values; `priority_origin` for audit.
+4. **Acceptance/refusal** — Every request produces an explicit outcome. Retries are idempotent (cpl-req-009).
+5. **Evidence** — Correlated request, decision, and outcome. Accessible to authorised inspection (cpl-req-012).
+6. **Service profile** — Measurable bounds for acknowledgement, availability, and evidence visibility (cpl-req-901).
+
+### 15.2 Test path
+
+| Phase | Tests | Description |
+|---|---|---|
+| **Identity** | CPL-T04 (L1), CPL-T19 | Register agent, declare capability, namespace locations |
+| **Task flow** | CPL-T07 (L1), CPL-T09 | Submit task, accept/refuse, no duplicates |
+| **Evidence** | CPL-T12 (L1), CPL-T16 (L1) | Correlate outcomes, measure service profile |
+| **Assurance** | CPL-T03, CPL-T01 | Domain requirements not waived, declaration valid |
+| **Integration** | CPL-T13 (L1) | Workflow admission with mixed levels |
+
+### 15.3 Progression to L2
+
+When L1 is stable:
+- Add state reporting within declared bounds
+- Implement freshness tracking (cpl-req-010)
+- Add predefined policy responses to state changes
+- Extend service profile with state age, change visibility, and recovery bounds
+
+### 15.4 Progression to L3
+
+When L2 is stable:
+- Implement runtime coordination: proposals, renegotiation, reassignment
+- Add bounded resolution (cpl-req-011): finite cycles, no oscillation
+- Preserve authority: local control, human decisions, building safety
+- Verify end-to-end with integration test across all participating planes (cpl-req-503)
+
+### 15.5 Version pinning
+
+This document is version `0.2-draft`. Implementation against this version should record the schema version in the declaration (`schema_version: rocom-conformance/control-planes-0.2-draft`). When the specification is adopted, the version will increment to `1.0`. The migration ledger (cpl-req-1002) will document any semantic changes between the draft and adopted version.
+
+## 16. Source basis
+
+Source links below are pinned to the current baseline. The proposal introduces new requirements; it does not claim that those requirements already exist in these sources.
+
+- [Part 2 — Conformance](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-02-conformance/CONFORMANCE.md): current level definitions, profile, provenance, deviations and certification.
+- [Part 3 — Information Model](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-03-information-model/INFORMATION-MODEL.yaml): core data types; location model extended by §14.1 of this document.
+- [Part 4 — Service Contracts](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-04-services/): availability provider and task source contracts; alignment documented in §14.2.
+- [Contributing](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/CONTRIBUTING.md): revision route for new conformance levels.
+- [CP/Supplement registry](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-registry.md): authoritative numbering and source status.
+- [CP-007 — Agent identity](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-007-agent-identity.md): type/configuration/individual identity and issuer handling.
+- [CP-008 — Resource authority](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-008-resource-authority.md): grants, expiry, release, delegated autonomy and commitments.
+- [CP-009 — Priority and preemption](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-009-priority-preemption.md): priority origin, limits, preemption and starvation reporting.
+- [Sup-003 — BMS infrastructure](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/supplements/sup-003.md): infrastructure authority and safety boundary.
+- [Sup-005 — Certification provider requirements](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/supplements/sup-005-certification-provider.md): draft provider/evidence framework; its draft status is preserved.
 
 ---
 
