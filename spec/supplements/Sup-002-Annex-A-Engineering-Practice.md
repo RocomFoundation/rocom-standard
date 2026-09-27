@@ -171,7 +171,7 @@ has been renamed to match.
   expected figure rather than the specification. Coverage was restated from
   2/17 to 2/20. We mention this because a coverage ratio is only as honest as
   its denominator, and ours was briefly fitted to a target.
-- **The systems-code core does not compile.** It is excluded from every
+- **The systems-code core does not compile** (as of 2026-08-22). It is excluded from every
   evidence claim until a green build exists, and the fix is owned by a named
   engineer rather than by an agent.
 - **Timeout handling is partial.** Test execution is bounded for in-process

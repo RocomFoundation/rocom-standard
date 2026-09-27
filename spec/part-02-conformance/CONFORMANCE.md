@@ -57,6 +57,7 @@ implementer:
 
 # Scope
 conformance_scope:
+  profile: "General"   # or "Healthcare"
   parts_declared:
     - part: 1
       level: L1   # or L2, L3
@@ -127,7 +128,23 @@ eligible for Rocom Certified status.
 
 # 5. Formal Certification
 
-Formal Rocom Certified status is awarded by the Rocom Certification
-Program upon successful execution of the full conformance test suite
-at the declared level. The certification program is defined separately
-and maintained by the specification steward (see GOVERNANCE.md).
+Formal Rocom Certified status is awarded by independent Certification
+Providers under ROCOM Board oversight upon successful execution of the
+full conformance test suite at the declared level and profile. The
+Certification Program is defined in Sup-005 (Certification Provider
+Requirements). During the transition period before providers are
+appointed, self-declaration of conformance remains available.
+
+## 5.1 Deviation Severity
+
+Declarations of partial conformance must classify each deviation:
+
+| Severity | Definition | Certification impact |
+|----------|-----------|---------------------|
+| **Critical** | Security vulnerability, safety hazard, or data integrity failure | Certification blocked. Must be resolved before certification. |
+| **Major** | Missing normative requirement that affects interoperability | Maximum 1 major deviation permitted. |
+| **Minor** | Implementation difference that does not affect interoperability | Maximum 2 minor deviations permitted. |
+
+Systems with more than three deviations total (any severity) at L2 or
+above are not eligible for Rocom Certified status. One or more Critical
+deviations block certification regardless of level.

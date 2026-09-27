@@ -40,10 +40,11 @@ Supplements add normative content between editions. See
 
 ## Certification
 
-Rocom certification is performed by independent ICT providers with
-ISO 27001 competence under ROCOM Board oversight. The secretariat
-does not certify its own implementations.
-See [Governance](governance.html) and Sup-005.
+Independent ICT providers with ISO 27001 competence will perform Rocom
+certification under ROCOM Board oversight (Sup-005). The secretariat
+does not certify its own implementations. During the transition period
+before providers are appointed, self-declaration of conformance is
+available per Part 2. See [Governance](governance.html) and Sup-005.
 
 ## Licensing
 

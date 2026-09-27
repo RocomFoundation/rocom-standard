@@ -87,19 +87,12 @@ approach among many.
 
 ## Recommendation
 
-1. Create Part 8 (Orchestrator Service Interface) with the 13 normative
-   endpoints as OpenAPI specification.
-2. A management system's Postman collection references the standard's 13
-   endpoints via submodule and extends with its own 3 proposal endpoints.
-3. The proposal model is documented in the management system's product docs,
-   not in the standard.
-
-## Pending Approval
-
-This supplement is MERGED into Edition 2026a draft. The 13 normative
-endpoints are incorporated as the orchestrator service interface
-requirement. After full Edition publication:
-- OpenAPI spec is published as a standalone machine-readable artifact
-- Conformance Postman collection is generated from the OpenAPI spec
-- Implementations reference the standard via submodule and extend with
-  product-specific endpoints
+The 13 normative endpoints are incorporated as the orchestrator service
+interface requirement in Edition 2026a draft. After full Edition
+publication:
+1. OpenAPI spec is published as a standalone machine-readable artifact.
+2. A management system's Postman collection references the standard's
+   13 endpoints via submodule and extends with its own 3 proposal
+   endpoints.
+3. The proposal model is documented in the management system's product
+   docs, not in the standard.

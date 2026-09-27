@@ -126,10 +126,13 @@ or Parts, provided each provider satisfies these requirements independently.
 
 ## 8. Current Status
 
-As of this supplement, a Certification Provider has not yet been selected.
-The Specification Steward (Tech Happens Europe ApS) provides interim
-stewardship and conformance testing capability. The ROCOM Board will
-conduct provider selection after the Board is constituted.
+Candidate Certification Providers have been identified: Secura (Denmark)
+and Cybercom (Norway) for regional ISO 27001 audit and ROS-analyses;
+Aikido Security (Belgium) for automated code analysis; Ferrous Systems
+(Germany) for Ferrocene toolchain and Supply Chain; Escape (France) for
+API testing. Formal selection and contracts pending Board constitution
+and demo validation per Issue #47. Self-declaration of conformance
+remains available during this transition period.
 
 ## 9. Cross-References
 

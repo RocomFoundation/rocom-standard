@@ -8,24 +8,32 @@ considered Rocom-conformant. It extends the VDA 5050 standard by adding
 healthcare-specific capability declarations, compliance event reporting,
 and chain-of-custody tracking on `rocom/v0/` extension topics.
 
-Standard VDA 5050 messages are never modified.
+Rocom extensions use the separate `rocom/v0/` namespace and never
+modify standard VDA 5050 messages.
 
 ## 1.1 Normative References
 
-This profile is based on **VDA 5050 version 2.1** (VDA 5050-2, Release 2.1, 2023).
-All references to "VDA 5050" in this profile refer to this specific version unless
-explicitly stated otherwise.
+This profile is based on **VDA 5050 version 2.1.0** (VDA 5050-2,
+published January 2025). All references to "VDA 5050" in this profile
+refer to this specific version unless explicitly stated otherwise.
 
 VDA 5050 3.0 was published in April 2026 and introduces zones, movement
 rules, and areas requiring explicit permission. Rocom has reviewed these
-changes. Version 2.1 is retained as the normative baseline because it
+changes. Version 2.1.0 is retained as the normative baseline because it
 provides sufficient coverage for current deployments and is widely
 implemented. Overlap with 3.0 features (notably zone semantics) is
 addressed through Rocom's own zone model (Part 1) and the Healthcare
 profile, rather than by depending on a newer VDA release.
 
-The VDA 5050 specification is publicly available:
-https://github.com/vda-5050/vda5050-facts
+The VDA 5050 specification and MQTT topic structure are publicly available:
+https://github.com/VDA5050/VDA5050
+
+Topic namespace: `vda5050/`. Messages follow the VDA 5050 factsheet
+schema. Cancellation uses `instantActions` — the orchestrator publishes
+`{"action": "cancelOrder", "order": {"serialNumber": "..."}}` to
+`vda5050/instantActions/<serialNumber>`. Rocom extensions use the
+separate `rocom/v0/` namespace and never modify standard VDA 5050
+messages.
 
 ## 2. Conformance Levels
 

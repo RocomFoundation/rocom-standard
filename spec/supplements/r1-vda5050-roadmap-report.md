@@ -12,14 +12,15 @@ its own contract.
 
 ## Findings
 
-### VDA 5050 v2.1 Scope (Current)
+### VDA 5050 v2.1.0 Scope (Current)
 
-VDA 5050-2 Release 2.1 (2023) covers:
+VDA 5050-2, version 2.1.0 (published January 2025) covers:
 - Factsheet publication (`vda5050/factsheet`)
 - State updates (`vda5050/state/<serialNumber>`)
 - Order dispatch (`vda5050/order/<serialNumber>`)
 - Connection state (`vda5050/connection/<serialNumber>`)
-- Order cancellation (`vda5050/cancel/<serialNumber>`)
+- Order cancellation via `instantActions` with `cancelOrder`:
+  `vda5050/instantActions/<serialNumber>`
 - Navigation nodes with building/floor attributes
 
 **NOT covered:**
@@ -35,9 +36,9 @@ VDA 5050 3.0 was published in April 2026. New features include:
 - Area-based access control
 
 The VDA 5050 specification is publicly available at:
-https://github.com/vda-5050/vda5050-facts
+https://github.com/VDA5050/VDA5050
 
-Rocom has reviewed VDA 5050 3.0. Version 2.1 is retained as the normative
+Rocom has reviewed VDA 5050 3.0. Version 2.1.0 is retained as the normative
 baseline because it provides sufficient coverage for current deployments
 and is widely implemented. Overlap with 3.0 zone semantics is addressed
 through Rocom's own zone model (Part 1) and the Healthcare profile.
@@ -46,7 +47,7 @@ through Rocom's own zone model (Part 1) and the Healthcare profile.
 - VDA hjemmeside (vda.de): Ingen offentlig roadmap for VDA 5050 funnet.
   VDA 5050-dedikerte sider returnerer 404.
 - VDA 5050 er offentlig tilgjengelig via GitHub:
-  https://github.com/vda-5050/vda5050-facts
+  https://github.com/VDA5050/VDA5050
 - Ingen VDMA roadmap dokument funnet offentlig.
 
 ### Relevante Standarder
@@ -69,11 +70,12 @@ referere til.
 ## Sources
 
 ### VDA 5050 scope (konkret verifisert mot standardtekst)
-- VDA 5050-2 Release 2.1 — offentlig tilgjengelig:
-  https://github.com/vda-5050/vda5050-facts
+- VDA 5050-2, version 2.1.0 (january 2025) — offentlig tilgjengelig:
+  https://github.com/VDA5050/VDA5050
 - MQTT topic-oversikt fra standarden bekrefter 6 topic-familier; ingen
   dekker elevator eller dør: `vda5050/factsheet`, `vda5050/state`,
-  `vda5050/order`, `vda5050/connection`, `instantActions/cancelOrder`,
+  `vda5050/order`, `vda5050/connection`,
+  `vda5050/instantActions` (cancelOrder via instantActions),
   `vda5050/navigation`
 - VDA 5050-1 (2022, tidligere utgave) dekker samme omfang — ingen endring
 
