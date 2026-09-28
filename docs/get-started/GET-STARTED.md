@@ -1,8 +1,9 @@
-# Get Started with ROCOM
+# FILE: docs/get-started/GET-STARTED.md
+# Title: Get Started with ROCOM
 
 Find the entry point that matches your role. Each path leads to practical guidance and the relevant specification documents.
 
-## Hospitals & care organisations
+### Hospitals & care organisations
 
 You are evaluating whether robots and connected systems can improve your operations — or you are planning a deployment and need to know what to ask for.
 
@@ -19,7 +20,7 @@ You are evaluating whether robots and connected systems can improve your operati
 - [Security & Safety](security-safety.html) — how ROCOM addresses connections between systems
 - [Part 1 — Overview & Scope](part-01-overview.html) — what the standard covers
 
-## Technology providers
+### Technology providers
 
 You build or supply systems that participate in healthcare operations: robots, fleet-management platforms, building-system adapters, workforce systems or task integrations.
 
@@ -35,9 +36,9 @@ You build or supply systems that participate in healthcare operations: robots, f
 - [Specification Modules](modules.html) — structured reference of all requirements by part
 - [Part 2 — Service Levels L0–L3](part-02-service-levels.html) — capability levels and what each requires
 - [Part 2 — Conformance](part-02-conformance.html) — how to declare conformance
-- [Specification Modules](modules.html) — interface requirements by part
+- [Part 4 — Service Contracts](modules.html#module-part-04-services-availability-provider-contract) — interface requirements
 
-## IT, security & assurance
+### IT, security & assurance
 
 You review how systems connect, what data moves, and whether evidence supports claims. You need to understand trust boundaries, conformance and deviations.
 
@@ -51,7 +52,8 @@ You review how systems connect, what data moves, and whether evidence supports c
 **Start here:**
 
 - [Security & Safety](security-safety.html) — summary of how ROCOM addresses security at connections
-- [Specification Modules](modules.html) — Part 6 (Identity & Trust) and Part 7 (Data Governance) source
+- [Part 6 — Identity & Trust](modules.html#module-part-06-security-identity-trust) — machine identity requirements
+- [Part 7 — Data Governance](modules.html#module-part-07-data-governance-data-governance-module) — data flows
 - [Part 2 — Conformance](part-02-conformance.html) — conformance framework and evidence
 
 ---

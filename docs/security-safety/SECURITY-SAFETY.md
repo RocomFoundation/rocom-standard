@@ -1,12 +1,11 @@
-# Security & Safety
+# FILE: docs/security-safety/SECURITY-SAFETY.md
+# Status: Guidance
+# License: CC-BY 4.0
+# Title: Security & Safety
 
 ROCOM does not replace the safety systems, access control or clinical governance of a healthcare organisation. It makes the connections between those systems explicit, testable and traceable.
 
-## What ROCOM adds to security and safety
-
-When robots, building systems, workforce platforms and task systems interact, each system already has its own security and safety responsibilities. The gap is at the connections: who may request what, what data moves where, and how systems behave when a dependency fails.
-
-ROCOM addresses that gap through declared interfaces and verifiable behaviour at the boundaries.
+Each system already has its own security and safety responsibilities. The gap is at the connections: who may request what, what data moves where, and how systems behave when a dependency fails. ROCOM addresses that gap through declared interfaces and verifiable behaviour at the boundaries.
 
 ### Identified participants and controlled access
 
@@ -38,12 +37,12 @@ A conformance statement identifies which requirements an implementation claims t
 
 **Specification:** Part 2 (Conformance), Part 2 (Service Levels L0–L3); Sup-005 (Certification Provider).
 
-## What ROCOM does not do
+### What ROCOM does not do
 
-- Does not execute safety-critical decisions on behalf of building or clinical systems.
-- Does not claim that adopting the standard makes a deployment safe.
-- Does not replace local risk assessment, organisational readiness reviews, or regulatory compliance processes.
-- Does not define physical safety requirements for robots (covered by IEC 61508 / ISO 13482 / applicable medical-device regulation).
+- Execute safety-critical decisions on behalf of building or clinical systems.
+- Claim that adopting the standard makes a deployment safe.
+- Replace local risk assessment, organisational readiness reviews, or regulatory compliance processes.
+- Define physical safety requirements for robots (covered by IEC 61508 / ISO 13482 / applicable medical-device regulation).
 
 The standard provides the contracts and evidence that make the connections between existing systems auditable. Safety at the connections supports — but does not substitute for — the safety case of each participating system.
 

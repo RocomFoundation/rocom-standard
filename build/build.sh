@@ -21,12 +21,18 @@ repo_dir, src, out, output_dir, template = sys.argv[1:]
 with open(src) as f:
     raw = f.read()
 
-# Title from first # heading (skip comment lines like # === or # FILE:)
+# Title from # Title: header, or first # heading (skip comment lines)
 title = os.path.basename(src).replace('.md', '')
+title_from_header = None
 for line in raw.splitlines():
-    if line.startswith('# ') and not line.startswith('# ===') and not line.startswith('# FILE:'):
-        title = line[2:].strip()
-        break
+    if line.startswith('# Title:'):
+        title_from_header = line[len('# Title:'):].strip()
+    if line.startswith('# ') and not line.startswith('# ===') and not line.startswith('# FILE:') and not line.startswith('# Title:') and not line.startswith('# Status:') and not line.startswith('# License:'):
+        if title_from_header is None:
+            title = line[2:].strip()
+            break
+if title_from_header:
+    title = title_from_header
 
 # Status/license from comment headers
 status = ''
@@ -39,7 +45,7 @@ for line in raw.splitlines():
 
 # Strip comment-header lines, pandoc convert
 clean = raw
-for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*', r'^# Scope:.*', r'^# NOTE:.*']:
+for pat in [r'^# FILE:.*', r'^# ===.*', r'^# Status:.*', r'^# License:.*', r'^# Scope:.*', r'^# NOTE:.*', r'^# Title:.*']:
     clean = re.sub(pat, '', clean, flags=re.M)
 clean = re.sub(r'\n{3,}', '\n\n', clean)
 try:
