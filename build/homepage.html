@@ -104,7 +104,7 @@
     }
     .nav-cta:hover { background: #0d3a96; }
 
-    /* === Hamburger button (mobile) === */
+    /* === Hamburger (mobile) === */
     .mobile-menu-btn {
       display: none;
       background: none;
@@ -212,109 +212,142 @@
     .meta-line a { color: #718096; text-decoration: none; }
     .meta-line a:hover { color: #0a2c77; }
 
-    /* === Sections === */
-    .section {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem;
-    }
-    .section--narrow {
+    /* === Four control planes === */
+    .planes-intro {
       max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
     }
-    .section h2 {
+    .planes-intro h2 {
       font-size: 1.3rem;
       font-weight: 700;
       color: #1a2332;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
       letter-spacing: -0.01em;
     }
-    .section p {
+    .planes-intro p {
       font-size: 0.92rem;
       color: #4a5568;
       line-height: 1.6;
-      margin-bottom: 1rem;
     }
-    .section a { color: #0a2c77; text-decoration: none; }
-    .section a:hover { text-decoration: underline; }
-
-    /* === Example workflow === */
-    .example {
-      background: #f7f8fa;
+    .planes {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+    .plane-card {
+      padding: 1.3rem;
+      background: var(--plane-tint);
       border: 1px solid #e8ecf0;
+      border-top: 2px solid var(--plane-accent);
       border-radius: 4px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+      text-decoration: none;
+      display: block;
+      transition: box-shadow 0.15s, transform 0.15s;
     }
-    .example h3 {
+    .plane-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transform: translateY(-1px);
+    }
+    .plane-card--robot { --plane-accent: #00b5cc; --plane-tint: #f2fafb; }
+    .plane-card--infrastructure { --plane-accent: #459eda; --plane-tint: #f4f8fc; }
+    .plane-card--workforce { --plane-accent: #2460cd; --plane-tint: #f3f6fc; }
+    .plane-card--task { --plane-accent: #102878; --plane-tint: #f5f6fa; }
+    .plane-card h3 {
       font-size: 0.95rem;
-      font-weight: 600;
-      color: #1a2332;
+      font-weight: 700;
+      color: #0a2c77;
       margin-bottom: 0.5rem;
     }
-    .example p {
-      font-size: 0.88rem;
+    .plane-card p {
+      font-size: 0.82rem;
       color: #4a5568;
-      line-height: 1.6;
-      margin-bottom: 0.8rem;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
     }
-    .example-note {
+    .plane-card .plane-link {
       font-size: 0.78rem;
-      color: #a0aec0;
-      font-style: italic;
+      font-weight: 600;
+      color: var(--plane-accent);
+      text-decoration: none;
     }
+    .plane-card .plane-link:hover { text-decoration: underline; }
 
     /* === Security teaser === */
     .security-teaser {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+    }
+    .security-inner {
       border-left: 3px solid #0a2c77;
       padding: 1.2rem 1.5rem;
       background: #f7f8fa;
       border-radius: 0 4px 4px 0;
-      margin-bottom: 1rem;
     }
-    .security-teaser h3 {
+    .security-inner h3 {
       font-size: 1rem;
       font-weight: 600;
       color: #1a2332;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
-    .security-teaser p {
+    .security-inner p {
       font-size: 0.88rem;
       color: #4a5568;
       line-height: 1.6;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.6rem;
     }
-    .security-teaser a {
+    .security-inner a {
       font-weight: 600;
       color: #0a2c77;
       text-decoration: none;
     }
-    .security-teaser a:hover { text-decoration: underline; }
+    .security-inner a:hover { text-decoration: underline; }
+    .security-note {
+      font-size: 0.78rem;
+      color: #a0aec0;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
 
     /* === Entry points === */
+    .entry-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+    }
+    .entry-section h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a2332;
+      margin-bottom: 1rem;
+    }
     .entry-points {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
     }
     .entry-card {
-      padding: 1.3rem;
+      padding: 1.2rem;
       background: #fff;
       border: 1px solid #e8ecf0;
       border-top: 2px solid #0a2c77;
       border-radius: 4px;
     }
     .entry-card h3 {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #0a2c77;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
     .entry-card p {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #4a5568;
       line-height: 1.5;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.6rem;
     }
     .entry-card ul {
       list-style: none;
@@ -322,50 +355,43 @@
       margin: 0;
     }
     .entry-card li {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: #4a5568;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.25rem;
     }
     .entry-card li a { color: #0a2c77; text-decoration: none; }
     .entry-card li a:hover { text-decoration: underline; }
 
-    /* === Four domains === */
-    .areas-intro {
-      margin-bottom: 1.5rem;
+    /* === Further reading === */
+    .further {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1rem 2rem 3rem;
     }
-    .areas-intro h2 {
+    .further h2 {
       font-size: 1.1rem;
       font-weight: 600;
       color: #1a2332;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
-    .areas {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-    }
-    .area-card {
-      padding: 1.3rem;
-      background: var(--plane-tint);
-      border: 1px solid #e8ecf0;
-      border-top: 2px solid var(--plane-accent);
-      border-radius: 4px;
-    }
-    .area-card--robot { --plane-accent: #00b5cc; --plane-tint: #f2fafb; }
-    .area-card--infrastructure { --plane-accent: #459eda; --plane-tint: #f4f8fc; }
-    .area-card--workforce { --plane-accent: #2460cd; --plane-tint: #f3f6fc; }
-    .area-card--task { --plane-accent: #102878; --plane-tint: #f5f6fa; }
-    .area-card h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #0a2c77;
-      margin-bottom: 0.5rem;
-    }
-    .area-card p {
-      font-size: 0.82rem;
+    .further p {
+      font-size: 0.88rem;
       color: #4a5568;
-      line-height: 1.5;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
     }
+    .further-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .further-links a {
+      font-size: 0.82rem;
+      color: #0a2c77;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .further-links a:hover { text-decoration: underline; }
 
     /* === Footer === */
     .footer {
@@ -385,15 +411,22 @@
     }
 
     /* === Responsive === */
+    @media (max-width: 1024px) {
+      .planes { grid-template-columns: repeat(2, 1fr); }
+      .entry-points { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
       .topnav-inner { padding: 0 1rem; }
       .topnav-links { display: none; }
       .mobile-menu-btn { display: inline-block; }
       .hero { padding: 2rem 1.25rem 1.5rem; }
       .hero h1 { font-size: 1.5rem; }
-      .section { padding: 2rem 1.25rem; }
-      .areas { grid-template-columns: 1fr; }
+      .planes { grid-template-columns: 1fr; padding: 1.5rem 1.25rem; }
+      .planes-intro { padding: 1.5rem 1.25rem 0; }
+      .security-teaser { padding: 0 1.25rem 2rem; }
+      .entry-section { padding: 0 1.25rem 2rem; }
       .entry-points { grid-template-columns: 1fr; }
+      .further { padding: 1rem 1.25rem 3rem; }
     }
   </style>
 </head>
@@ -405,7 +438,7 @@
         <img src="assets/rocom-wordmark-net.png" alt="ROCOM" class="topnav-logo">
       </a>
       <nav class="topnav-links" aria-label="Main navigation">
-        <div class="nav-group"><a href="index.html">Why ROCOM</a></div>
+        <div class="nav-group"><a href="why-rocom.html">Why ROCOM</a></div>
         <div class="nav-group"><a href="security-safety.html">Security &amp; Safety</a></div>
         <div class="nav-group has-dropdown">
           <a href="part-01-overview.html">The Standard</a>
@@ -438,7 +471,7 @@
       </nav>
       <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" onclick="var m=document.getElementById('mobile-menu');var b=this;m.toggleAttribute('open');b.setAttribute('aria-expanded',m.hasAttribute('open'));b.textContent=m.hasAttribute('open')?'Close':'Menu';">Menu</button>
       <dialog class="mobile-menu-panel" id="mobile-menu" aria-label="Mobile navigation">
-        <a href="index.html">Why ROCOM</a>
+        <a href="why-rocom.html">Why ROCOM</a>
         <a href="security-safety.html">Security &amp; Safety</a>
         <div class="mm-label">The Standard — Parts</div>
         <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
@@ -464,7 +497,7 @@
     </div>
   </div>
 
-  <!-- Hero -->
+  <!-- 1. Hero -->
   <div class="hero">
     <h1>Robots, people and buildings. Working together in <span>healthcare</span>.</h1>
     <p>ROCOM is an open standard for connecting robots, building systems, workforce platforms and task systems — with clear responsibilities and testable interfaces.</p>
@@ -478,30 +511,49 @@
     </div>
   </div>
 
-  <!-- Practical example -->
-  <section class="section section--narrow" aria-labelledby="example-title">
-    <div class="example">
-      <h3 id="example-title">One practical example</h3>
-      <p>A hospital needs to deliver supplies from a central store to a ward on another floor. A delivery robot is assigned the task by the hospital's task system. Before leaving, the robot requests door access from the building management system — and receives authorisation for a defined time window.</p>
-      <p>The robot reaches the lift. It sends a dispatch request to the BMS. The lift is currently serving human traffic, so the BMS returns a queued response with an estimated arrival. The robot waits at a safe stand-off distance.</p>
-      <p>The lift becomes available. The BMS dispatches it. The robot boards, rides to the target floor, and exits. At the ward entrance, the robot re-requests zone authorisation because the previous door access has expired. The BMS grants it, and the robot proceeds to the delivery point.</p>
-      <p>At each step, the robot system executes the movement, the BMS controls building resources, and the task system tracks progress. No single system takes over the others' authority.</p>
-      <p class="example-note">This is an illustrative workflow. ROCOM specifies the interfaces and responsibilities — it does not execute them. Local robot safety, building systems and required human decisions remain authoritative.</p>
+  <!-- 2. Four control planes -->
+  <section aria-labelledby="planes-title">
+    <div class="planes-intro">
+      <h2 id="planes-title">Four control planes. One shared standard.</h2>
+      <p>ROCOM connects four areas of healthcare operations. Each contributes its own capabilities and retains its responsibilities.</p>
+    </div>
+    <div class="planes">
+      <a class="plane-card plane-card--robot" href="why-rocom.html">
+        <h3>Robot</h3>
+        <p>Connect robot capabilities and execution status through robot and fleet-management systems.</p>
+        <span class="plane-link">Learn more &rarr;</span>
+      </a>
+      <a class="plane-card plane-card--infrastructure" href="why-rocom.html">
+        <h3>Infrastructure</h3>
+        <p>Coordinate access to doors, lifts and shared spaces through building and access-control systems.</p>
+        <span class="plane-link">Learn more &rarr;</span>
+      </a>
+      <a class="plane-card plane-card--workforce" href="why-rocom.html">
+        <h3>Workforce</h3>
+        <p>Connect staffing, skills and availability to coordinate people and robot capacity.</p>
+        <span class="plane-link">Learn more &rarr;</span>
+      </a>
+      <a class="plane-card plane-card--task" href="why-rocom.html">
+        <h3>Task</h3>
+        <p>Connect operational needs, priorities and progress through clinical and logistics task systems.</p>
+        <span class="plane-link">Learn more &rarr;</span>
+      </a>
     </div>
   </section>
 
-  <!-- Security & Safety teaser -->
-  <section class="section section--narrow" aria-labelledby="security-title">
-    <div class="security-teaser">
+  <!-- 3. Security & Safety teaser -->
+  <section class="security-teaser" aria-labelledby="security-title">
+    <div class="security-inner">
       <h3 id="security-title">Security at the connections</h3>
       <p>Each system has its own responsibilities. Their connections need clear rules too.</p>
       <p>ROCOM defines who may request an action, what data may be shared, and how systems respond when access is denied or a dependency fails.</p>
       <a href="security-safety.html">Explore Security &amp; Safety &rarr;</a>
+      <p class="security-note">A shared concern across all four planes — not a replacement for local safety systems.</p>
     </div>
   </section>
 
-  <!-- Three entry points -->
-  <section class="section" aria-labelledby="entry-title">
+  <!-- 4. Role-based entry points -->
+  <section class="entry-section" aria-labelledby="entry-title">
     <h2 id="entry-title">Find your starting point</h2>
     <div class="entry-points">
       <div class="entry-card">
@@ -534,29 +586,17 @@
     </div>
   </section>
 
-  <!-- Four domains -->
-  <section class="section" aria-labelledby="domains-title">
-    <div class="areas-intro">
-      <h2 id="domains-title">Four domains, one shared standard</h2>
-      <p>Healthcare operations involve different systems with different expertise. ROCOM defines how they connect.</p>
-    </div>
-    <div class="areas">
-      <div class="area-card area-card--robot">
-        <h3>Robot</h3>
-        <p>Delivery, transport and support robots connect to healthcare workflows through shared identity, capability and task interfaces — while retaining the specialist capabilities of their fleet-management systems.</p>
-      </div>
-      <div class="area-card area-card--infrastructure">
-        <h3>Infrastructure</h3>
-        <p>Doors, lifts and shared building resources are coordinated through building management and access-control systems, with clear responsibilities, capacity limits and permissions.</p>
-      </div>
-      <div class="area-card area-card--workforce">
-        <h3>Workforce</h3>
-        <p>Staffing and availability systems coordinate human teams and robot capacity, respecting the distinct skills, responsibilities and operating constraints of each.</p>
-      </div>
-      <div class="area-card area-card--task">
-        <h3>Task</h3>
-        <p>Clinical and operational task systems share priorities, progress and completion evidence across participating systems, with traceability at every step.</p>
-      </div>
+  <!-- 5. Further reading -->
+  <section class="further" aria-labelledby="further-title">
+    <h2 id="further-title">Further reading and participation</h2>
+    <p>The ROCOM specification is developed openly through a structured process with editions, supplements and correction proposals.</p>
+    <div class="further-links">
+      <a href="why-rocom.html">Why ROCOM — purpose, benefits and an example</a>
+      <a href="principles.html">Principles &amp; Architecture</a>
+      <a href="changes.html">Changes — correction proposals &amp; supplements</a>
+      <a href="governance.html">Governance — association and participation</a>
+      <a href="contributing.html">Contribution process</a>
+      <a href="adopting-rocom.html">Adopting ROCOM</a>
     </div>
   </section>
 

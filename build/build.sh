@@ -169,6 +169,7 @@ fi
 [ -f "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/TRANSPORT.md" "part-05-transport.html" && echo "  part-05-transport.html"
 [ -f "$REPO_DIR/spec/part-05-transport/PROFILE.md" ] && convert_md "$REPO_DIR/spec/part-05-transport/PROFILE.md" "part-05-transport.html" && echo "  part-05-transport.html"
 [ -f "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" ] && convert_md "$REPO_DIR/docs/principles-and-architecture/PRINCIPLES.md" "principles.html" && echo "  principles.html"
+[ -f "$REPO_DIR/docs/why-rocom/WHY-ROCOM.md" ] && convert_md "$REPO_DIR/docs/why-rocom/WHY-ROCOM.md" "why-rocom.html" && echo "  why-rocom.html"
 [ -f "$REPO_DIR/docs/adopting-rocom/ADOPTING-ROCOM.md" ] && convert_md "$REPO_DIR/docs/adopting-rocom/ADOPTING-ROCOM.md" "adopting-rocom.html" && echo "  adopting-rocom.html"
 [ -f "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" ] && convert_md "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" "security-safety.html" && echo "  security-safety.html"
 [ -f "$REPO_DIR/docs/get-started/GET-STARTED.md" ] && convert_md "$REPO_DIR/docs/get-started/GET-STARTED.md" "get-started.html" && echo "  get-started.html"
