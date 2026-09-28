@@ -91,6 +91,17 @@
       background: #f7f8fa;
       outline: none;
     }
+    .nav-cta {
+      background: #0a2c77;
+      color: #fff !important;
+      padding: 0.35rem 0.9rem !important;
+      border-radius: 4px;
+      border-bottom: 2px solid transparent !important;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .nav-cta:hover { background: #0d3a96; }
+
     .nav-dropdown .dd-label {
       color: #a0aec0;
       font-size: 0.62rem;
@@ -381,58 +392,61 @@
         <img src="assets/rocom-wordmark-net.png" alt="ROCOM" class="topnav-logo">
       </a>
       <nav class="topnav-links" aria-label="Main navigation">
+        <div class="nav-group"><a href="index.html">Why ROCOM</a></div>
+        <div class="nav-group"><a href="security-safety.html">Security &amp; Safety</a></div>
         <div class="nav-group has-dropdown">
-          <a href="part-01-overview.html">Specification</a>
+          <a href="part-01-overview.html">The Standard</a>
           <div class="nav-dropdown">
             <div class="dd-label">Parts</div>
             <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
             <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
-<a href="part-02-conformance.html">Part 2 — Conformance</a>
-             <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
-             <a href="part-05-transport.html">Part 5 — Transport Profile</a>
-            <div class="dd-label">Reference</div>
-            <a href="principles.html">Principles &amp; Architecture</a>
-            <a href="modules.html">Specification Modules (YAML)</a>
-          </div>
-        </div>
-        <div class="nav-group has-dropdown">
-          <a href="supplements.html">Supplements</a>
-          <div class="nav-dropdown">
+            <a href="part-02-conformance.html">Part 2 — Conformance</a>
+            <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
+            <a href="part-05-transport.html">Part 5 — Transport Profile</a>
+            <div class="dd-label">Supplements</div>
             <a href="supplements.html">All Supplements</a>
             <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
             <a href="supplement-Sup-002-Annex-A-Engineering-Practice.html">Annex A — Engineering Practice</a>
             <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
+            <div class="dd-label">Reference</div>
+            <a href="principles.html">Principles &amp; Architecture</a>
+            <a href="modules.html">Specification Modules (YAML)</a>
+            <a href="changes.html">Changes</a>
           </div>
         </div>
-        <div class="nav-group">
-          <a href="adopting-rocom.html">Adopting ROCOM</a>
+        <div class="nav-group has-dropdown">
+          <a href="governance.html">About ROCOM</a>
+          <div class="nav-dropdown">
+            <a href="governance.html">Association &amp; Governance</a>
+            <a href="contributing.html">Contribution Process</a>
+          </div>
         </div>
-        <div class="nav-group">
-          <a href="changes.html">Changes</a>
-        </div>
-        <div class="nav-group">
-          <a href="governance.html">Governance</a>
-        </div>
+        <div class="nav-group"><a href="get-started.html" class="nav-cta">Get Started</a></div>
       </nav>
       <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" onclick="var m=document.getElementById('mobile-menu');var b=this;m.toggleAttribute('open');b.setAttribute('aria-expanded',m.hasAttribute('open'));b.textContent=m.hasAttribute('open')?'Close':'Menu';">Menu</button>
       <dialog class="mobile-menu-panel" id="mobile-menu" aria-label="Mobile navigation">
-        <div class="mm-label">Parts</div>
+        <a href="index.html">Why ROCOM</a>
+        <a href="security-safety.html">Security &amp; Safety</a>
+        <div class="mm-label">The Standard — Parts</div>
         <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
         <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
-<a href="part-02-conformance.html">Part 2 — Conformance</a>
-         <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
-         <a href="part-05-transport.html">Part 5 — Transport Profile</a>
-        <div class="mm-label">Reference</div>
-        <a href="principles.html">Principles &amp; Architecture</a>
-        <a href="modules.html">Specification Modules (YAML)</a>
+        <a href="part-02-conformance.html">Part 2 — Conformance</a>
+        <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
+        <a href="part-05-transport.html">Part 5 — Transport Profile</a>
         <div class="mm-label">Supplements</div>
         <a href="supplements.html">All Supplements</a>
         <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
+        <a href="supplement-Sup-002-Annex-A-Engineering-Practice.html">Annex A — Engineering Practice</a>
         <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
-        <div class="mm-label">Other</div>
-        <a href="adopting-rocom.html">Adopting ROCOM</a>
+        <div class="mm-label">Reference</div>
+        <a href="principles.html">Principles &amp; Architecture</a>
+        <a href="modules.html">Specification Modules (YAML)</a>
         <a href="changes.html">Changes</a>
+        <div class="mm-label">About</div>
         <a href="governance.html">Governance</a>
+        <a href="contributing.html">Contribution Process</a>
+        <div class="mm-label">Action</div>
+        <a href="get-started.html" style="font-weight:600; color:#0a2c77;">Get Started</a>
       </dialog>
     </div>
   </div>

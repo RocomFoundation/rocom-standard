@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rocom Specification</title>
+  <title>ROCOM — Robots, people and buildings in healthcare</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; font-size: 16px; }
@@ -93,6 +93,16 @@
       padding: 0.3rem 1rem 0.15rem;
       pointer-events: none;
     }
+    .nav-cta {
+      background: #0a2c77;
+      color: #fff !important;
+      padding: 0.35rem 0.9rem !important;
+      border-radius: 4px;
+      border-bottom: 2px solid transparent !important;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .nav-cta:hover { background: #0d3a96; }
 
     /* === Hamburger button (mobile) === */
     .mobile-menu-btn {
@@ -202,11 +212,126 @@
     .meta-line a { color: #718096; text-decoration: none; }
     .meta-line a:hover { color: #0a2c77; }
 
-    /* === Four control planes — restrained colours from the layered O === */
-    .areas-intro {
-      max-width: 720px;
+    /* === Sections === */
+    .section {
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 1rem 2rem 0;
+      padding: 2.5rem 2rem;
+    }
+    .section--narrow {
+      max-width: 720px;
+    }
+    .section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a2332;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+    .section p {
+      font-size: 0.92rem;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .section a { color: #0a2c77; text-decoration: none; }
+    .section a:hover { text-decoration: underline; }
+
+    /* === Example workflow === */
+    .example {
+      background: #f7f8fa;
+      border: 1px solid #e8ecf0;
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .example h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a2332;
+      margin-bottom: 0.5rem;
+    }
+    .example p {
+      font-size: 0.88rem;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
+    }
+    .example-note {
+      font-size: 0.78rem;
+      color: #a0aec0;
+      font-style: italic;
+    }
+
+    /* === Security teaser === */
+    .security-teaser {
+      border-left: 3px solid #0a2c77;
+      padding: 1.2rem 1.5rem;
+      background: #f7f8fa;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 1rem;
+    }
+    .security-teaser h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a2332;
+      margin-bottom: 0.5rem;
+    }
+    .security-teaser p {
+      font-size: 0.88rem;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
+    }
+    .security-teaser a {
+      font-weight: 600;
+      color: #0a2c77;
+      text-decoration: none;
+    }
+    .security-teaser a:hover { text-decoration: underline; }
+
+    /* === Entry points === */
+    .entry-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .entry-card {
+      padding: 1.3rem;
+      background: #fff;
+      border: 1px solid #e8ecf0;
+      border-top: 2px solid #0a2c77;
+      border-radius: 4px;
+    }
+    .entry-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0a2c77;
+      margin-bottom: 0.5rem;
+    }
+    .entry-card p {
+      font-size: 0.85rem;
+      color: #4a5568;
+      line-height: 1.5;
+      margin-bottom: 0.8rem;
+    }
+    .entry-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .entry-card li {
+      font-size: 0.82rem;
+      color: #4a5568;
+      margin-bottom: 0.3rem;
+    }
+    .entry-card li a { color: #0a2c77; text-decoration: none; }
+    .entry-card li a:hover { text-decoration: underline; }
+
+    /* === Four domains === */
+    .areas-intro {
+      margin-bottom: 1.5rem;
     }
     .areas-intro h2 {
       font-size: 1.1rem;
@@ -214,30 +339,11 @@
       color: #1a2332;
       margin-bottom: 0.5rem;
     }
-    .areas-intro p {
-      font-size: 0.9rem;
-      color: #4a5568;
-      line-height: 1.6;
-    }
     .areas {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2rem 2rem 3rem;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
     }
-    .areas-cta {
-      text-align: center;
-      margin-top: 1rem;
-      color: #606b7a;
-      font-size: .9rem;
-    }
-    .areas-cta a {
-      color: var(--blue);
-      text-decoration: none;
-    }
-    .areas-cta a:hover { text-decoration: underline; }
     .area-card {
       padding: 1.3rem;
       background: var(--plane-tint);
@@ -285,8 +391,9 @@
       .mobile-menu-btn { display: inline-block; }
       .hero { padding: 2rem 1.25rem 1.5rem; }
       .hero h1 { font-size: 1.5rem; }
-      .areas { padding: 1.5rem 1.25rem; grid-template-columns: 1fr; }
-      .areas-intro { padding: 1rem 1.25rem 0; }
+      .section { padding: 2rem 1.25rem; }
+      .areas { grid-template-columns: 1fr; }
+      .entry-points { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -298,62 +405,72 @@
         <img src="assets/rocom-wordmark-net.png" alt="ROCOM" class="topnav-logo">
       </a>
       <nav class="topnav-links" aria-label="Main navigation">
+        <div class="nav-group"><a href="index.html">Why ROCOM</a></div>
+        <div class="nav-group"><a href="security-safety.html">Security &amp; Safety</a></div>
         <div class="nav-group has-dropdown">
-          <a href="part-01-overview.html">Specification</a>
+          <a href="part-01-overview.html">The Standard</a>
           <div class="nav-dropdown">
             <div class="dd-label">Parts</div>
             <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
             <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
-<a href="part-02-conformance.html">Part 2 — Conformance</a>
-              <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
-             <a href="part-05-transport.html">Part 5 — Transport Profile</a>
-            <div class="dd-label">Reference</div>
-            <a href="principles.html">Principles &amp; Architecture</a>
-            <a href="modules.html">Specification Modules (YAML)</a>
-          </div>
-        </div>
-        <div class="nav-group has-dropdown">
-          <a href="supplements.html">Supplements</a>
-          <div class="nav-dropdown">
+            <a href="part-02-conformance.html">Part 2 — Conformance</a>
+            <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
+            <a href="part-05-transport.html">Part 5 — Transport Profile</a>
+            <div class="dd-label">Supplements</div>
             <a href="supplements.html">All Supplements</a>
             <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
             <a href="supplement-Sup-002-Annex-A-Engineering-Practice.html">Annex A — Engineering Practice</a>
             <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
+            <div class="dd-label">Reference</div>
+            <a href="principles.html">Principles &amp; Architecture</a>
+            <a href="modules.html">Specification Modules (YAML)</a>
+            <a href="changes.html">Changes</a>
           </div>
         </div>
-        <div class="nav-group"><a href="adopting-rocom.html">Adopting ROCOM</a></div>
-        <div class="nav-group"><a href="changes.html">Changes</a></div>
-        <div class="nav-group"><a href="governance.html">Governance</a></div>
+        <div class="nav-group has-dropdown">
+          <a href="governance.html">About ROCOM</a>
+          <div class="nav-dropdown">
+            <a href="governance.html">Association &amp; Governance</a>
+            <a href="contributing.html">Contribution Process</a>
+          </div>
+        </div>
+        <div class="nav-group"><a href="get-started.html" class="nav-cta">Get Started</a></div>
       </nav>
       <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" onclick="var m=document.getElementById('mobile-menu');var b=this;m.toggleAttribute('open');b.setAttribute('aria-expanded',m.hasAttribute('open'));b.textContent=m.hasAttribute('open')?'Close':'Menu';">Menu</button>
       <dialog class="mobile-menu-panel" id="mobile-menu" aria-label="Mobile navigation">
-        <div class="mm-label">Parts</div>
+        <a href="index.html">Why ROCOM</a>
+        <a href="security-safety.html">Security &amp; Safety</a>
+        <div class="mm-label">The Standard — Parts</div>
         <a href="part-01-overview.html">Part 1 — Overview &amp; Scope</a>
         <a href="part-01-arm.html">Part 1 — Architecture Reference Model</a>
-<a href="part-02-conformance.html">Part 2 — Conformance</a>
-         <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
-         <a href="part-05-transport.html">Part 5 — Transport Profile</a>
-        <div class="mm-label">Reference</div>
-        <a href="principles.html">Principles &amp; Architecture</a>
-        <a href="modules.html">Specification Modules (YAML)</a>
+        <a href="part-02-conformance.html">Part 2 — Conformance</a>
+        <a href="part-02-service-levels.html">Part 2 — Service Levels L0–L3</a>
+        <a href="part-05-transport.html">Part 5 — Transport Profile</a>
         <div class="mm-label">Supplements</div>
         <a href="supplements.html">All Supplements</a>
         <a href="supplement-Sup-001-Orchestrator-Service-Interface.html">Sup-001 — Orchestrator API</a>
+        <a href="supplement-Sup-002-Annex-A-Engineering-Practice.html">Annex A — Engineering Practice</a>
         <a href="supplement-sup-003.html">Sup-003 — BMS Infrastructure</a>
-        <div class="mm-label">Other</div>
-        <a href="adopting-rocom.html">Adopting ROCOM</a>
+        <div class="mm-label">Reference</div>
+        <a href="principles.html">Principles &amp; Architecture</a>
+        <a href="modules.html">Specification Modules (YAML)</a>
         <a href="changes.html">Changes</a>
+        <div class="mm-label">About</div>
         <a href="governance.html">Governance</a>
+        <a href="contributing.html">Contribution Process</a>
+        <div class="mm-label">Action</div>
+        <a href="get-started.html" style="font-weight:600; color:#0a2c77;">Get Started</a>
       </dialog>
     </div>
   </div>
 
+  <!-- Hero -->
   <div class="hero">
-    <h1>Connecting robots, people, infrastructure and tasks in <span>healthcare</span></h1>
-    <p>ROCOM brings robot manufacturers, infrastructure providers, workforce platforms and task-system developers together around shared interfaces, governance and conformance requirements. The aim is coordinated healthcare operations, with clear responsibilities and reusable evidence that supports integration, procurement and local assurance.</p>
+    <h1>Robots, people and buildings. Working together in <span>healthcare</span>.</h1>
+    <p>ROCOM is an open standard for connecting robots, building systems, workforce platforms and task systems — with clear responsibilities and testable interfaces.</p>
     <div class="hero-actions">
-      <a href="part-01-overview.html" class="btn-primary">Explore the standard</a>
-      <a href="governance.html" class="btn-secondary">Governance</a>
+      <a href="get-started.html" class="btn-primary">Find your starting point</a>
+      <a href="part-01-overview.html" class="btn-secondary">Explore the standard</a>
     </div>
     <div class="meta-line">
       Edition 2026a (draft) &middot; CC-BY 4.0 &middot;
@@ -361,35 +478,89 @@
     </div>
   </div>
 
-  <section aria-labelledby="control-planes-title">
-    <div class="areas-intro">
-      <h2 id="control-planes-title">Four control planes, one shared standard</h2>
-      <p>The four blue layers of the O in our wordmark reflect these connected planes: distinct roles and expertise, working together through open interfaces.</p>
+  <!-- Practical example -->
+  <section class="section section--narrow" aria-labelledby="example-title">
+    <div class="example">
+      <h3 id="example-title">One practical example</h3>
+      <p>A hospital needs to deliver supplies from a central store to a ward on another floor. A delivery robot is assigned the task by the hospital's task system. Before leaving, the robot requests door access from the building management system — and receives authorisation for a defined time window.</p>
+      <p>The robot reaches the lift. It sends a dispatch request to the BMS. The lift is currently serving human traffic, so the BMS returns a queued response with an estimated arrival. The robot waits at a safe stand-off distance.</p>
+      <p>The lift becomes available. The BMS dispatches it. The robot boards, rides to the target floor, and exits. At the ward entrance, the robot re-requests zone authorisation because the previous door access has expired. The BMS grants it, and the robot proceeds to the delivery point.</p>
+      <p>At each step, the robot system executes the movement, the BMS controls building resources, and the task system tracks progress. No single system takes over the others' authority.</p>
+      <p class="example-note">This is an illustrative workflow. ROCOM specifies the interfaces and responsibilities — it does not execute them. Local robot safety, building systems and required human decisions remain authoritative.</p>
     </div>
-   <div class="areas">
-    <div class="area-card area-card--robot">
-      <h3>Robot</h3>
-      <p>Connect your robots to healthcare workflows through shared identity, capability and task interfaces, while retaining the specialist capabilities of your robots and fleet-management systems.</p>
-    </div>
-    <div class="area-card area-card--infrastructure">
-      <h3>Infrastructure</h3>
-      <p>Connect doors, lifts and shared resources through building management and access-control systems, with clear responsibilities, capacity limits and access permissions.</p>
-    </div>
-    <div class="area-card area-card--workforce">
-      <h3>Workforce</h3>
-      <p>Connect staffing and availability systems to coordinate human teams and robot capacity, respecting their distinct skills, responsibilities and operating constraints.</p>
-    </div>
-    <div class="area-card area-card--task">
-      <h3>Task</h3>
-      <p>Connect clinical and operational task systems to workforce and robot services through shared priorities, status updates and traceability.</p>
-    </div>
-    </div>
-    <p class="areas-cta"><a href="adopting-rocom.html">Planning a deployment? Explore what adopting ROCOM means for your organisation.</a></p>
-   </section>
+  </section>
 
+  <!-- Security & Safety teaser -->
+  <section class="section section--narrow" aria-labelledby="security-title">
+    <div class="security-teaser">
+      <h3 id="security-title">Security at the connections</h3>
+      <p>Each system has its own responsibilities. Their connections need clear rules too.</p>
+      <p>ROCOM defines who may request an action, what data may be shared, and how systems respond when access is denied or a dependency fails.</p>
+      <a href="security-safety.html">Explore Security &amp; Safety &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Three entry points -->
+  <section class="section" aria-labelledby="entry-title">
+    <h2 id="entry-title">Find your starting point</h2>
+    <div class="entry-points">
+      <div class="entry-card">
+        <h3>Hospitals &amp; care organisations</h3>
+        <p>Understand what to ask for, assess and verify when introducing connected robot systems.</p>
+        <ul>
+          <li><a href="adopting-rocom.html">Adopting ROCOM</a> — responsibilities and workflow planning</li>
+          <li><a href="security-safety.html">Security &amp; Safety</a> — how responsibilities are distributed</li>
+          <li><a href="part-01-overview.html">Part 1 — Overview</a> — what the standard covers</li>
+        </ul>
+      </div>
+      <div class="entry-card">
+        <h3>Technology providers</h3>
+        <p>Find the interfaces and evidence relevant to your system.</p>
+        <ul>
+          <li><a href="modules.html">Specification Modules</a> — structured requirements reference</li>
+          <li><a href="part-02-service-levels.html">Service Levels L0–L3</a> — capability levels</li>
+          <li><a href="part-02-conformance.html">Conformance</a> — declaring capability</li>
+        </ul>
+      </div>
+      <div class="entry-card">
+        <h3>IT, security &amp; assurance</h3>
+        <p>Review trust boundaries, responsibilities and conformance evidence.</p>
+        <ul>
+          <li><a href="security-safety.html">Security &amp; Safety</a> — summary of connections</li>
+          <li><a href="modules.html">Specification Modules</a> — Part 6 (Identity &amp; Trust), Part 7 (Data Governance)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Four domains -->
+  <section class="section" aria-labelledby="domains-title">
+    <div class="areas-intro">
+      <h2 id="domains-title">Four domains, one shared standard</h2>
+      <p>Healthcare operations involve different systems with different expertise. ROCOM defines how they connect.</p>
+    </div>
+    <div class="areas">
+      <div class="area-card area-card--robot">
+        <h3>Robot</h3>
+        <p>Delivery, transport and support robots connect to healthcare workflows through shared identity, capability and task interfaces — while retaining the specialist capabilities of their fleet-management systems.</p>
+      </div>
+      <div class="area-card area-card--infrastructure">
+        <h3>Infrastructure</h3>
+        <p>Doors, lifts and shared building resources are coordinated through building management and access-control systems, with clear responsibilities, capacity limits and permissions.</p>
+      </div>
+      <div class="area-card area-card--workforce">
+        <h3>Workforce</h3>
+        <p>Staffing and availability systems coordinate human teams and robot capacity, respecting the distinct skills, responsibilities and operating constraints of each.</p>
+      </div>
+      <div class="area-card area-card--task">
+        <h3>Task</h3>
+        <p>Clinical and operational task systems share priorities, progress and completion evidence across participating systems, with traceability at every step.</p>
+      </div>
+    </div>
+  </section>
 
   <div class="footer">
-    Rocom Specification &copy; 2026 ROCOM (CVR 46774043) &middot;
+    ROCOM &copy; 2026 ROCOM (CVR 46774043) &middot;
     Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>
   </div>
 
