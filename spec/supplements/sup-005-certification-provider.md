@@ -126,13 +126,15 @@ or Parts, provided each provider satisfies these requirements independently.
 
 ## 8. Current Status
 
-Candidate Certification Providers have been identified: Secura (Denmark)
-and Cybercom (Norway) for regional ISO 27001 audit and ROS-analyses;
-Aikido Security (Belgium) for automated code analysis; Ferrous Systems
-(Germany) for Ferrocene toolchain and Supply Chain; Escape (France) for
-API testing. Formal selection and contracts pending Board constitution
-and demo validation per Issue #47. Self-declaration of conformance
-remains available during this transition period.
+Provider selection, appointment and contracts are managed through ROCOM's
+governance process. Candidate evaluations and implementation-specific work
+plans are maintained separately from this specification. An example plan
+does not appoint or endorse a provider. Self-declaration of conformance
+remains available during the transition period described in GOVERNANCE.md.
+
+See [ROCOM Certification Plan — Example](../../docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md)
+for informative, vendor-neutral preparation guidance. This example does not
+change the requirements or certification criteria in this supplement.
 
 ## 9. Cross-References
 

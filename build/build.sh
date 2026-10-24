@@ -62,6 +62,11 @@ link_map = {
     'CONTRIBUTING.md': 'contributing.html',
     'GOVERNANCE.md': 'governance.html',
     'README.md': 'index.html',
+    'CONTROLLED-PRODUCTION-CHANGES.md': 'controlled-production-changes.html',
+    '../security-safety/CONTROLLED-PRODUCTION-CHANGES.md': 'controlled-production-changes.html',
+    'docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md': 'controlled-production-changes.html',
+    '../examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md': 'rocom-certification-plan-example.html',
+    'docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md': 'rocom-certification-plan-example.html',
 }
 for md_src, html_dst in link_map.items():
     body = body.replace(f'href="{md_src}"', f'href="{html_dst}"')
@@ -172,6 +177,8 @@ fi
 [ -f "$REPO_DIR/docs/why-rocom/WHY-ROCOM.md" ] && convert_md "$REPO_DIR/docs/why-rocom/WHY-ROCOM.md" "why-rocom.html" && echo "  why-rocom.html"
 [ -f "$REPO_DIR/docs/adopting-rocom/ADOPTING-ROCOM.md" ] && convert_md "$REPO_DIR/docs/adopting-rocom/ADOPTING-ROCOM.md" "adopting-rocom.html" && echo "  adopting-rocom.html"
 [ -f "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" ] && convert_md "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" "security-safety.html" && echo "  security-safety.html"
+[ -f "$REPO_DIR/docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md" ] && convert_md "$REPO_DIR/docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md" "controlled-production-changes.html" && echo "  controlled-production-changes.html"
+[ -f "$REPO_DIR/docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md" ] && convert_md "$REPO_DIR/docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md" "rocom-certification-plan-example.html" && echo "  rocom-certification-plan-example.html"
 [ -f "$REPO_DIR/docs/get-started/GET-STARTED.md" ] && convert_md "$REPO_DIR/docs/get-started/GET-STARTED.md" "get-started.html" && echo "  get-started.html"
 
 # Modules page — structured YAML reference; invalid sources fail the build.
@@ -307,6 +314,10 @@ for sp in supps:
     except Exception:
         body = '<pre>' + clean.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;') + '</pre>'
 
+    body = body.replace(
+        'href="../../docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md"',
+        'href="rocom-certification-plan-example.html"'
+    )
     full_content = meta + '<div class="content">' + body + '</div>'
     with open(template) as f:
         tpl = f.read()

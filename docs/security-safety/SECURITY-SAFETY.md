@@ -37,6 +37,18 @@ A conformance statement identifies which requirements an implementation claims t
 
 **Specification:** Part 2 (Conformance), Part 2 (Service Levels L0–L3); Sup-005 (Certification Provider).
 
+### Controlled production changes
+
+Zero Trust limits who may act and on which resources. Zero Touch Production
+and Zero Touch Networking guide how administrative changes are executed:
+through scoped, prevalidated and auditable operations, with explicit emergency
+access and recovery. These practices also apply to automation and AI agents.
+
+See [Controlled Production Changes — Zero Trust and Zero Touch](CONTROLLED-PRODUCTION-CHANGES.md)
+for informative deployment controls and verification scenarios, and
+[ROCOM Certification Plan — Example](../examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md)
+for a vendor-neutral assessment planning template.
+
 ### What ROCOM does not do
 
 - Execute safety-critical decisions on behalf of building or clinical systems.
