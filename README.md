@@ -46,6 +46,11 @@ does not certify its own implementations. During the transition period
 before providers are appointed, self-declaration of conformance is
 available per Part 2. See [Governance](governance.html) and Sup-005.
 
+Informative guidance:
+
+- [Controlled Production Changes — Zero Trust and Zero Touch](docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md)
+- [ROCOM Certification Plan — Example](docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md)
+
 ## Our Wordmark
 
 The ROCOM wordmark brings separate layers into one shared form. The coloured
