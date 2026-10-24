@@ -35,23 +35,37 @@ def validate_policy(ref):
     if "interfaces" not in scope or not scope["interfaces"]:
         return False, "scope.interfaces is required and non-empty"
 
-    # Check digest format
+    # Check digest format: must be sha256: followed by exactly 64 hex chars
+    import re
     digest = ref.get("digest", "")
     if not digest.startswith("sha256:"):
         return False, f"digest must start with 'sha256:', got: {digest}"
+    hex_part = digest[len("sha256:"):]
+    if not re.fullmatch(r'[0-9a-f]{64}', hex_part):
+        return False, f"digest must be sha256: followed by 64 hex chars, got: {digest}"
 
-    # Check valid_from is parseable datetime
+    # Check valid_from is parseable datetime with timezone
     try:
-        datetime.fromisoformat(ref["valid_from"].replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return False, f"valid_from is not valid ISO 8601: {ref.get('valid_from')}"
+        vf = ref.get("valid_from", "")
+        if not isinstance(vf, str):
+            return False, f"valid_from must be a string: {vf}"
+        parsed = datetime.fromisoformat(vf.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            return False, f"valid_from requires timezone (Z/+HH:MM): {vf}"
+    except (ValueError, AttributeError, TypeError) as e:
+        return False, f"valid_from is not valid ISO 8601: {ref.get('valid_from')} — {e}"
 
     # Check valid_until if present
     if "valid_until" in ref and ref["valid_until"]:
         try:
-            datetime.fromisoformat(ref["valid_until"].replace("Z", "+00:00"))
-        except (ValueError, AttributeError):
-            return False, f"valid_until is not valid ISO 8601: {ref.get('valid_until')}"
+            vu = ref["valid_until"]
+            if not isinstance(vu, str):
+                return False, f"valid_until must be a string: {vu}"
+            parsed_u = datetime.fromisoformat(vu.replace("Z", "+00:00"))
+            if parsed_u.tzinfo is None:
+                return False, f"valid_until requires timezone (Z/+HH:MM): {vu}"
+        except (ValueError, AttributeError, TypeError) as e:
+            return False, f"valid_until is not valid ISO 8601: {ref.get('valid_until')} — {e}"
 
     # Check revoked flag
     if ref.get("revoked"):
@@ -126,19 +140,40 @@ def validate_policy_runtime(ref, ctx):
         return False, f"Digest mismatch: {ref['digest']} != {expected}"
 
     # 6. Approval binding (§6.4)
-    # Approval MUST be found and bind correctly: policy_id, version, digest, scope.
+    # Approval MUST be found and bind ALL fields: policy_id, version, digest, scope, namespace.
+    # Missing digest or scope on the approval entry is a verification failure — not optional.
     approval_ref = ref["approval_ref"]
     if approval_ref not in ctx.approval_store:
         return False, f"Approval '{approval_ref}' not found in trusted approval store"
     approval = ctx.approval_store[approval_ref]
-    if approval.get("policy_id") != pid:
-        return False, f"Approval {approval_ref} binds policy {approval.get('policy_id')}, not {pid}"
-    if approval.get("version") != ver:
-        return False, f"Approval {approval_ref} binds version {approval.get('version')}, not {ver}"
-    if approval.get("digest") and approval.get("digest") != ref["digest"]:
+
+    # Required approval fields — missing is rejection, not pass-through
+    if "policy_id" not in approval:
+        return False, f"Approval {approval_ref} missing policy_id binding"
+    if "version" not in approval:
+        return False, f"Approval {approval_ref} missing version binding"
+    if "digest" not in approval:
+        return False, f"Approval {approval_ref} missing digest binding"
+    if "scope" not in approval:
+        return False, f"Approval {approval_ref} missing scope binding"
+
+    if approval["policy_id"] != pid:
+        return False, f"Approval {approval_ref} binds policy {approval['policy_id']}, not {pid}"
+    if approval["version"] != ver:
+        return False, f"Approval {approval_ref} binds version {approval['version']}, not {ver}"
+    if approval["digest"] != ref["digest"]:
         return False, f"Approval {approval_ref} digest mismatch"
-    if approval.get("scope") and approval.get("scope") != ref.get("scope"):
+    if approval["scope"] != ref.get("scope"):
         return False, f"Approval {approval_ref} scope mismatch"
+
+    # 6b. Namespace authority (§6.3): the approval must explicitly bind the
+    # policy's namespace. If the approval entry lacks a namespace field, it
+    # cannot attest to the policy's namespace — reject.
+    ns = ref.get("namespace", "")
+    if "namespace" not in approval:
+        return False, f"Approval {approval_ref} missing namespace binding"
+    if approval["namespace"] != ns:
+        return False, f"Approval {approval_ref} namespace '{approval['namespace']}' != policy namespace '{ns}'"
 
     # 7. Required extensions (§6.9)
     for ext in ref.get("required_extensions", []):
@@ -172,6 +207,7 @@ VALID_APPROVAL = {
     "version": "1.0.0",
     "digest": sha256_digest(POLICY_CONTENT),
     "scope": VALID_POLICY["scope"],
+    "namespace": VALID_POLICY["namespace"],
 }
 
 # Default trusted context for full validation
@@ -450,6 +486,61 @@ TEST_CASES = [
              approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
          )
      ), False),
+
+    # POL-T31: Approval missing digest → rejection
+    ("POL-T31: Approval missing digest binding → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "policy_id": VALID_POLICY["policy_id"],
+                     "version": VALID_POLICY["version"],
+                     "scope": VALID_POLICY["scope"],
+                     "namespace": VALID_POLICY["namespace"],
+                     # digest intentionally missing
+                 }
+             },
+         )
+     ), False),
+
+    # POL-T32: Approval missing scope → rejection
+    ("POL-T32: Approval missing scope binding → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "policy_id": VALID_POLICY["policy_id"],
+                     "version": VALID_POLICY["version"],
+                     "digest": VALID_POLICY["digest"],
+                     "namespace": VALID_POLICY["namespace"],
+                     # scope intentionally missing
+                 }
+             },
+         )
+     ), False),
+
+    # POL-T33: Namespace mismatch → rejection
+    ("POL-T33: Namespace not within approval → rejection",
+     lambda: validate_policy_runtime(
+         {**VALID_POLICY, "namespace": "urn:other:authority"},
+         ctx=make_trusted_context(current_time=NOW)
+     ), False),
+
+    # POL-T34: Invalid SHA-256 hex format → structural rejection
+    ("POL-T34: Invalid SHA-256 hex format → rejection",
+     lambda: validate_policy({**VALID_POLICY, "digest": "sha256:not-a-64-hex-digest"}), False),
+
+    # POL-T35: valid_from without timezone → structural rejection (not TypeError)
+    ("POL-T35: valid_from without timezone → rejection",
+     lambda: validate_policy({**VALID_POLICY, "valid_from": "2026-10-01T00:00:00"}), False),
 ]
 
 
