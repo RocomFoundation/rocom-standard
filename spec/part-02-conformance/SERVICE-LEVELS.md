@@ -27,7 +27,7 @@ Keep deployment scope, deployment stage, domain profile and measurable service-q
 
 The current Part 2 level names — Pilot, Single Site and Multi-Site — cannot be silently relabelled. Historical declarations retain their original meaning; new claims require a versioned declaration and new evidence.
 
-This document contains proposed normative text, a declaration model, migration rules and an implementation brief. The requirement identifiers below are proposed identifiers and are not reserved until the revision is registered and reviewed.
+This document defines normative coordination service levels, a per-plane declaration model, migration rules and an implementation brief. The requirement identifiers are part of Edition 2026a.
 
 ## 1. Rationale and scope — informative
 
@@ -240,7 +240,7 @@ Coordination level expresses supported behaviour. Service-quality profiles expre
 
 **cpl-req-904 — Profile changes.** Changes to timing, authority, accepted load or degraded-mode policies SHALL be versioned, authorised and associated with affected claims. An implementation SHALL NOT improve its apparent result by silently relaxing a bound during a measurement period.
 
-No new universal numeric thresholds are introduced in this proposal. Existing contract defaults, such as Sup-003's door-response deadline and its request-level override mechanism, remain applicable until explicitly revised. The responsible profile owners must approve any additional concrete values for each workflow and deployment class before conformance testing. Missing values are implementation/review blockers, not zero, infinity or a default success.
+No new universal numeric thresholds are introduced in this revision. Existing contract defaults, such as Sup-003's door-response deadline and its request-level override mechanism, remain applicable until explicitly revised. The responsible profile owners must approve any additional concrete values for each workflow and deployment class before conformance testing. Missing values are implementation blockers, not zero, infinity or a default success.
 
 ## 7. Declaration and evidence model — normative
 
@@ -374,13 +374,13 @@ Required integrated demonstration: submit a healthcare transport task with a des
 
 **cpl-req-1003 — Versioned rollout.** Providers and consumers SHALL identify supported declaration/contract versions. A migration adapter MAY preserve compatibility, but SHALL NOT manufacture missing state, evidence or dynamic capability. The implementation SHALL maintain a clear distinction between legacy declarations and new coordination declarations throughout transition.
 
-**cpl-req-1004 — Publication and claims.** Draft implementation and evaluation MAY proceed under this proposal with explicit draft labelling. Adopted normative requirements, public certification claims and website statements SHALL follow the approved edition/revision and evidence status. No draft or successful simulation alone establishes production conformance or certification.
+**cpl-req-1004 — Publication and claims.** Draft implementation and evaluation MAY proceed under this revision with explicit draft labelling. Adopted normative requirements, public certification claims and website statements SHALL follow the approved edition/revision and evidence status. No draft or successful simulation alone establishes production conformance or certification.
 
 ### 9.1 Editorial adoption route — informative
 
-The baseline `CONTRIBUTING.md` explicitly assigns new conformance levels to **Full Part Revisions**, requiring Editor approval, a `[Revision]` issue, a minimum 14-day discussion period, a draft within the Part directory and replacement on Edition release. This proposal follows that route. It is not a cosmetic CP and does not allocate CP-010 or the reserved Sup-006.
+This revision was adopted per `CONTRIBUTING.md`: Full Part Revision, Editor approval, `[Revision]` issue, 14-day discussion period, draft in Part directory. It is not a cosmetic CP and does not allocate CP-010 or the reserved Sup-006.
 
-Use the draft above as the proposed replacement for Part 2 §1–§1.1 plus new service-level, composition, measurement and migration clauses. Integrate the declaration additions into Part 2's existing template, retaining provenance, deviations and independent certification requirements. The coordinated updates to other Parts must be included in the review, rather than treating Part 2 alone as sufficient.
+The text in §1–§9 replaces the previous Part 2 §1–§1.1 plus adds new service-level, composition, measurement and migration clauses. The declaration template in Part 2 (CONFORMANCE.md) was updated to match, retaining provenance, deviations and independent certification requirements. Coordinated updates to Parts 5–7 and Supplements are included in the same revision.
 
 ## 10. Implementation brief for Viktor — informative
 

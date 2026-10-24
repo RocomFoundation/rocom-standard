@@ -68,68 +68,68 @@ data_classes:
     personal_data: yes
 
 requirements:
-  # ---- Level 1 — pilot / lab ----------------------------------------
+  # ---- Tier 1 — Baseline data governance (all deployments) ----------
   - id: dg-req-001
-    level: L1
+    dg_tier: 1
     statement: >
       Every agent has a data profile in the Agent Registry:
       cap-006): sensors on board, data classes generated, declared
       destinations, lawful basis per destination.
     verification: registry inspection; conformance test DG-01
   - id: dg-req-002
-    level: L1
+    dg_tier: 1
     statement: >
       Every provider/task-source connection declares
       data_classes_delivered, declared_destinations and lawful_basis
       (availability_provider_contract data_profile section).
     verification: contract inspection; conformance test DG-02
   - id: dg-req-003
-    level: L1
+    dg_tier: 1
     statement: >
       Sensor-payload class does not traverse the convergence layer
       (dg-p-002). Teleoperation exception per dg-req-020.
     verification: conformance test DG-03 (payload injection attempt
       must be rejected)
   - id: dg-req-004
-    level: L1
+    dg_tier: 1
     statement: >
       Operational telemetry is verified free of personal-data fields
       (no names, no free-text carrying patient/staff identifiers in
       order payloads).
     verification: schema review + conformance test DG-04
 
-  # ---- Level 2 — production, single site ----------------------------
+  # ---- Tier 2 — Production-grade data governance --------------------
   - id: dg-req-101
-    level: L2
+    dg_tier: 2
     statement: >
       All vendor telemetry/diagnostic egress is declared, routable and
       blockable at the convergence layer. Undeclared destinations are
       denied by default.
     verification: conformance test DG-10 (undeclared endpoint blocked)
   - id: dg-req-102
-    level: L2
+    dg_tier: 2
     statement: >
       No third-country transfer of any data class without a documented
       transfer basis (SCC, adequacy decision, or equivalent) recorded
       in the registry entry. Approved-destination list: PENDING-DEPLOYMENT-PROFILE.
     verification: registry inspection; audit sample
   - id: dg-req-103
-    level: L2
+    dg_tier: 2
     statement: >
       Data flows are attributable to agent identity in the audit
       trail: which agent, which class, which destination, when.
       Retention period: PENDING-DEPLOYMENT-PROFILE (reference value: 12 months).
     verification: conformance test DG-11 (flow → identity lookup)
   - id: dg-req-104
-    level: L2
+    dg_tier: 2
     statement: >
       The registry can export an Article 30-compatible record of
       processing (per-agent and per-connection view) on demand.
     verification: export test DG-12; DPO review of format
 
-  # ---- Level 3 — production, multi-site / regional ------------------
+  # ---- Tier 3 — Multi-site / regional data governance maturity ------
   - id: dg-req-201
-    level: L3
+    dg_tier: 3
     statement: >
       Egress policy is enforced technically at the convergence layer
       (allow-list per agent identity and data class), not only
@@ -137,23 +137,23 @@ requirements:
       rule: PENDING-DEPLOYMENT-PROFILE).
     verification: conformance test DG-20
   - id: dg-req-202
-    level: L3
+    dg_tier: 3
     statement: >
       Continuous verification: declared data profiles are reconciled
       against observed flows; deviations raise governance events
       within 24 hours.
     verification: conformance test DG-21 (planted deviation detected)
   - id: dg-req-203
-    level: L3
+    dg_tier: 3
     statement: >
       Third-country transfer register is auditable per art. 30 with
       per-transfer lawful-basis reference, exportable to regional
       compliance systems. Format: PENDING-DEPLOYMENT-PROFILE.
     verification: export test DG-22
 
-  # ---- Teleoperation exception (all levels where used) ---------------
+  # ---- Teleoperation exception (all tiers where used) ---------------
   - id: dg-req-020
-    level: L1+
+    dg_tier: "1+"
     statement: >
       Teleoperation/remote assistance MAY carry sensor payloads across
       the boundary ONLY as a declared exception: (a) registered in the
@@ -183,4 +183,4 @@ regulatory_mapping:
 open_items:
   - "PENDING-DEPLOYMENT-PROFILE parameters (approved destinations, retention, two-person rule, export format)"
   - "Vendor contract clause templates (egress declaration warranty) — commercial work item, outside spec scope"
-  - "Interaction with certification: DG conformance tests enter the Rocom Certified test set from L2"
+  - "Interaction with certification: DG conformance tests enter the Rocom Certified test set from dg_tier 2"
