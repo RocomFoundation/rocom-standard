@@ -34,6 +34,124 @@ VALID_PROVISION = ["planned", "provided", "not_provided"]
 SCHEMA_VERSION = "rocom-conformance/control-planes-1.0"
 
 
+# ── Synthetic evidence resolver ──
+
+class EvidenceResolver:
+    """Authoritative resolver for integration evidence.
+
+    Maps test_ids to verified results, validates scope, contract version,
+    and cumulative requirement coverage. Policy data cannot self-authorise
+    evidence.
+    """
+    def __init__(self, verified_tests=None, contract_version=None):
+        """
+        verified_tests: dict mapping test_id -> {
+            interfaces: [interface_ids covered],
+            result: PASS/FAIL,
+            scope: deployment_scope (single_site/multi_site),
+            contract_version: spec edition string,
+        }
+        contract_version: canonical spec edition for this declaration
+        """
+        self.verified_tests = verified_tests or {}
+        self.contract_version = contract_version
+
+    def resolve(self, test_id):
+        """Resolve a single test_id. Returns test metadata or None if unknown."""
+        return self.verified_tests.get(test_id)
+
+    def validate_integration_evidence(self, wf, decl, errors):
+        """Validate L3 integration_evidence with actual lookup.
+
+        Checks:
+        - workflow_id matches
+        - test_ids resolve to real tests
+        - all tests PASS
+        - collective coverage includes all required interfaces
+        - scope matches declaration context
+        - contract_version matches declaration specification
+        """
+        ie = wf.get("integration_evidence")
+        if not ie or not isinstance(ie, dict):
+            errors.append(
+                f"E2E L3 on '{wf.get('id','?')}': integration_evidence must be a structured object (cpl-req-503)"
+            )
+            return
+
+        # workflow_id binding
+        if ie.get("workflow_id") != wf.get("id"):
+            errors.append(
+                f"E2E L3 on '{wf.get('id','?')}': integration_evidence.workflow_id "
+                f"must match workflow id (got '{ie.get('workflow_id')}')"
+            )
+            return
+
+        tid = ie.get("test_ids")
+        if not isinstance(tid, list) or len(tid) < 2:
+            errors.append(
+                f"E2E L3 on '{wf.get('id','?')}': integration_evidence.test_ids "
+                f"must reference ≥ 2 cross-interface tests (cpl-req-503)"
+            )
+            return
+
+        # Actual resolution of each test_id
+        resolved_tests = []
+        covered_interfaces = set()
+        for test_id in tid:
+            test_meta = self.resolve(test_id)
+            if test_meta is None:
+                errors.append(
+                    f"E2E L3 on '{wf.get('id','?')}': test_id '{test_id}' not found "
+                    f"in evidence registry — cannot verify"
+                )
+                continue
+            if test_meta.get("result") != "PASS":
+                errors.append(
+                    f"E2E L3 on '{wf.get('id','?')}': test '{test_id}' result is "
+                    f"'{test_meta.get('result')}', not PASS"
+                )
+                continue
+            resolved_tests.append(test_meta)
+            covered_interfaces.update(test_meta.get("interfaces", []))
+
+        if not resolved_tests:
+            return  # All tests failed/unknown — errors already recorded
+
+        # Check all required interfaces are covered by resolved tests
+        required_iface_ids = set()
+        for req in wf.get("requirements", []):
+            iface_id = req.get("interface")
+            if iface_id:
+                required_iface_ids.add(iface_id)
+
+        uncovered = required_iface_ids - covered_interfaces
+        if uncovered:
+            errors.append(
+                f"E2E L3 on '{wf.get('id','?')}': integration evidence does not "
+                f"cover required interfaces: {sorted(uncovered)}"
+            )
+
+        # Scope compatibility
+        decl_scope = decl.get("context", {}).get("deployment_scope")
+        if decl_scope:
+            for rt in resolved_tests:
+                test_scope = rt.get("scope")
+                if test_scope and test_scope != decl_scope:
+                    errors.append(
+                        f"E2E L3 on '{wf.get('id','?')}': test '{tid}' scope "
+                        f"'{test_scope}' mismatch with declaration scope '{decl_scope}'"
+                    )
+
+        # Contract version compatibility
+        if self.contract_version:
+            decl_edition = decl.get("specification", {}).get("edition")
+            if decl_edition and self.contract_version != decl_edition:
+                errors.append(
+                    f"E2E L3: evidence registry contract version "
+                    f"'{self.contract_version}' != declaration edition '{decl_edition}'"
+                )
+
+
 def _get_coordination_level(iface, errors=None):
     """Read coordination level from interface.
 
@@ -157,6 +275,11 @@ def validate_declaration(decl):
     iface_ids = {i["id"] for i in interfaces if i.get("id")}
 
     # Workflows
+    # Synthetic evidence resolver for L3 integration evidence
+    evidence_resolver = EvidenceResolver(
+        verified_tests=EVIDENCE_REGISTRY,
+        contract_version=decl.get("specification", {}).get("edition"),
+    )
     for wf in decl.get("workflows", []):
         wf_id = wf.get("id", "?")
         min_levels = wf.get("requirements", [])
@@ -215,34 +338,8 @@ def validate_declaration(decl):
                             f"E2E L3: interface {m.get('id')} verification is {m.get('verification_status')}"
                         )
 
-            # L3 requires structured integration_evidence (cpl-req-503)
-            ie = wf.get("integration_evidence")
-            if not ie or not isinstance(ie, dict):
-                errors.append(
-                    f"E2E L3 on '{wf_id}': integration_evidence must be a structured object (cpl-req-503)"
-                )
-            else:
-                # Must have workflow_id binding matching this workflow
-                if ie.get("workflow_id") != wf_id:
-                    errors.append(
-                        f"E2E L3 on '{wf_id}': integration_evidence.workflow_id "
-                        f"must match workflow id (got '{ie.get('workflow_id')}')"
-                    )
-                # Must have test_ids referencing at least 2 different interfaces
-                tid = ie.get("test_ids")
-                if not isinstance(tid, list) or len(tid) < 2:
-                    errors.append(
-                        f"E2E L3 on '{wf_id}': integration_evidence.test_ids "
-                        f"must reference ≥ 2 cross-interface tests (cpl-req-503)"
-                    )
-                # test_ids must reference actual interfaces in the declaration
-                if isinstance(tid, list) and len(tid) >= 2:
-                    referenced_planes = set()
-                    for test_id in tid:
-                        # Test ID convention: must reference an interface ID
-                        # Extract interface reference from test ID
-                        # e.g. "meal-transport-integration-test" → check participating_interfaces
-                        pass  # Structural check above; semantic resolver in test fixtures
+            # L3 requires structured integration_evidence with actual resolution (cpl-req-503)
+            evidence_resolver.validate_integration_evidence(wf, decl, errors)
 
     return len(errors) == 0, errors
 
@@ -259,6 +356,38 @@ def validate_policy(ref):
     if not ref.get("digest", "").startswith("sha256:"):
         return False, "digest must start with 'sha256:'"
     return True, "OK"
+
+
+# ── Synthetic evidence registry ──
+
+EVIDENCE_REGISTRY = {
+    # Cross-interface integration tests for meal-transport workflow
+    "meal-transport-integration-1": {
+        "interfaces": ["robot-adapter", "task-source"],
+        "result": "PASS",
+        "scope": "single_site",
+        "contract_version": "2026a",
+    },
+    "meal-transport-integration-2": {
+        "interfaces": ["robot-adapter", "task-source", "infra-adapter"],
+        "result": "PASS",
+        "scope": "single_site",
+        "contract_version": "2026a",
+    },
+    # L3 multi-interface tests for full coordination
+    "full-l3-integration-1": {
+        "interfaces": ["r", "t"],
+        "result": "PASS",
+        "scope": "single_site",
+        "contract_version": "2026a",
+    },
+    "full-l3-integration-2": {
+        "interfaces": ["i", "w", "t"],
+        "result": "PASS",
+        "scope": "single_site",
+        "contract_version": "2026a",
+    },
+}
 
 
 # ── Fixtures ──
@@ -598,6 +727,128 @@ add("D9: Optional extension ignored (schema accepts)",
 # D10: Decision evidence identifies exact policy version
 add("D10: Policy version in evidence (structure check)",
     lambda: all(k in VALID_POLICY for k in ["policy_id", "version", "digest"]), True)
+
+# ── V2: Evidence resolver tests ──
+
+# V2a: L3 with valid integration_evidence (resolved) passes
+L3_VALID_DECL = {
+    **VALID_DECLARATION,
+    "coordination": {
+        **VALID_DECLARATION["coordination"],
+        "interfaces": [
+            {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-103"]},
+            {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-403"]},
+            {"id": "workforce-prov", "plane": "workforce", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-303"]},
+            {"id": "infra-adapter", "plane": "infrastructure", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-203"]},
+        ],
+    },
+    "workflows": [
+        {
+            "id": "meal-transport-l3",
+            "requirements": [
+                {"interface": "robot-adapter", "minimum_level": "L3"},
+                {"interface": "task-source", "minimum_level": "L3"},
+            ],
+            "verified_end_to_end_level": "L3",
+            "integration_evidence": {
+                "workflow_id": "meal-transport-l3",
+                "test_ids": ["meal-transport-integration-1", "meal-transport-integration-2"],
+            },
+        },
+    ],
+}
+
+add("V2a: L3 with valid resolved evidence passes",
+    lambda: validate_declaration(L3_VALID_DECL)[0], True)
+
+# V2b: L3 with invented test_ids (not in registry) → rejected
+add("V2b: L3 with invented test_ids rejected",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "workflows": [
+            {
+                **L3_VALID_DECL["workflows"][0],
+                "integration_evidence": {
+                    "workflow_id": "meal-transport-l3",
+                    "test_ids": ["invented-a", "invented-b"],
+                },
+            },
+        ],
+    })[0], False)
+
+# V2c: L3 with empty requirements + invented evidence → rejected
+add("V2c: L3 empty requirements + invented evidence rejected",
+    lambda: validate_declaration({
+        **VALID_DECLARATION,
+        "coordination": {
+            **VALID_DECLARATION["coordination"],
+            "interfaces": [
+                {"id": "x", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": []},
+            ],
+        },
+        "workflows": [
+            {
+                "id": "empty",
+                "requirements": [],
+                "verified_end_to_end_level": "L3",
+                "integration_evidence": {
+                    "workflow_id": "empty",
+                    "test_ids": ["invented-a", "invented-b"],
+                },
+            },
+        ],
+    })[0], False)
+
+# V2d: L3 with string integration_evidence (not dict) → rejected
+add("V2d: L3 with string integration_evidence rejected",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "workflows": [
+            {
+                **L3_VALID_DECL["workflows"][0],
+                "integration_evidence": "this-is-a-long-text-string-that-is-not-useful",
+            },
+        ],
+    })[0], False)
+
+# V2e: L3 with unresolved interface reference → rejected
+add("V2e: L3 with missing interface reference rejected",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "workflows": [
+            {
+                "id": "missing-iface",
+                "requirements": [
+                    {"interface": "missing-interface", "minimum_level": "L2"},
+                ],
+                "verified_end_to_end_level": "L3",
+                "integration_evidence": {
+                    "workflow_id": "missing-iface",
+                    "test_ids": ["meal-transport-integration-1", "meal-transport-integration-2"],
+                },
+            },
+        ],
+    })[0], False)
+
+# V2f: L3 evidence coverage gap — tests don't cover all required interfaces → rejected
+add("V2f: L3 evidence does not cover all required interfaces",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "workflows": [
+            {
+                "id": "coverage-gap",
+                "requirements": [
+                    {"interface": "robot-adapter", "minimum_level": "L3"},
+                    {"interface": "infra-adapter", "minimum_level": "L3"},  # not in evidence
+                ],
+                "verified_end_to_end_level": "L3",
+                "integration_evidence": {
+                    "workflow_id": "coverage-gap",
+                    "test_ids": ["meal-transport-integration-1"],  # only covers robot+task
+                },
+            },
+        ],
+    })[0], False)
 
 
 def main():

@@ -106,30 +106,43 @@ def validate_policy_runtime(ref, ctx):
         return False, f"Not yet effective: {ref['valid_from']} > {ctx.current_time.isoformat()}"
 
     # 3. Issuer verification (§6.3)
-    if ctx.known_issuers and ref["issuer"] not in ctx.known_issuers:
-        return False, f"Unknown issuer: {ref['issuer']}"
+    # Empty known_issuers means NO issuer is trusted — reject unknown.
+    # Non-empty known_issuers means only listed issuers are trusted.
+    if not ctx.known_issuers or ref["issuer"] not in ctx.known_issuers:
+        return False, f"Unverified issuer: {ref['issuer']}"
 
     # 4. Revocation check (§6.6)
     if pkey in ctx.revocation_set:
         return False, f"Policy {pkey} has been revoked"
 
     # 5. Content integrity (§6.5)
-    if pkey in ctx.content_store:
-        expected = sha256_digest(ctx.content_store[pkey])
-        if ref["digest"] != expected:
-            return False, f"Digest mismatch: {ref['digest']} != {expected}"
+    # If the policy has a digest, it MUST be verifiable against stored content.
+    # Missing content for a digest-bearing policy is a verification failure.
+    content_key = f"{pid}:{ver}"
+    if content_key not in ctx.content_store:
+        return False, f"No trusted content for {content_key} — digest cannot be verified"
+    expected = sha256_digest(ctx.content_store[content_key])
+    if ref["digest"] != expected:
+        return False, f"Digest mismatch: {ref['digest']} != {expected}"
 
     # 6. Approval binding (§6.4)
-    if ref["approval_ref"] in ctx.approval_store:
-        approval = ctx.approval_store[ref["approval_ref"]]
-        if approval.get("policy_id") != pid:
-            return False, f"Approval {ref['approval_ref']} binds different policy"
-        if approval.get("version") != ver:
-            return False, f"Approval {ref['approval_ref']} binds version {approval.get('version')}, not {ver}"
+    # Approval MUST be found and bind correctly: policy_id, version, digest, scope.
+    approval_ref = ref["approval_ref"]
+    if approval_ref not in ctx.approval_store:
+        return False, f"Approval '{approval_ref}' not found in trusted approval store"
+    approval = ctx.approval_store[approval_ref]
+    if approval.get("policy_id") != pid:
+        return False, f"Approval {approval_ref} binds policy {approval.get('policy_id')}, not {pid}"
+    if approval.get("version") != ver:
+        return False, f"Approval {approval_ref} binds version {approval.get('version')}, not {ver}"
+    if approval.get("digest") and approval.get("digest") != ref["digest"]:
+        return False, f"Approval {approval_ref} digest mismatch"
+    if approval.get("scope") and approval.get("scope") != ref.get("scope"):
+        return False, f"Approval {approval_ref} scope mismatch"
 
     # 7. Required extensions (§6.9)
     for ext in ref.get("required_extensions", []):
-        if ctx.known_extensions and ext not in ctx.known_extensions:
+        if ext not in ctx.known_extensions:
             return False, f"Unsupported required extension: {ext}"
 
     return True, "OK"
@@ -154,14 +167,31 @@ VALID_POLICY = {
     },
 }
 
+VALID_APPROVAL = {
+    "policy_id": "test-policy-001",
+    "version": "1.0.0",
+    "digest": sha256_digest(POLICY_CONTENT),
+    "scope": VALID_POLICY["scope"],
+}
+
+# Default trusted context for full validation
+def make_trusted_context(current_time=None):
+    """Create a fully populated PolicyContext for valid policy verification."""
+    return PolicyContext(
+        current_time=current_time or NOW,
+        known_issuers=[VALID_POLICY["issuer"]],
+        content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+        approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+    )
+
 # Clock injection timestamps
 NOW = datetime(2026, 10, 15, 12, 0, 0, tzinfo=timezone.utc)
 PAST = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 FUTURE = datetime(2027, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
 
 TEST_CASES = [
-    # POL-T01: Valid policy
-    ("POL-T01: Valid policy",
+    # POL-T01: Valid policy structural
+    ("POL-T01: Valid policy structural",
      lambda: validate_policy(dict(VALID_POLICY)), True),
 
     # POL-T02: Missing approval_ref
@@ -172,14 +202,14 @@ TEST_CASES = [
     ("POL-T03: Expired policy (injected past clock)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "valid_until": "2026-01-01T00:00:00Z"},
-         ctx=PolicyContext(current_time=NOW, known_issuers=[VALID_POLICY["issuer"]])
+         ctx=make_trusted_context(current_time=NOW)
      ), False),
 
     # POL-T03b: Same policy, injected future clock → should pass
     ("POL-T03b: Not yet expired (injected early clock)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "valid_until": "2027-01-01T00:00:00Z"},
-         ctx=PolicyContext(current_time=NOW, known_issuers=[VALID_POLICY["issuer"]])
+         ctx=make_trusted_context(current_time=NOW)
      ), True),
 
     # POL-T04: Missing namespace
@@ -232,7 +262,7 @@ TEST_CASES = [
     ("POL-T13: Policy not yet effective (injected clock)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "valid_from": "2027-01-01T00:00:00Z"},
-         ctx=PolicyContext(current_time=NOW, known_issuers=[VALID_POLICY["issuer"]])
+         ctx=make_trusted_context(current_time=NOW)
      ), False),
 
     # POL-T14: Digest mismatch — runtime rejects wrong content hash
@@ -242,7 +272,8 @@ TEST_CASES = [
          ctx=PolicyContext(
              current_time=NOW,
              known_issuers=[VALID_POLICY["issuer"]],
-             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": "different content"}
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": "different content"},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
          )
      ), False),
 
@@ -250,21 +281,14 @@ TEST_CASES = [
     ("POL-T15: Digest verified (runtime, correct content)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY},
-         ctx=PolicyContext(
-             current_time=NOW,
-             known_issuers=[VALID_POLICY["issuer"]],
-             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT}
-         )
+         ctx=make_trusted_context(current_time=NOW)
      ), True),
 
     # POL-T16: Unknown issuer rejected (context does NOT include attacker)
     ("POL-T16: Unknown issuer rejected (runtime)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "issuer": "spiffe://unknown.attacker/evil"},
-         ctx=PolicyContext(
-             current_time=NOW,
-             known_issuers=[VALID_POLICY["issuer"]]  # attacker NOT in known issuers
-         )
+         ctx=make_trusted_context(current_time=NOW)
      ), False),
 
     # POL-T17: Unknown required extension rejected
@@ -274,7 +298,9 @@ TEST_CASES = [
          ctx=PolicyContext(
              current_time=NOW,
              known_issuers=[VALID_POLICY["issuer"]],
-             known_extensions=["supported:ext-v1"]
+             known_extensions=["supported:ext-v1"],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
          )
      ), False),
 
@@ -282,25 +308,21 @@ TEST_CASES = [
     ("POL-T18: At valid_until boundary rejected (strict <)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "valid_until": "2026-10-15T12:00:00Z"},
-         ctx=PolicyContext(current_time=NOW, known_issuers=[VALID_POLICY["issuer"]])
+         ctx=make_trusted_context(current_time=NOW)
      ), False),
 
     # POL-T19: Just before valid_until — accepted
     ("POL-T19: Just before valid_until accepted",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "valid_until": "2026-10-15T12:00:01Z"},
-         ctx=PolicyContext(current_time=NOW, known_issuers=[VALID_POLICY["issuer"]])
+         ctx=make_trusted_context(current_time=NOW)
      ), True),
 
     # POL-T20: Optional extension unsupported — accepted (ignored)
     ("POL-T20: Optional extension ignored (runtime)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "optional_extensions": ["unsupported:opt-v1"]},
-         ctx=PolicyContext(
-             current_time=NOW,
-             known_issuers=[VALID_POLICY["issuer"]],
-             known_extensions=[]
-         )
+         ctx=make_trusted_context(current_time=NOW)
      ), True),
 
     # POL-T21: Approval binding — wrong version rejected
@@ -310,11 +332,13 @@ TEST_CASES = [
          ctx=PolicyContext(
              current_time=NOW,
              known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
              approval_store={
                  VALID_POLICY["approval_ref"]: {
                      "policy_id": VALID_POLICY["policy_id"],
                      "version": "9.9.9",  # wrong version
-                     "digest": VALID_POLICY["digest"]
+                     "digest": VALID_POLICY["digest"],
+                     "scope": VALID_POLICY["scope"],
                  }
              }
          )
@@ -327,6 +351,8 @@ TEST_CASES = [
          ctx=PolicyContext(
              current_time=NOW,
              known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
              revocation_set=[f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}"]
          )
      ), False),
@@ -335,9 +361,93 @@ TEST_CASES = [
     ("POL-T23: Context separation (policy cannot self-authorise)",
      lambda: validate_policy_runtime(
          {**VALID_POLICY, "issuer": "spiffe://attacker/evil"},
+         ctx=make_trusted_context(current_time=NOW)
+     ), False),
+
+    # POL-T24: Empty context — no trusted issuers → rejection
+    ("POL-T24: Empty context rejects (no trusted issuers)",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(current_time=NOW)
+     ), False),
+
+    # POL-T25: Context with issuer+content but no approval → rejection
+    ("POL-T25: Missing approval in context → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
          ctx=PolicyContext(
              current_time=NOW,
-             known_issuers=[VALID_POLICY["issuer"]]  # only the real issuer
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+         )
+     ), False),
+
+    # POL-T26: Approval with wrong digest → rejection
+    ("POL-T26: Approval digest mismatch → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "policy_id": VALID_POLICY["policy_id"],
+                     "version": VALID_POLICY["version"],
+                     "digest": "sha256:wrongdigest",
+                     "scope": VALID_POLICY["scope"],
+                 }
+             }
+         )
+     ), False),
+
+    # POL-T27: Approval with wrong scope → rejection
+    ("POL-T27: Approval scope mismatch → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "policy_id": VALID_POLICY["policy_id"],
+                     "version": VALID_POLICY["version"],
+                     "digest": VALID_POLICY["digest"],
+                     "scope": {"interfaces": ["wrong"]},
+                 }
+             }
+         )
+     ), False),
+
+    # POL-T28: No content in context → rejection
+    ("POL-T28: No trusted content → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+         )
+     ), False),
+
+    # POL-T29: Full valid runtime with complete context
+    ("POL-T29: Full valid runtime verification",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=make_trusted_context(current_time=NOW)
+     ), True),
+
+    # POL-T30: Required extension with empty known_extensions → rejection
+    ("POL-T30: Required extension with empty known_extensions → rejection",
+     lambda: validate_policy_runtime(
+         {**VALID_POLICY, "required_extensions": ["local:ext-v1"]},
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             known_extensions=[],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
          )
      ), False),
 ]
