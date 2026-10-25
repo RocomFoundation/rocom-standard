@@ -848,6 +848,79 @@ TEST_CASES = [
              audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
          )
      ), False),
+
+    # POL-T47: audit missing policy_id → rejection (F1 regression)
+    ("POL-T47: Audit missing policy_id → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
+
+    # POL-T48: audit missing version → rejection (F1 regression)
+    ("POL-T48: Audit missing version → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "policy_id": VALID_POLICY["policy_id"]}},
+         )
+     ), False),
+
+    # POL-T49: audit missing digest → rejection (F1 regression)
+    ("POL-T49: Audit missing digest → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "policy_id": VALID_POLICY["policy_id"], "version": VALID_POLICY["version"]}},
+         )
+     ), False),
+
+    # POL-T50: approval missing spec_edition → rejection (F2 regression)
+    ("POL-T50: Approval missing spec_edition → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "policy_id": VALID_POLICY["policy_id"],
+                     "version": VALID_POLICY["version"],
+                     "digest": VALID_POLICY["digest"],
+                     "scope": VALID_POLICY["scope"],
+                     "namespace": VALID_POLICY["namespace"],
+                     # spec_edition intentionally missing
+                 }
+             },
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "policy_id": VALID_POLICY["policy_id"], "version": VALID_POLICY["version"], "digest": VALID_POLICY["digest"]}},
+         )
+     ), False),
 ]
 
 
