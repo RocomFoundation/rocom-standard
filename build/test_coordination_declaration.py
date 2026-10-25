@@ -190,6 +190,40 @@ class EvidenceResolver:
                     f"requirements: {sorted(uncovered_reqs)}"
                 )
 
+        # Cumulative mandatory coverage: for E2E L3, the workflow must declare
+        # and provide evidence for ALL mandatory requirements at each interface's
+        # declared level (cpl-req-002 + CONFORMANCE §1). Uses trusted matrix,
+        # not self-declared requirement_ids.
+        mandatory_for_evidence = set()
+        for req in wf.get("requirements", []):
+            req_iface_id = req.get("interface")
+            req_min_level = req.get("minimum_level")
+            if req_iface_id and req_min_level:
+                matching = [i for i in interfaces if i.get("id") == req_iface_id]
+                for m in matching:
+                    mlvl = _get_coordination_level(m, None)  # Don't double-report level errors
+                    mandatory_for_evidence.update(
+                        _get_mandatory_requirements_for_level(m.get("plane"), mlvl)
+                    )
+        if mandatory_for_evidence:
+            mandatory_uncovered = mandatory_for_evidence - covered_requirements
+            if mandatory_uncovered:
+                errors.append(
+                    f"E2E L3: integration evidence does not cover mandatory "
+                    f"cumulative requirements: {sorted(mandatory_uncovered)} "
+                    f"(cpl-req-002: L3 requires L1+L2+L3 evidence per plane)"
+                )
+            # Also verify the declaration's interfaces declare these requirements
+            declared_req_ids = set()
+            for iface in interfaces:
+                declared_req_ids.update(iface.get("requirement_ids", []))
+            mandatory_not_declared = mandatory_for_evidence - declared_req_ids
+            if mandatory_not_declared:
+                errors.append(
+                    f"E2E L3: interfaces do not declare mandatory cumulative "
+                    f"requirements: {sorted(mandatory_not_declared)}"
+                )
+
 
 def _get_coordination_level(iface, errors=None):
     """Read coordination level from interface.
@@ -360,6 +394,12 @@ def validate_declaration(decl):
         # End-to-end level checks
         e2e = wf.get("verified_end_to_end_level")
         if e2e == "L3":
+            # L3 E2E requires non-empty requirements — empty list cannot claim cross-interface coverage
+            if not min_levels:
+                errors.append(
+                    f"E2E L3 on '{wf_id}': requirements must be non-empty — "
+                    f"cannot verify cross-interface coverage without required interfaces (cpl-req-002)"
+                )
             # All participating interfaces must be L3 conformant
             for req in min_levels:
                 req_iface_id = req.get("interface")
@@ -418,12 +458,13 @@ EVIDENCE_REGISTRY = {
         "workflow_id": "meal-transport-l1",
     },
     # L3 multi-interface tests for full coordination
+    # Coverage is cumulative: L3 tests verify L1+L2+L3 requirements (cpl-req-002)
     "full-l3-integration-1": {
         "interfaces": ["robot-adapter", "task-source"],
         "result": "PASS",
         "scope": "single_site",
         "contract_version": "2026a",
-        "requirements_verified": ["cpl-req-103", "cpl-req-403"],
+        "requirements_verified": ["cpl-req-101", "cpl-req-102", "cpl-req-103", "cpl-req-401", "cpl-req-402", "cpl-req-403"],
         "workflow_id": "meal-transport-l3",
     },
     "full-l3-integration-2": {
@@ -431,7 +472,7 @@ EVIDENCE_REGISTRY = {
         "result": "PASS",
         "scope": "single_site",
         "contract_version": "2026a",
-        "requirements_verified": ["cpl-req-203", "cpl-req-303", "cpl-req-403"],
+        "requirements_verified": ["cpl-req-201", "cpl-req-202", "cpl-req-203", "cpl-req-301", "cpl-req-302", "cpl-req-303", "cpl-req-401", "cpl-req-402", "cpl-req-403"],
         "workflow_id": "meal-transport-l3",
     },
 }
@@ -443,6 +484,43 @@ KNOWN_REQUIREMENTS = {
     "cpl-req-401", "cpl-req-402", "cpl-req-403",
     "cpl-req-501", "cpl-req-502", "cpl-req-503",
 }
+
+# Mandatory cumulative requirement matrix per plane per level.
+# L3 requires all L1 + L2 + L3 requirements for each declared plane.
+# SOURCE: SERVICE-LEVELS cpl-req-002 and CONFORMANCE §1.
+# This is a trusted synthetic requirement set — independent of the declaration.
+MANDATORY_REQUIREMENTS_BY_PLANE = {
+    # plane -> { level -> set of mandatory requirement IDs (cumulative) }
+    "robot": {
+        "L1": {"cpl-req-101"},
+        "L2": {"cpl-req-101", "cpl-req-102"},
+        "L3": {"cpl-req-101", "cpl-req-102", "cpl-req-103"},
+    },
+    "infrastructure": {
+        "L1": {"cpl-req-201"},
+        "L2": {"cpl-req-201", "cpl-req-202"},
+        "L3": {"cpl-req-201", "cpl-req-202", "cpl-req-203"},
+    },
+    "workforce": {
+        "L1": {"cpl-req-301"},
+        "L2": {"cpl-req-301", "cpl-req-302"},
+        "L3": {"cpl-req-301", "cpl-req-302", "cpl-req-303"},
+    },
+    "task": {
+        "L1": {"cpl-req-401"},
+        "L2": {"cpl-req-401", "cpl-req-402"},
+        "L3": {"cpl-req-401", "cpl-req-402", "cpl-req-403"},
+    },
+}
+
+COMMON_REQUIREMENTS = {"cpl-req-501"}  # Common cross-plane requirements (e.g., assurance)
+
+
+def _get_mandatory_requirements_for_level(plane, level):
+    """Get mandatory cumulative requirements for a plane at a given level.
+    Returns empty set if plane/level not found (defensive)."""
+    plane_reqs = MANDATORY_REQUIREMENTS_BY_PLANE.get(plane, {})
+    return plane_reqs.get(level, set())
 
 
 # ── Fixtures ──
@@ -786,15 +864,16 @@ add("D10: Policy version in evidence (structure check)",
 # ── V2: Evidence resolver tests ──
 
 # V2a: L3 with valid integration_evidence (resolved) passes
+# L3 requires cumulative L1+L2+L3 requirement_ids per plane (cpl-req-002)
 L3_VALID_DECL = {
     **VALID_DECLARATION,
     "coordination": {
         **VALID_DECLARATION["coordination"],
         "interfaces": [
-            {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-103"]},
-            {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-403"]},
-            {"id": "workforce-prov", "plane": "workforce", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-303"]},
-            {"id": "infra-adapter", "plane": "infrastructure", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-203"]},
+            {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-101", "cpl-req-102", "cpl-req-103"]},
+            {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-401", "cpl-req-402", "cpl-req-403"]},
+            {"id": "workforce-prov", "plane": "workforce", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-301", "cpl-req-302", "cpl-req-303"]},
+            {"id": "infra-adapter", "plane": "infrastructure", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-201", "cpl-req-202", "cpl-req-203"]},
         ],
     },
     "workflows": [
@@ -957,6 +1036,45 @@ add("V2j: Test workflow_id mismatch rejected",
             {
                 **L3_VALID_DECL["workflows"][0],
                 "id": "different-workflow-name",
+            },
+        ],
+    })[0], False)
+
+# V2k: Empty requirements on E2E L3 → rejected (cannot claim cross-interface coverage)
+add("V2k: E2E L3 with empty requirements rejected",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "workflows": [
+            {
+                **L3_VALID_DECL["workflows"][0],
+                "requirements": [],
+            },
+        ],
+    })[0], False)
+
+# V2l: L3 with only L1 requirements and L1 evidence → rejected (missing L2/L3 mandatory coverage)
+add("V2l: L3 with L1-only requirements rejected (missing mandatory cumulative coverage)",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "coordination": {
+            **L3_VALID_DECL["coordination"],
+            "interfaces": [
+                {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-101"]},
+                {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-401"]},
+            ],
+        },
+        "workflows": [
+            {
+                "id": "meal-transport-l1",
+                "requirements": [
+                    {"interface": "robot-adapter", "minimum_level": "L3"},
+                    {"interface": "task-source", "minimum_level": "L3"},
+                ],
+                "verified_end_to_end_level": "L3",
+                "integration_evidence": {
+                    "workflow_id": "meal-transport-l1",
+                    "test_ids": ["meal-transport-integration-1", "meal-transport-integration-2"],
+                },
             },
         ],
     })[0], False)
