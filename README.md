@@ -1,6 +1,6 @@
 # Rocom — Robot-Enterprise Integration Standard
 
-> Edition 2026a (draft) · Owned by ROCOM (CVR 46774043)
+> Edition 2026a · Published 2026-10-25 · Owned by ROCOM (CVR 46774043)
 
 Rocom is an open standard for integrating robots, human workers,
 task systems, and building infrastructure in healthcare environments.

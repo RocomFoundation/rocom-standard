@@ -10,6 +10,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/) adapted for standards.
 
 ---
 
+## [2026a] — 2026-10-25
+
+**Published Edition 2026a.** Promoted from draft.
+
+### Added
+- **Sup-007** Versioned Policy References — policy reference envelope (policy_id, namespace, version, digest, issuer, approval_ref, validity interval, scope), namespaced extensions model (DICOM-inspired), authority boundaries (AI cannot approve policy), 51 test fixtures (POL-T01–T50)
+- **Level model reconciliation** (L0–L3): Part 6 `level` → `security_tier` (1,2,3), Part 7 `level` → `dg_tier` (1,2,3); CONFORMANCE.md §1–1.1 coordination service levels; §1.2 legacy backward compat
+- **Coordination declaration tests** (34 fixtures): evidence resolver, L0–L3 model, L3 cumulative mandatory coverage (per-plane + COMMON_REQUIREMENTS), empty workflow rejection, contract version, requirement ID, workflow binding
+- **Policy runtime validation** (trusted PolicyContext): issuer, approval, content, revocation, extensions, decision scope, spec_edition binding, revocation freshness, audit correlation (POL-T01–T50)
+- `docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md` — certification plan template
+- `docs/issues/level-model-migration-ledger.md` — 49 requirements accounted for
+- `docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md` — zero trust / zero touch guidance
+
+### Changed
+- CONFORMANCE.md: L1/L2/L3 level definitions replaced with coordination service level model
+- PROFILE.md, OVERVIEW.md, ARM.md, GOVERNANCE.md, Sup-003: terminology reconciled
+- `build/build.sh`: integrated V2/V5 test suites as mandatory gate
+- Status: `ADOPTED 1.0, Edition 2026a` (draft → published)
+
+### Fixed
+- V2: empty workflow rejection (V2k), cumulative L1+L2+L3 per-plane (V2l), COMMON_REQUIREMENTS enforcement (V2m)
+- V5: decision_scope overlap (POL-T41/42), spec_edition → supported_versions (POL-T43), audit correlation mandatory policy_id/version/digest (POL-T44/47/48/49), revocation freshness (POL-T38/45), naive timezone rejection (POL-T46), spec_edition mandatory on approval (POL-T50)
+
+### Verified
+- 90/90 tests PASS (34 declaration + 51 policy + 5 renderer)
+- 26/26 independent review probe expectations
+- Site build: 31 pages, exit 0
+- Merge commit: `91e7ffd41c796f7d5b5856a420cd3810a6f7847b`
+
+---
+
 ## [2026a-draft] — 2026-09-26
 
 ### Added
@@ -94,4 +125,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/) adapted for standards.
 
 ---
 
+[2026a]: https://github.com/RocomFoundation/rocom-standard/releases/tag/2026a
 [2026a-draft]: https://github.com/RocomFoundation/rocom-standard/
