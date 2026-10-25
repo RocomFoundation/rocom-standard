@@ -31,10 +31,11 @@ of the same commit as the CP/Sup content.
 | Sup-004 | Governance Structure: Board and Working Groups | — | 2026-09-26 | ADOPTED |
 | Sup-005 | Certification Provider Requirements | — | 2026-09-26 | ADOPTED |
 | Sup-006 | — | — | — | RESERVED |
+| Sup-007 | Versioned Policy References and Namespaced Extensions | — | 2026-10-24 | DRAFT |
 
 ## Numbering Rules
 
 1. Numbers are sequential within each series (CP-001, CP-002, ... Sup-001, Sup-002, ...).
-2. The NEXT available number is **CP-010** and **Sup-006**.
+2. The NEXT available CP number is **CP-010**. Sup-006 is RESERVED (unassigned). The next available Sup number after Sup-006 is **Sup-008**.
 3. New CPs/Sup must update this registry in the same commit.
 4. Commit messages reference the CP/Sup number; the registry is authoritative.

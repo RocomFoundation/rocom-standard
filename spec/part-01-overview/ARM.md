@@ -40,7 +40,7 @@ reference model. Both follow the same pattern:
 | **Transport** | HTTP/JSON (primary), MQTT, WebSocket bindings | MQTT on `rocom/v0/` topics (VDA 5050 baseline) | MQTT 3.1.1/5.0, JSON encoding |
 | **Security** | SMART on FHIR, OAuth 2.0, OpenID Connect | mTLS, X.509 machine identity | TLS (recommended by VDA) |
 | **Audit** | AuditEvent (RFC 3634 / DICOM conformance) | Compliance events with `auditCorrelationId` | — |
-| **Conformance** | ImplementationGuides (IHE profiles), SUSHI/GENESIS | Conformance levels L1--L3, conformance statements | VDA 5050 certification |
+| **Conformance** | ImplementationGuides (IHE profiles), SUSHI/GENESIS | Coordination service levels L0–L3 per plane, conformance statements | VDA 5050 certification |
 
 ## The Pattern: Open Protocol, Profile on Top
 
@@ -55,7 +55,7 @@ proven successful in healthcare interoperability:
 |--------|--------------|---------|-------------|
 | Medical imaging | DICOM | IHE profiles | IHE testing events |
 | Clinical data | HL7 FHIR | IHE XCA, XDS | IHE testing events |
-| Robot orchestration | VDA 5050 | Rocom (healthcare profile) | Rocom conformance (L1--L3) |
+| Robot orchestration | VDA 5050 | Rocom (healthcare profile) | Rocom conformance (coordination levels L0–L3) |
 
 Rocom is the **healthcare profile on VDA 5050**, analogous to how IHE
 profiles sit on DICOM or HL7 FHIR.
@@ -124,7 +124,7 @@ Availability Provider, Task Source) terminate at this boundary.
 Understanding Rocom's position in the interoperability landscape is not
 academic. It determines:
 
-1. **Procurement language** — "Rocom L2 conformance" means something
+1. **Procurement language** — "Rocom L2 coordination on the Robot plane" means something
    specific and testable, not "we integrate with robots"
 2. **Security architecture** — the IT/OT boundary is where data governance
    (Part 7) and security (Part 6) are material concerns

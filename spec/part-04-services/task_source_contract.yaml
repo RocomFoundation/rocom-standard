@@ -62,8 +62,8 @@ contract:
 
     - name: zone
       type: "Optional[String]"
-      description: "Target ward/zone (Part 3 Location model)."
-      example: '"Ward 3B"'
+      description: "Target ward/zone. Legacy: plain string. New: Part 3 format 'namespace:identifier' (e.g., 'facility:ward-3B')."
+      example: '"facility:ward-3B"'
 
     - name: constraints
       type: "Optional[Array[String]]"

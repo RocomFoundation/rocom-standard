@@ -67,6 +67,8 @@ link_map = {
     'docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md': 'controlled-production-changes.html',
     '../examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md': 'rocom-certification-plan-example.html',
     'docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md': 'rocom-certification-plan-example.html',
+    '../../docs/issues/level-model-migration-ledger.md': 'level-model-migration-ledger.html',
+    'SERVICE-LEVELS.md': 'part-02-service-levels.html',
 }
 for md_src, html_dst in link_map.items():
     body = body.replace(f'href="{md_src}"', f'href="{html_dst}"')
@@ -130,11 +132,19 @@ toc = build_toc(body)
 # Doc-meta block
 meta = ''
 if status and lic:
-    badge = "ADOPTED"
-    cls = 'badge-draft'
-    if any(w in status.lower() for w in ('final', 'published')):
+    sl = status.lower()
+    if any(w in sl for w in ('final', 'published', 'adopted')):
         badge = 'FINAL'
         cls = 'badge-final'
+    elif 'draft' in sl:
+        badge = 'DRAFT'
+        cls = 'badge-draft'
+    elif 'proposal' in sl or 'review' in sl:
+        badge = 'IN REVIEW'
+        cls = 'badge-draft'
+    else:
+        badge = 'DRAFT'
+        cls = 'badge-draft'
     meta = (
         f"<div class='doc-meta'>"
         f"<strong>Document:</strong> {title} &nbsp;"
@@ -179,6 +189,7 @@ fi
 [ -f "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" ] && convert_md "$REPO_DIR/docs/security-safety/SECURITY-SAFETY.md" "security-safety.html" && echo "  security-safety.html"
 [ -f "$REPO_DIR/docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md" ] && convert_md "$REPO_DIR/docs/security-safety/CONTROLLED-PRODUCTION-CHANGES.md" "controlled-production-changes.html" && echo "  controlled-production-changes.html"
 [ -f "$REPO_DIR/docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md" ] && convert_md "$REPO_DIR/docs/examples/ROCOM-CERTIFICATION-PLAN-EXAMPLE.md" "rocom-certification-plan-example.html" && echo "  rocom-certification-plan-example.html"
+[ -f "$REPO_DIR/docs/issues/level-model-migration-ledger.md" ] && convert_md "$REPO_DIR/docs/issues/level-model-migration-ledger.md" "level-model-migration-ledger.html" && echo "  level-model-migration-ledger.html"
 [ -f "$REPO_DIR/docs/get-started/GET-STARTED.md" ] && convert_md "$REPO_DIR/docs/get-started/GET-STARTED.md" "get-started.html" && echo "  get-started.html"
 
 # Modules page — structured YAML reference; invalid sources fail the build.
@@ -551,3 +562,28 @@ echo ""
 # Count pages
 page_count=$(find "$OUTPUT_DIR" -name "*.html" | wc -l)
 echo "Done: $page_count pages in $OUTPUT_DIR/"
+
+# Run contract tests (must pass for green build)
+echo ""
+echo "=== Contract tests ==="
+set +e
+TEST_FAIL=0
+for t in test_render_modules.py test_coordination_declaration.py test_policy_reference.py; do
+    if [ ! -f "$REPO_DIR/build/$t" ]; then
+        echo "  $t: MISSING — required test file not found"
+        TEST_FAIL=1
+        continue
+    fi
+    if python3 "$REPO_DIR/build/$t" >> "$OUTPUT_DIR/../test.log" 2>&1; then
+        echo "  $t: PASS"
+    else
+        echo "  $t: FAIL"
+        TEST_FAIL=1
+    fi
+done
+set -e
+if [ $TEST_FAIL -eq 1 ]; then
+    echo ""
+    echo "Contract tests failed — see test.log"
+    exit 1
+fi

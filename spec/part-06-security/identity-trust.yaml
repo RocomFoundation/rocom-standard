@@ -68,75 +68,75 @@ transport_bindings:
     requirement: mTLS between connector and provider endpoint
 
 requirements:
-  # ---- Level 1 — pilot / lab ----------------------------------------
+  # ---- Tier 1 — Baseline security (all deployments) -----------------
   - id: it-req-001
-    level: L1
+    security_tier: 1
     statement: Every agent presents a unique X.509 client certificate.
     verification: conformance test ID-01 (shared certificates rejected)
   - id: it-req-002
-    level: L1
+    security_tier: 1
     statement: Static certificates permitted; maximum validity 24 months.
     verification: certificate inspection
   - id: it-req-003
-    level: L1
+    security_tier: 1
     statement: >
       Manual revocation supported: a revoked agent is denied within
       one operational day.
     verification: conformance test ID-02
   - id: it-req-004
-    level: L1
+    security_tier: 1
     statement: Identity events logged to the audit trail (it-p-004).
     verification: audit log inspection
 
-  # ---- Level 2 — production, single site ----------------------------
+  # ---- Tier 2 — Production-grade security ---------------------------
   - id: it-req-101
-    level: L2
+    security_tier: 2
     statement: >
       Certificate rotation without service interruption. Maximum
       validity: PENDING-DEPLOYMENT-PROFILE (reference value: 90 days).
-    verification: conformance test ID-10
+    verification: conformance test CT-ID-10 (CP-007 §7)
   - id: it-req-102
-    level: L2
+    security_tier: 2
     statement: >
       Revocation propagated to all brokers/endpoints within
       PENDING-DEPLOYMENT-PROFILE (reference value: 15 minutes).
-    verification: conformance test ID-11
+    verification: conformance test CT-ID-11 (CP-007 §7)
   - id: it-req-103
-    level: L2
+    security_tier: 2
     statement: >
       Network zone model enforced: agents in the OT zone communicate
       with IT-zone systems ONLY via the convergence layer (see Part 1).
       Zone parameters: PENDING-DEPLOYMENT-PROFILE.
-    verification: architecture review + network test ID-12
+    verification: architecture review + network test CT-ID-12 (CP-007 §7)
   - id: it-req-104
-    level: L2
+    security_tier: 2
     statement: >
       Certificate profile (key type, EKU, SAN content) conforms to the
       deployment's CA policy. Profile: PENDING-DEPLOYMENT-PROFILE.
     verification: certificate inspection
 
-  # ---- Level 3 — production, multi-site / regional ------------------
+  # ---- Tier 3 — Multi-site / regional security maturity -------------
   - id: it-req-201
-    level: L3
+    security_tier: 3
     statement: >
       Fully automatic issuance and rotation (no human in the loop for
       routine lifecycle); SPIRE or equivalent workload-identity plane.
     verification: conformance test ID-20
   - id: it-req-202
-    level: L3
+    security_tier: 3
     statement: >
       Central revocation authority with signed revocation feed;
       propagation under 5 minutes.
     verification: conformance test ID-21
   - id: it-req-203
-    level: L3
+    security_tier: 3
     statement: >
       Onboarding/offboarding in the agent registry triggers identity
       issuance/revocation atomically (no orphan credentials, no
       credential-less registered agents).
     verification: conformance test ID-22 (orphan sweep)
   - id: it-req-204
-    level: L3
+    security_tier: 3
     statement: >
       Compromise response: a flagged agent is quarantined (denied all
       brokers/endpoints, task allocation suspended) within 5 minutes.
@@ -146,6 +146,7 @@ deployment_profiles:
   - profile: dk-region-hovedstaden
     status: in definition
     fills: [it-req-101, it-req-102, it-req-103, it-req-104]
+    security_tier: 2
   - profile: no-helseid
     status: planned
     note: HelseID system-credential integration (Norway).
@@ -155,8 +156,8 @@ regulatory_mapping:
     relevance: security-by-design for products implementing this standard
   - regime: IEC 62443
     relevance: >
-      Conformance levels map informatively (not certifiably) to
-      security levels: L1~SL1, L2~SL2, L3~SL3.
+      Security tiers map informatively (not certifiably) to
+      security levels: tier 1~SL1, tier 2~SL2, tier 3~SL3.
   - regime: NIS2
     relevance: hospital operators; zone model (it-req-103) is the hook
   - regime: Normen (NO)

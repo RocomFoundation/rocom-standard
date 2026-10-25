@@ -51,15 +51,18 @@ agent:
       description: >
         Three-layer identity model (CP-007). access_key identifies
         the agent type (stable across versions and units).
-        device_identifier identifies the configuration/version.
-        production_identifier identifies the individual unit.
+        device_identifier identifies the configuration/version — only
+        for machine agents (CP-007 §6). production_identifier identifies
+        the individual unit. Human agents omit device_identifier.
         Each layer declares its issuing_entity; implementations
         MUST NOT require all layers to share the same issuer.
       type: object
       required_fields:
         - access_key
-        - device_identifier
         - production_identifier
+      conditional_fields:
+        - field: device_identifier
+          condition: "required when agent_type is 'robot', 'infrastructure_component', or 'autonomous_system'. MUST be omitted for 'human', 'workforce', or 'operator'."
       fields:
         access_key:
           type: object
@@ -302,7 +305,11 @@ resource_authority:
     resource_type:
       type: string
       enum: [door, lift, dock, zone, task]
-      description: Type of shared resource.
+      description: >
+        Type of shared resource. Maps to CP-008 RA-02 categories:
+        door → passage, lift → transport, dock → dock, zone → space,
+        task → task. Implementations that use CP-008 terminology
+        SHALL apply this mapping.
     capacity:
       type: integer
       description: >
@@ -389,37 +396,49 @@ task:
       type: string
       description: Capability key matching the capability registry.
     priority:
-      type: string
-      enum: [immediate, expedited, routine, deferred]
-      description: >
-        Priority level (CP-009). 'immediate' for life-safety
-        tasks. 'expedited' for time-critical but non-emergency.
-        'routine' for standard operations. 'deferred' for
-        background work. Replaces numeric 0–9 scale; numeric
-        values are implementation-specific and must map to
-        these levels.
-      default: routine
+       type: string
+       enum: [immediate, expedited, routine, deferred]
+       description: >
+         Priority level (CP-009). 'immediate' for life-safety
+         tasks. 'expedited' for time-critical but non-emergency.
+         'routine' for standard operations. 'deferred' for
+         background work. Replaces numeric 0–9 scale; numeric
+         values are implementation-specific and must map to
+         these levels.
+         Maps to Sup-003 BMS dispatch: immediate→emergency,
+         expedited→urgent, routine→routine, deferred→not used
+         by BMS (scheduling concern only).
+         IMPORTANT: Task priority is a scheduling/dispatch concept.
+         It does NOT grant building safety authority or override
+         BMS emergency modes (CP-009 PR-09/11). A task with
+         priority 'immediate' still requires resource authority
+         (CP-008) and cannot preempt physical occupancy (CP-009 PR-10).
+         Building safety modes (fire, evacuation, lockdown) sit
+         above the entire priority scale (CP-009 PR-11).
+       default: routine
     priority_origin:
       type: string
       description: >
-        Entity authorized to set this priority (CP-009).
-        Only the clinical lead, BMS (fire/evacuation), or
-        orchestrator (system policy) may set 'immediate'.
-      required: false
+        Entity authorized to set this priority (CP-009 PR-04).
+        Mandatory in task creation (new declarations); optional
+        in legacy Part 3. Only the clinical lead, BMS
+        (fire/evacuation), or orchestrator (system policy) may
+        set 'immediate'. Consumers SHALL reject priority changes
+        from unauthorised origins.
     status:
       type: string
       enum: [pending, assigned, in_progress, completed, cancelled]
       default: pending
     assigned_agent_id:
       type: string
-      required: false
+      description: Agent assigned by the orchestrator. Null for pending tasks.
     zone:
       type: string
-      required: false
+      description: Target ward/zone (Part 3 Location model).
     constraints:
       type: array
       items: string
-      required: false
+      description: Operational constraints.
 
 # ====================================================================
 # Data Profile (Part 7)
@@ -435,7 +454,7 @@ data_profile:
     data_classes_delivered:
       type: array
       items: string
-      description: "From data class taxonomy (Part 7): operational_telemetry, diagnostic, sensor_payload, personal_data"
+      description: "From data class taxonomy (Part 7): operational-telemetry, diagnostic, sensor-payload, personal-data (wire format uses hyphens per Part 7)"
     declared_destinations:
       type: array
       items: destination

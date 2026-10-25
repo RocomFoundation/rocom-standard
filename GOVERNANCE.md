@@ -39,11 +39,11 @@ The secretariat does not make certification decisions.
 ## Certification Program
 
 The Certification Program verifies that an implementation conforms to
-the declared conformance level. Certification is:
+the declared coordination service level and applicable scope tiers. Certification is:
 
 - **Voluntary.** Implementers may self-declare conformance without
   certification.
-- **Tiered.** Certification is awarded per Part and per level (L1–L3).
+- **Tiered.** Certification is awarded per control-plane interface, per coordination level (L0–L3), and per applicable scope tier (security_tier, dg_tier). See cpl-req-006: scope tiers are independent of coordination capability.
 - **Maintained.** Certified implementations must pass annual re-testing.
 
 **Independent certification.** Formal certification is performed by

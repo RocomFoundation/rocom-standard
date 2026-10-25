@@ -30,9 +30,10 @@ robots, or human-in-the-loop operator stations (cockpit).
 fleet data (OT zone) meets enterprise systems (IT zone). All cross-zone
 data flow passes through the convergence layer (see Part 7, dg-p-001).
 
-**conformance level** — A tiered set of requirements (L1 through L3)
-that allows incremental adoption. A system conforming to L2 satisfies
-all L1 requirements.
+**coordination service level** — A per-plane capability tier (L0 through L3)
+that describes the degree of machine integration, state awareness and
+dynamic coordination. L1–L3 are cumulative within a plane. Defined in
+Part 2 (SERVICE-LEVELS.md).
 
 # 3. Architecture — Specification Layers
 

@@ -55,8 +55,8 @@ The Certification Provider is responsible for:
 
 | ID | Requirement |
 |----|-------------|
-| **CP-REQ-06** | Certificates SHALL be issued per Part and per conformance level (L1, L2, or L3). A single certificate covers one Part at one level. |
-| **CP-REQ-07** | The certificate SHALL include: `certificate_id`, `certified_by` (provider name), `implementer`, `product`, `part`, `level`, `valid_until`, and issuance date. |
+| **CP-REQ-06** | Certificates SHALL be issued per Part and per applicable scope. A single certificate covers one Part, one deployment profile (evaluation or production), and one scope tier (security_tier, dg_tier, or coordination level) as applicable. |
+| **CP-REQ-07** | The certificate SHALL include: `certificate_id`, `certified_by` (provider name), `implementer`, `product`, `part`, `scope_tier`, `deployment_profile`, `coordination_levels_covered`, `valid_until`, and issuance date. For certificates issued against Edition 2026a or later, `coordination_levels_covered` is mandatory. For pre-2026a certificates, the legacy `level` field is retained but does NOT imply coordination capability — per CONFORMANCE.md §5.2, legacy L3/multi-site certificates do not auto-translate to L3 coordination. |
 | **CP-REQ-08** | The `valid_until` date SHALL NOT exceed 12 months from issuance. |
 
 ### 3.4. Partial Conformance
@@ -64,7 +64,7 @@ The Certification Provider is responsible for:
 | ID | Requirement |
 |----|-------------|
 | **CP-REQ-09** | The provider SHALL process partial conformance declarations per Part 2, Section 4: each deviation must list requirement ID, status, rationale, and planned resolution. |
-| **CP-REQ-10** | Systems with more than three deviations at L2 or above SHALL NOT be eligible for Rocom Certified status. The provider SHALL reject such submissions. |
+| **CP-REQ-10** | Systems with more than three deviations at coordination levels L2 or above, or at security_tier ≥ 2, or dg_tier ≥ 2 SHALL NOT be eligible for Rocom Certified status. The provider SHALL reject such submissions. |
 
 ## 4. Operational Requirements
 
@@ -89,7 +89,7 @@ The Certification Provider is responsible for:
 
 | ID | Requirement |
 |----|-------------|
-| **OP-REQ-08** | The provider SHALL maintain a public, queryable certificate registry. Minimum exposure: URL-accessible list of certificates with `certificate_id`, `implementer`, `product`, `part`, `level`, and `valid_until`. |
+| **OP-REQ-08** | The provider SHALL maintain a public, queryable certificate registry. Minimum exposure: URL-accessible list of certificates with `certificate_id`, `implementer`, `product`, `part`, `scope_tier`, `coordination_levels_covered`, and `valid_until`. |
 | **OP-REQ-09** | Revoked or expired certificates SHALL be marked as such in the registry, with revocation date and reason. |
 
 ## 5. Independence Requirements

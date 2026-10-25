@@ -35,12 +35,15 @@ schema. Cancellation uses `instantActions` — the orchestrator publishes
 separate `rocom/v0/` namespace and never modify standard VDA 5050
 messages.
 
-## 2. Conformance Levels
+## 2. Transport Capability Tiers
 
-Levels follow Part 2 (L1 = Pilot, L2 = Single Site, L3 = Multi-Site).
-The Healthcare profile adds domain-specific requirements at every level.
+Transport-profile tiers are cumulative capability tiers. They are not
+synonymous with coordination service levels (SERVICE-LEVELS.md): a robot
+may be L3 on the robot coordination plane while operating at Transport
+Tier 1 (VDA 5050 baseline). The Healthcare profile adds domain-specific
+requirements at every tier.
 
-### Level 1 — VDA 5050 Baseline
+### Tier 1 — Static Integration (VDA 5050 Baseline)
 The system SHALL:
 - [P-2.1.1] Publish a valid factsheet on `vda5050/factsheet` on connection.
 - [P-2.1.2] Publish periodic state updates on `vda5050/state/<serialNumber>`.
@@ -49,19 +52,19 @@ The system SHALL:
 - [P-2.1.5] Support order cancellation via `instantActions` with `cancelOrder`
   as defined in VDA 5050 2.1 (topic: `vda5050/instantActions/<serialNumber>`).
 
-### Level 2 — Rocom Core
+### Tier 2 — State-Aware Coordination (Rocom Core)
 The system SHALL additionally:
 - [P-2.2.1] Publish compliance events on `rocom/v0/compliance/event` on every zone transition.
 - [P-2.2.2] Each compliance event MUST include `auditCorrelationId` referencing the orchestrator AuditEvent.
 - [P-2.2.3] Declare Rocom-profile capabilities on `rocom/v0/capability/declare` using keys from the capability registry.
 - [P-2.2.4] Report `complianceStatus` as `passed`, `failed`, or `exception` for each zone transition.
 
-### Level 3 — Multi-Site Transport
+### Tier 3 — Fully Dynamic Coordination (Multi-Site Transport)
 The system SHALL additionally:
 - [P-2.3.5] Support federated connection state: publish `rocom/v0/connection/federated`
   with cross-site routing information when operating across multiple deployment sites.
 
-### Healthcare Profile (any level)
+### Healthcare Profile (any tier)
 When the Healthcare profile is declared, the system SHALL additionally:
 - [P-2.3.1] Publish chain-of-custody events on `rocom/v0/chainOfCustody/event` for tasks requiring chain-of-custody (`chainOfCustody: true` in capability params).
 - [P-2.3.2] Enforce restricted-zone access: robot MUST publish a `restricted_zone_check` compliance event before entering a restricted zone, and SHALL NOT proceed if `complianceStatus` is `failed`.
@@ -72,8 +75,8 @@ When the Healthcare profile is declared, the system SHALL additionally:
 
 Every conformant robot SHALL publish a capability declaration containing:
 - `key`: one of the keys defined in the capability registry
-- `level`: `basic`, `advanced`, or `certified`
-- `certified`: boolean indicating whether the capability has passed certification testing
+- `level`: `basic`, `intermediate`, or `expert` (per Part 3 capability model)
+- `certified`: boolean indicating whether the capability has passed independent certification testing. Certification status is separate from proficiency level.
 
 ## 4. Audit Correlation
 
