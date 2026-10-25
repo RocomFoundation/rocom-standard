@@ -849,7 +849,8 @@ TEST_CASES = [
          )
      ), False),
 
-    # POL-T47: audit missing policy_id → rejection (F1 regression)
+    # POL-T47: audit missing policy_id only → rejection (F1 regression, isolated)
+    # All other audit fields present; only policy_id is absent.
     ("POL-T47: Audit missing policy_id → rejection",
      lambda: validate_policy_runtime(
          VALID_POLICY,
@@ -861,11 +862,12 @@ TEST_CASES = [
              decision_scope=VALID_POLICY["scope"],
              supported_versions={"2026a"},
              revocation_checked_at=NOW,
-             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "version": VALID_POLICY["version"], "digest": VALID_POLICY["digest"]}},
          )
      ), False),
 
-    # POL-T48: audit missing version → rejection (F1 regression)
+    # POL-T48: audit missing version only → rejection (F1 regression, isolated)
+    # All other audit fields present; only version is absent.
     ("POL-T48: Audit missing version → rejection",
      lambda: validate_policy_runtime(
          VALID_POLICY,
@@ -877,7 +879,7 @@ TEST_CASES = [
              decision_scope=VALID_POLICY["scope"],
              supported_versions={"2026a"},
              revocation_checked_at=NOW,
-             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "policy_id": VALID_POLICY["policy_id"]}},
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"], "policy_id": VALID_POLICY["policy_id"], "digest": VALID_POLICY["digest"]}},
          )
      ), False),
 
