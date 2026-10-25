@@ -206,12 +206,14 @@ class EvidenceResolver:
                         _get_mandatory_requirements_for_level(m.get("plane"), mlvl)
                     )
         if mandatory_for_evidence:
+            # Add common cross-plane requirements (cpl-req-002)
+            mandatory_for_evidence.update(COMMON_REQUIREMENTS)
             mandatory_uncovered = mandatory_for_evidence - covered_requirements
             if mandatory_uncovered:
                 errors.append(
                     f"E2E L3: integration evidence does not cover mandatory "
                     f"cumulative requirements: {sorted(mandatory_uncovered)} "
-                    f"(cpl-req-002: L3 requires L1+L2+L3 evidence per plane)"
+                    f"(cpl-req-002: L3 requires L1+L2+L3 + common evidence)"
                 )
             # Also verify the declaration's interfaces declare these requirements
             declared_req_ids = set()
@@ -464,7 +466,7 @@ EVIDENCE_REGISTRY = {
         "result": "PASS",
         "scope": "single_site",
         "contract_version": "2026a",
-        "requirements_verified": ["cpl-req-101", "cpl-req-102", "cpl-req-103", "cpl-req-401", "cpl-req-402", "cpl-req-403"],
+        "requirements_verified": ["cpl-req-101", "cpl-req-102", "cpl-req-103", "cpl-req-401", "cpl-req-402", "cpl-req-403", "cpl-req-501"],
         "workflow_id": "meal-transport-l3",
     },
     "full-l3-integration-2": {
@@ -472,7 +474,7 @@ EVIDENCE_REGISTRY = {
         "result": "PASS",
         "scope": "single_site",
         "contract_version": "2026a",
-        "requirements_verified": ["cpl-req-201", "cpl-req-202", "cpl-req-203", "cpl-req-301", "cpl-req-302", "cpl-req-303", "cpl-req-401", "cpl-req-402", "cpl-req-403"],
+        "requirements_verified": ["cpl-req-201", "cpl-req-202", "cpl-req-203", "cpl-req-301", "cpl-req-302", "cpl-req-303", "cpl-req-401", "cpl-req-402", "cpl-req-403", "cpl-req-501"],
         "workflow_id": "meal-transport-l3",
     },
 }
@@ -864,14 +866,14 @@ add("D10: Policy version in evidence (structure check)",
 # ── V2: Evidence resolver tests ──
 
 # V2a: L3 with valid integration_evidence (resolved) passes
-# L3 requires cumulative L1+L2+L3 requirement_ids per plane (cpl-req-002)
+# L3 requires cumulative L1+L2+L3 requirement_ids per plane + common requirements (cpl-req-002)
 L3_VALID_DECL = {
     **VALID_DECLARATION,
     "coordination": {
         **VALID_DECLARATION["coordination"],
         "interfaces": [
             {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-101", "cpl-req-102", "cpl-req-103"]},
-            {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-401", "cpl-req-402", "cpl-req-403"]},
+            {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-401", "cpl-req-402", "cpl-req-403", "cpl-req-501"]},
             {"id": "workforce-prov", "plane": "workforce", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-301", "cpl-req-302", "cpl-req-303"]},
             {"id": "infra-adapter", "plane": "infrastructure", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-201", "cpl-req-202", "cpl-req-203"]},
         ],
@@ -1077,6 +1079,20 @@ add("V2l: L3 with L1-only requirements rejected (missing mandatory cumulative co
                 },
             },
         ],
+    })[0], False)
+
+# V2m: Missing COMMON_REQUIREMENTS (cpl-req-501) in evidence → rejected
+add("V2m: L3 missing common requirements in evidence rejected",
+    lambda: validate_declaration({
+        **L3_VALID_DECL,
+        "coordination": {
+            **L3_VALID_DECL["coordination"],
+            "interfaces": [
+                {"id": "robot-adapter", "plane": "robot", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-101", "cpl-req-102", "cpl-req-103"]},
+                {"id": "task-source", "plane": "task", "provision": "provided", "declared_level": "L3", "verification_status": "conformant", "requirement_ids": ["cpl-req-401", "cpl-req-402", "cpl-req-403"]},
+                # cpl-req-501 not declared on any interface
+            ],
+        },
     })[0], False)
 
 

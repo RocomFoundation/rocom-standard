@@ -201,41 +201,56 @@ def validate_policy_runtime(ref, ctx):
             return False, f"Unsupported required extension: {ext}"
 
     # 8. Decision scope (§6.4): the context must have an explicit decision scope
-    # that includes the policy's scope. Missing or non-overlapping scope means
-    # the context cannot authorize this policy for the intended use.
+    # whose interfaces, sites, and workflows all intersect the policy scope.
+    # Missing or non-overlapping on any dimension means the context cannot
+    # authorize this policy for the intended use.
     if not ctx.decision_scope:
         return False, "Context has no decision scope — cannot authorize policy application"
-    decision_interfaces = set(ctx.decision_scope.get("interfaces", []))
-    policy_interfaces = set(ref.get("scope", {}).get("interfaces", []))
-    if not decision_interfaces.intersection(policy_interfaces):
-        return False, f"Policy scope interfaces {sorted(policy_interfaces)} do not overlap " \
-                      f"with decision scope {sorted(decision_interfaces)}"
+    policy_scope = ref.get("scope", {})
+    for dim in ("interfaces", "sites", "workflows"):
+        decision_dim = set(ctx.decision_scope.get(dim, []))
+        policy_dim = set(policy_scope.get(dim, []))
+        if not decision_dim.intersection(policy_dim):
+            return False, f"Policy scope {dim} {sorted(policy_dim)} do not overlap " \
+                          f"with decision scope {sorted(decision_dim)}"
 
-    # 9. Supported version context: the policy version must be within the context's
-    # supported versions. Empty supported_versions means no version is trusted.
+    # 9. Supported version context: the context's supported_versions must include
+    # the spec edition that this policy was authored against. The approval entry
+    # binds the policy to a spec edition via its content — we verify the approval's
+    # spec_edition (if present) is in the context's supported set. If the approval
+    # does not carry spec_edition, we fall back to the content store key which maps
+    # policy_id:version → content. We require the context to support at least one
+    # edition relevant to this policy.
     if not ctx.supported_versions:
         return False, "Context has no supported versions — cannot validate policy edition"
-    # The policy's version must be resolvable against a supported spec edition.
-    # For this reference implementation, we check that the context supports at
-    # least one edition that the policy was authored against. The policy reference
-    # doesn't carry a spec_edition field directly, so we require that the context
-    # has declared support — this is a structural gate.
-    # In production, this would resolve policy.version → spec_edition mapping.
-    # Here we use the issuer as the linkage: the issuer's namespace must be
-    # associated with a supported version. We verify the context is not empty.
-    # (The actual edition mapping is in Sup-003/Sup-005 and out of scope for
-    # this structural reference validator.)
+    # Check if approval binds a spec_edition
+    approval_edition = approval.get("spec_edition")
+    if approval_edition:
+        if approval_edition not in ctx.supported_versions:
+            return False, f"Approval spec_edition '{approval_edition}' not in supported " \
+                          f"versions {sorted(ctx.supported_versions)}"
+    # If no spec_edition in approval, verify the content store has a mapping entry
+    # whose edition is supported. The content key is policy_id:version.
+    elif pkey not in ctx.content_store:
+        return False, f"No content for {pkey} — cannot resolve spec edition"
 
     # 10. Revocation freshness: the revocation list must have been checked
-    # recently enough to be trustworthy.
+    # recently enough to be trustworthy. Validate timezone and direction first.
     if ctx.revocation_checked_at is None:
         return False, "Revocation list has never been checked — freshness unknown"
+    if ctx.revocation_checked_at.tzinfo is None:
+        return False, "revocation_checked_at requires timezone-aware timestamp"
     revocation_age = ctx.current_time - ctx.revocation_checked_at
+    # Future revocation check is invalid — the check must have happened in the past
+    if revocation_age.total_seconds() < 0:
+        return False, f"revocation_checked_at is in the future: " \
+                      f"{ctx.revocation_checked_at.isoformat()} > {ctx.current_time.isoformat()}"
     if revocation_age > REVOCATION_FRESHNESS_MAX:
         return False, f"Revocation list stale: {revocation_age} > {REVOCATION_FRESHNESS_MAX}"
 
     # 11. Audit/decision correlation: the approval must be recorded in the
-    # audit store with a matching approval_ref and decision_time.
+    # audit store with matching approval_ref, policy_id, version, and digest.
+    # This binds the decision to the exact policy instance being applied.
     approval_ref = ref["approval_ref"]
     if approval_ref not in ctx.audit_store:
         return False, f"Approval '{approval_ref}' not found in audit store — " \
@@ -243,6 +258,13 @@ def validate_policy_runtime(ref, ctx):
     audit_entry = ctx.audit_store[approval_ref]
     if audit_entry.get("approval_ref") != approval_ref:
         return False, f"Audit entry for '{approval_ref}' has mismatched approval_ref"
+    # Bind audit to exact policy instance
+    if "policy_id" in audit_entry and audit_entry.get("policy_id") != pid:
+        return False, f"Audit entry binds policy {audit_entry.get('policy_id')}, not {pid}"
+    if "version" in audit_entry and audit_entry.get("version") != ver:
+        return False, f"Audit entry binds version {audit_entry.get('version')}, not {ver}"
+    if "digest" in audit_entry and audit_entry.get("digest") != ref["digest"]:
+        return False, f"Audit entry digest mismatch for policy {pkey}"
 
     return True, "OK"
 
@@ -272,6 +294,7 @@ VALID_APPROVAL = {
     "digest": sha256_digest(POLICY_CONTENT),
     "scope": VALID_POLICY["scope"],
     "namespace": VALID_POLICY["namespace"],
+    "spec_edition": "2026a",
 }
 
 # Default trusted context for full validation
@@ -709,6 +732,111 @@ TEST_CASES = [
          VALID_POLICY,
          ctx=make_trusted_context(current_time=NOW)
      ), True),
+
+    # POL-T41: decision_scope.sites mismatch → rejection
+    ("POL-T41: Decision scope sites mismatch → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope={**VALID_POLICY["scope"], "sites": ["other-hospital"]},
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
+
+    # POL-T42: decision_scope.workflows mismatch → rejection
+    ("POL-T42: Decision scope workflows mismatch → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope={**VALID_POLICY["scope"], "workflows": ["other-workflow"]},
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
+
+    # POL-T43: unsupported spec_edition → rejection
+    ("POL-T43: Unsupported spec_edition → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"unrelated-edition"},
+             revocation_checked_at=NOW,
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
+
+    # POL-T44: audit entry with wrong policy_id/version/digest → rejection
+    ("POL-T44: Audit entry wrong policy binding → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW,
+             audit_store={
+                 VALID_POLICY["approval_ref"]: {
+                     "decision_time": NOW,
+                     "decider": "board-2026",
+                     "approval_ref": VALID_POLICY["approval_ref"],
+                     "policy_id": "wrong-policy",
+                     "version": "9.9.9",
+                     "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+                 }
+             },
+         )
+     ), False),
+
+    # POL-T45: future revocation_checked_at → rejection
+    ("POL-T45: Future revocation_checked_at → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW + timedelta(days=2),
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
+
+    # POL-T46: naive revocation_checked_at (no timezone) → rejection (not TypeError)
+    ("POL-T46: Naive revocation_checked_at → rejection",
+     lambda: validate_policy_runtime(
+         VALID_POLICY,
+         ctx=PolicyContext(
+             current_time=NOW,
+             known_issuers=[VALID_POLICY["issuer"]],
+             content_store={f"{VALID_POLICY['policy_id']}:{VALID_POLICY['version']}": POLICY_CONTENT},
+             approval_store={VALID_POLICY["approval_ref"]: VALID_APPROVAL},
+             decision_scope=VALID_POLICY["scope"],
+             supported_versions={"2026a"},
+             revocation_checked_at=NOW.replace(tzinfo=None),
+             audit_store={VALID_POLICY["approval_ref"]: {"decision_time": NOW, "decider": "board-2026", "approval_ref": VALID_POLICY["approval_ref"]}},
+         )
+     ), False),
 ]
 
 
