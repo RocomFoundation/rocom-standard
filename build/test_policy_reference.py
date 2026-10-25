@@ -224,15 +224,16 @@ def validate_policy_runtime(ref, ctx):
     if not ctx.supported_versions:
         return False, "Context has no supported versions — cannot validate policy edition"
     # Check if approval binds a spec_edition
+    # Mandatory: the approval MUST carry a spec_edition to resolve the policy's
+    # contract version against the context's supported versions. Missing spec_edition
+    # means the approval cannot attest to the policy's edition — reject.
     approval_edition = approval.get("spec_edition")
-    if approval_edition:
-        if approval_edition not in ctx.supported_versions:
-            return False, f"Approval spec_edition '{approval_edition}' not in supported " \
-                          f"versions {sorted(ctx.supported_versions)}"
-    # If no spec_edition in approval, verify the content store has a mapping entry
-    # whose edition is supported. The content key is policy_id:version.
-    elif pkey not in ctx.content_store:
-        return False, f"No content for {pkey} — cannot resolve spec edition"
+    if not approval_edition:
+        return False, f"Approval {approval_ref} missing spec_edition — " \
+                      f"cannot resolve policy edition against supported versions"
+    if approval_edition not in ctx.supported_versions:
+        return False, f"Approval spec_edition '{approval_edition}' not in supported " \
+                      f"versions {sorted(ctx.supported_versions)}"
 
     # 10. Revocation freshness: the revocation list must have been checked
     # recently enough to be trustworthy. Validate timezone and direction first.
@@ -250,7 +251,8 @@ def validate_policy_runtime(ref, ctx):
 
     # 11. Audit/decision correlation: the approval must be recorded in the
     # audit store with matching approval_ref, policy_id, version, and digest.
-    # This binds the decision to the exact policy instance being applied.
+    # All four fields are mandatory — the decision must bind to the exact policy
+    # instance. Missing fields mean insufficient correlation.
     approval_ref = ref["approval_ref"]
     if approval_ref not in ctx.audit_store:
         return False, f"Approval '{approval_ref}' not found in audit store — " \
@@ -258,12 +260,18 @@ def validate_policy_runtime(ref, ctx):
     audit_entry = ctx.audit_store[approval_ref]
     if audit_entry.get("approval_ref") != approval_ref:
         return False, f"Audit entry for '{approval_ref}' has mismatched approval_ref"
-    # Bind audit to exact policy instance
-    if "policy_id" in audit_entry and audit_entry.get("policy_id") != pid:
-        return False, f"Audit entry binds policy {audit_entry.get('policy_id')}, not {pid}"
-    if "version" in audit_entry and audit_entry.get("version") != ver:
-        return False, f"Audit entry binds version {audit_entry.get('version')}, not {ver}"
-    if "digest" in audit_entry and audit_entry.get("digest") != ref["digest"]:
+    # Mandatory: audit must bind exact policy instance
+    if "policy_id" not in audit_entry:
+        return False, f"Audit entry for '{approval_ref}' missing policy_id — insufficient correlation"
+    if audit_entry["policy_id"] != pid:
+        return False, f"Audit entry binds policy {audit_entry['policy_id']}, not {pid}"
+    if "version" not in audit_entry:
+        return False, f"Audit entry for '{approval_ref}' missing version — insufficient correlation"
+    if audit_entry["version"] != ver:
+        return False, f"Audit entry binds version {audit_entry['version']}, not {ver}"
+    if "digest" not in audit_entry:
+        return False, f"Audit entry for '{approval_ref}' missing digest — insufficient correlation"
+    if audit_entry["digest"] != ref["digest"]:
         return False, f"Audit entry digest mismatch for policy {pkey}"
 
     return True, "OK"
@@ -311,9 +319,12 @@ def make_trusted_context(current_time=None):
         revocation_checked_at=ct,  # Fresh revocation check
         audit_store={
             VALID_POLICY["approval_ref"]: {
-                "decision_time": ct,
+                "decision_time": NOW,
                 "decider": "board-2026",
                 "approval_ref": VALID_POLICY["approval_ref"],
+                "policy_id": VALID_POLICY["policy_id"],
+                "version": VALID_POLICY["version"],
+                "digest": VALID_POLICY["digest"],
             }
         },
     )
