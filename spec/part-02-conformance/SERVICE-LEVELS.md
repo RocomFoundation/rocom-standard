@@ -4,7 +4,6 @@
 **Version:** 1.0  
 **Date:** 27 September 2026.  
 **Adopted by:** ROCOM Foundation (CVR 46774043).  
-**Requested by:** Egil Utheim.  
 **Primary target:** Part 2 — Conformance.  
 **Also affects:** Parts 3–7, the four control-plane contracts, Sup-001, Sup-003 and certification guidance in Sup-005.  
 **Repository location:** `spec/part-02-conformance/SERVICE-LEVELS.md`.
@@ -14,7 +13,7 @@
 | Version | Date | Changes |
 |---|---|---|
 | 0.1-draft | 27 Sept 2026 | Initial proposal: L0–L3 per plane, location model (§5), service quality (§6), tests CPL-T01–22 |
-| 0.2-draft | 27 Sept 2026 | Integrated specification: §12 L1 profile, §13 L2/L3 progression, §14 Part 3/4 alignment, §15 supplier guide |
+| 0.2-draft | 27 Sept 2026 | Integrated specification: §10 L1 profile, §11 L2/L3 progression, §12 Part 3/4 alignment, §13 supplier guide |
 | 1.0 | 27 Sept 2026 | **ADOPTED.** Normative text. All requirements reserved. Declaration schema `control-planes-1.0`. |
 
 ## Executive decision
@@ -261,7 +260,7 @@ For an intended but untested integration, `target_level` MAY be L3 while `declar
 
 ### 7.1 Illustrative target declaration — informative
 
-The example below deliberately contains **no conformance or certification claim**. The `example` references identify documents to be supplied; they are not operational endpoints or evidence. Viktor should implement the versioned schema and validation before populating evidence-backed declarations.
+The example below deliberately contains **no conformance or certification claim**. The `example` references identify documents to be supplied; they are not operational endpoints or evidence.
 
 ```yaml
 schema_version: rocom-conformance/control-planes-1.0
@@ -382,53 +381,7 @@ This revision was adopted per `CONTRIBUTING.md`: Full Part Revision, Editor appr
 
 The text in §1–§9 replaces the previous Part 2 §1–§1.1 plus adds new service-level, composition, measurement and migration clauses. The declaration template in Part 2 (CONFORMANCE.md) was updated to match, retaining provenance, deviations and independent certification requirements. Coordinated updates to Parts 5–7 and Supplements are included in the same revision.
 
-## 10. Implementation brief for Viktor — informative
-
-### Objective
-
-Implement versioned, evidence-backed L0–L3 declarations per control-plane interface and enforce them when admitting and running workflows. Build reusable contracts so robot, building, workforce and task-system providers can participate at different verified levels.
-
-### Work packages and definition of done
-
-| Package | Deliverable | Acceptance |
-|---|---|---|
-| WP1 — Standards mapping | The requirement migration ledger, proposed Part 2 text and amendments to Parts 3–7/Sup-001/Sup-003/Sup-005. | Every affected legacy level-tagged requirement is accounted for; reviewers can see the semantic changes. No global search-and-replace of L1/L2/L3. |
-| WP2 — Declaration schemas | Versioned machine-readable schemas for declarations, plane capabilities, service-quality profiles, operational state, and location mappings. Valid/invalid fixtures and a validator. | Target vs claim, L0 vs not-provided, evidence vs runtime condition, profile digests, provenance, namespace enforcement, and granularity are validated. Test CPL-T01–03, CPL-T16–22. |
-| WP3 — Registry and adapters | Provider/interface registration; version/capability support; stable agent/resource references; per-plane status/freshness. | Exercise all four adapter types and preserve two distinct units of the same robot type. A disconnected adapter does not appear available. |
-| WP4 — Workflow admission | Dependency declaration, minimum-level/capability matching, assurance checks and explicit reasons for rejection or alternative flow. | Mixed-level, absent-plane and incompatible-version fixtures behave as CPL-T13–14 require. |
-| WP5 — Dynamic coordination | State-driven replanning, commitment acknowledgements/refusals, bounded negotiation, retries, leases, release and reconciliation. | Pass per-plane tests and integrated normal/degraded/recovery scenarios without requiring routine manual reconfiguration. No prescribed vendor planning algorithm. |
-| WP6 — Measurement and evidence | Service-profile enforcement, metrics, breach records, reproducible test evidence and export by build/profile/interface/workflow. | Report failed requests and breaches as well as successes; satisfy CPL-T09–12 and CPL-T15–17. |
-| WP7 — Presentation and release | Per-plane capability view, separate runtime health, workflow compatibility and draft/evidence status; rendered standard pages and migration notes. | UI/API do not show one misleading global L3 badge. Documentation and schemas use the same model version. Live pages and source agree on status. |
-
-Suggested order: WP1 and WP2 establish the model; WP3 enables realistic fixtures; WP4 establishes admission; WP5 and WP6 implement dynamic operation and evidence; WP7 publishes the reviewed results. Viktor can start the schema and simulator work while the revision is under review, with the model explicitly marked experimental.
-
-### Repository boundaries
-
-In `rocom-standard`, keep normative text, interoperable schemas, conformance fixtures, test definitions, source references and rendering changes. Keep HRRM or other product runtime logic in the corresponding implementation repository. Viktor should identify the relevant implementation branches and components in the work-package plan.
-
-Use concrete model fields such as `coordination_level` in product APIs; avoid an ambiguous bare `level` that could refer to legacy conformance, priority or robot proficiency. Align identities with CP-007 and commitments with CP-008. Retain CP-009's existing priority and preemption semantics.
-
-### Handoff checklist
-
-- Submit separate reviewable changes for the standard revision, interoperability schemas/tests and product implementation.
-- Include the exact baseline and proposed model version in each change.
-- Demonstrate one mixed-level deployment and one fully dynamic four-plane workflow.
-- Include disconnection, stale state, duplicate requests, capacity contention, refusal, override and recovery in evidence.
-- Document unresolved decisions instead of filling them with implementation assumptions.
-- Do not publish L3 conformance or certification before the relevant evidence and approval process support it.
-
-## 11. Decisions to resolve during review — informative
-
-1. Approve the new level semantics and their separation from deployment scope/stage and assurance.
-2. Complete the per-requirement migration ledger, especially for existing L1–L3 security/data-governance requirements and transport bindings.
-3. Assign service-profile owners and approve concrete timing, load, availability and recovery bounds for initial workflows.
-4. Confirm which workflows require human acceptance and which actions can proceed under standing delegated authority.
-5. Choose the declaration/schema compatibility period and the target Edition release. Do not infer either from this draft's date.
-6. Confirm the certification scope for a plane interface versus a combined workflow, including production evidence expectations with the independent provider process.
-
-These are explicit review decisions. They do not prevent producing an experimental schema, simulator fixtures or a reviewable implementation plan.
-
-## 12. L1 implementation profile — normative
+## 10. L1 implementation profile — normative
 
 This section defines a concrete L1 starting point for any supplier who wants to deliver a single-plane integration against the specification. It draws requirements from this document, the Part 3 information model, and the Part 4 service contracts. An L1 implementation need not provide location mappings, runtime replanning, or cross-plane coordination — but it must establish identity, capability, explicit acceptance/refusal, and traceable evidence.
 
@@ -591,7 +544,7 @@ A supplier's L1 implementation is testable when the following conditions are met
 | Location namespace declared | CPL-T19 (L1 subset) | Any location reference used carries namespace; bare string is rejected |
 | Assurance not waived | CPL-T03 | L1 coordination does not bypass applicable security or domain requirements |
 
-## 13. L2 and L3 — what they add — informative
+## 11. L2 and L3 — what they add — informative
 
 ### 13.1 L2: State-aware coordination
 
@@ -623,7 +576,7 @@ L3 builds on L2 by introducing **runtime adaptation without manual reconfigurati
 
 End-to-end L3 requires every participating plane to reach L3 for the relevant operations. See cpl-req-503 for the composition rules. A mixed-level deployment (e.g., Robot L3 · Infrastructure L2 · Workforce L1 · Task L3) is a valid capability description but cannot claim end-to-end L3 for a workflow that uses all four planes.
 
-## 14. Part 3 and Part 4 alignment — normative
+## 12. Part 3 and Part 4 alignment — normative
 
 This section documents the coordinated amendments required for Parts 3 and 4 when the DRAFT is adopted. These amendments are part of the revision, not standalone corrections.
 
@@ -715,7 +668,7 @@ The declaration schema version is `rocom-conformance/control-planes-1.0`. The Pa
 
 Legacy declarations using schema version `rocom-conformance/control-planes-0.1-draft` or `0.2-draft` remain valid during the compatibility period defined in cpl-req-1003. The migration adapter must not manufacture missing state or dynamic capability.
 
-## 15. Start at L1 — supplier quick reference — informative
+## 13. Start at L1 — supplier quick reference — informative
 
 This section is designed for suppliers and integrators who want to begin implementation against a specific draft version. It summarises the minimum required elements, the test path, and the progression to L2 and L3.
 
@@ -758,13 +711,13 @@ When L2 is stable:
 
 This document is version `1.0`. Implementation should record the schema version in the declaration (`schema_version: rocom-conformance/control-planes-1.0`). The migration ledger (cpl-req-1002) documents any semantic changes between the draft and adopted version.
 
-## 16. Source basis
+## 14. Source basis
 
 Source links below are pinned to the current baseline. The proposal introduces new requirements; it does not claim that those requirements already exist in these sources.
 
 - [Part 2 — Conformance](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-02-conformance/CONFORMANCE.md): current level definitions, profile, provenance, deviations and certification.
-- [Part 3 — Information Model](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-03-information-model/INFORMATION-MODEL.yaml): core data types; location model extended by §14.1 of this document.
-- [Part 4 — Service Contracts](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-04-services/): availability provider and task source contracts; alignment documented in §14.2.
+- [Part 3 — Information Model](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-03-information-model/INFORMATION-MODEL.yaml): core data types; location model extended by §12.1 of this document.
+- [Part 4 — Service Contracts](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/part-04-services/): availability provider and task source contracts; alignment documented in §12.2.
 - [Contributing](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/CONTRIBUTING.md): revision route for new conformance levels.
 - [CP/Supplement registry](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-registry.md): authoritative numbering and source status.
 - [CP-007 — Agent identity](https://github.com/RocomFoundation/rocom-standard/blob/2ad13a1/spec/cp-007-agent-identity.md): type/configuration/individual identity and issuer handling.
