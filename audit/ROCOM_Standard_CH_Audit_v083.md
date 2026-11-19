@@ -19,7 +19,7 @@ The ROCOM Standard Edition 2026a is a well-structured specification for robot-hu
 | # | Severity | Area | Finding |
 |---|----------|------|---------|
 | 1 | High | CP-010–013 | Spec files exist on disk but are untracked in git. Normative authority only via cp-registry.md (blob `c49d5ab5...`). |
-| 2 | High | Parts 6–7 | 12 requirements reference `PENDING-DEPLOYMENT-PROFILE` parameters. Cannot verify conformance until deployment profiles are defined. |
+| 2 | High | Parts 6–7 | 20 requirements reference `PENDING-DEPLOYMENT-PROFILE` parameters (12 i Part 6, 8 i Part 7). Cannot verify conformance until deployment profiles are defined. |
 | 3 | Medium | Part 2 | Service levels L0–L3 are cumulative per plane but cross-plane interactions undefined. A system at L2 Robot + L1 Infrastructure has undefined coordination semantics. |
 | 4 | Medium | Part 4 | Availability provider contract defines `response_deadline` field but no normative requirement on how robots must respond to deadline expiry. |
 | 5 | Medium | Part 5 | VDA 5050 v2.1.0 pinned (CP-005) but Part 5 transport profile does not specify which VDA 5050 message types are in scope. |

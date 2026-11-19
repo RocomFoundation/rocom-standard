@@ -109,27 +109,30 @@
 
 ### By Warrant Status
 
-| Status | Count | Percentage |
-|--------|-------|------------|
-| WARRANTED (W) | 13 | 37% |
-| PARTIALLY WARRANTED (PW) | 14 | 39% |
-| TOPIC DEFINED (TD) | 5 | 14% |
+36 statusrader sporer 35 unike krav (LV-10 er delt i topic og periodisk publisering).
+
+| Status | Count | Percentage (of 36 rows) |
+|--------|-------|-------------------------|
+| WARRANTED (W) | 12 | 33% |
+| PARTIALLY WARRANTED (PW) | 10 | 28% |
+| TOPIC DEFINED (TD) | 4 | 11% |
 | NOT IMPLEMENTED (NI) | 5 | 14% |
 | OUT OF SCOPE (OO) | 5 | 14% |
-| **Total requirements traced** | **35** | |
+| **Total status rows** | **36** | |
+| **Unique requirements** | **35** | |
 
 ### By Spec Element
 
-| Spec Element | Traced | Warranted | Gap |
-|---|---|---|---|
-| Sup-003 Door Access | 5 | 3 | 2 PW |
-| Sup-003 Elevator Dispatch | 3 | 2 | 1 PW |
-| Sup-003 Zone Authorization | 3 | 2 | 1 PW |
-| Sup-003 Audit Trail | 3 | 0 | 3 PW |
-| CP-010 Liveness | 6 | 2 | 1 PW, 1 TD, 1 NI, 2 OO |
-| CP-011 Door State | 5 | 2 | 1 PW, 1 TD, 1 NI, 1 OO |
-| CP-012 Boarding | 5 | 2 | 1 PW, 1 TD, 1 NI, 1 OO |
-| CP-013 Lease Return | 6 | 2 | 1 PW, 1 TD, 2 NI, 1 OO |
+| Spec Element | Rows | W | PW | TD | NI | OO |
+|---|---|---|---|---|---|---|
+| Sup-003 Door Access | 5 | 4 | 1 | 0 | 0 | 0 |
+| Sup-003 Elevator Dispatch | 3 | 2 | 1 | 0 | 0 | 0 |
+| Sup-003 Zone Authorization | 3 | 2 | 1 | 0 | 0 | 0 |
+| Sup-003 Audit Trail | 3 | 0 | 3 | 0 | 0 | 0 |
+| CP-010 Liveness | 6 | 1 | 1 | 1 | 1 | 2 |
+| CP-011 Door State | 5 | 1 | 1 | 1 | 1 | 1 |
+| CP-012 Boarding | 5 | 1 | 1 | 1 | 1 | 1 |
+| CP-013 Lease Return | 6 | 1 | 1 | 1 | 2 | 1 |
 
 ### Implementation Coverage by File
 
