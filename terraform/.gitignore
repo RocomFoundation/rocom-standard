@@ -1,0 +1,11 @@
+# Terraform state — contains secrets
+*.tfstate
+*.tfstate.*
+*.tfvars
+override.tf
+override.tf.json
+_override.*
+.terraform*
+crash.log
+crash.*
+.env

@@ -1,0 +1,26 @@
+{
+  "rocom_head_sha": "ec36916fcdb9ee68502d95c0a016a8acdaec1568",
+  "branch": "issue-13-level-model-policy-contract",
+  "superretometer_sha": "40fbb97d3ea668e934b7604d99d85bbd0ba09594",
+  "timestamp": "2026-10-25T09:09:08.606580+00:00",
+  "v2": {
+    "status": "PASS",
+    "count": "31/31",
+    "output_sha256": "9f7e58c76e2a764330b2f9010433df25c13bb6314af57470604089627b5c7473"
+  },
+  "v5": {
+    "status": "PASS",
+    "count": "36/36",
+    "output_sha256": "815ab086dd7a4c2f40de2268a2105f9853367c3b182da9dc2e2cbed3f23f0103"
+  },
+  "build": {
+    "status": "PASS",
+    "exit": 0
+  },
+  "render": {
+    "status": "PASS",
+    "count": "5/5"
+  },
+  "warrant": "unwarranted",
+  "design_bearing": false
+}

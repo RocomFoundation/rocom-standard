@@ -153,15 +153,60 @@ deployment_profiles:
 
 regulatory_mapping:
   - regime: EU CRA
-    relevance: security-by-design for products implementing this standard
+    regulation: "Regulation (EU) 2024/2847"
+    entry_into_force: "2024-12-10"
+    general_application: "2027-12-11"
+    staggered_application:
+      - "Art 14 (vulnerability reporting): 2026-09-11"
+      - "Chapter IV (conformity assessment bodies, Art 35-51): 2026-06-11"
+    relevance: >
+      security-by-design for products implementing this standard;
+      Annex I Part I (product security) and Part II (vulnerability handling)
+      are the normative requirements. The EN 40000 harmonised standard series
+      implements Annex I. See informative references below.
+    informative_references:
+      - standard: "EN 40000-1-1"
+        title: "Cybersecurity for products with digital elements — Part 1-1: Terminology"
+        published: "2026-11-19"
+        publication_evidence: "CEN-CENELEC announcement 2026-11-19"
+        publication_source: "https://www.cen.eu/dynamicpage.php?art=4910&lang=en"
+        oj_publication: "unverified"
+        note: "EN published per CEN announcement. OJ reference required for Art 27 presumption — status unknown. Normative use in RoCom requires separate decision."
+      - standard: "EN 40000-1-2"
+        title: "Cybersecurity for products with digital elements — Part 1-2: Cybersecurity principles, product risk analysis and cybersecurity throughout the product lifecycle"
+        published: "2026-11-19"
+        publication_evidence: "CEN-CENELEC announcement 2026-11-19"
+        publication_source: "https://www.cen.eu/dynamicpage.php?art=4910&lang=en"
+        oj_publication: "unverified"
+        note: "EN published per CEN announcement. OJ reference required for Art 27 presumption — status unknown. Normative use in RoCom requires separate decision."
   - regime: IEC 62443
     relevance: >
-      Security tiers map informatively (not certifiably) to
-      security levels: tier 1~SL1, tier 2~SL2, tier 3~SL3.
+       Security tiers map informatively (not certifiably) to
+       security levels: tier 1~SL1, tier 2~SL2, tier 3~SL3.
   - regime: NIS2
     relevance: hospital operators; zone model (it-req-103) is the hook
   - regime: Normen (NO)
     relevance: applies to Norwegian deployments (no-helseid profile)
+
+ai_governance_references:
+  note: >
+    The following ISO/IEC standards are informative references for AI
+    components in the Rocom ecosystem (e.g., FD-015 AI Transparency).
+    They are NOT part of CRA compliance. Publication dates unverified
+    (ISO catalogue blocks automated access).
+  informative_references:
+    - standard: "ISO/IEC 42001:2023"
+      title: "Information technology — Artificial intelligence — Management system"
+      scope: "AI management system (AIMS); relevant for organizational AI governance"
+      catalog: "https://www.iso.org/standard/78702.html"
+    - standard: "ISO/IEC 42005"
+      title: "Information technology — Artificial intelligence — Artificial intelligence impact assessment"
+      scope: "AI impact assessment; complementary to EU AI Act compliance"
+      catalog: "https://www.iso.org/standard/86309.html"
+    - standard: "ISO/IEC 27090"
+      title: "Information security, cybersecurity and privacy protection — Security threats for AI technologies"
+      scope: "AI threat catalogue; useful for threat modelling AI components"
+      catalog: "https://www.iso.org/standard/86609.html"
 
 open_items:
   - Deployment-profile parameters for dk-region-hovedstaden
