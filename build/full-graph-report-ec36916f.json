@@ -1,0 +1,40 @@
+{
+  "rocom_head_sha": "ec36916fcdb9ee68502d95c0a016a8acdaec1568",
+  "branch": "issue-13-level-model-policy-contract",
+  "superretometer_sha": "40fbb97",
+  "timestamp": "2026-10-25T09:14:18.264383+00:00",
+  "graph": {
+    "total_kos": 28,
+    "requirements_extracted": 24,
+    "modules": {
+      "identity-trust": 12,
+      "data-governance": 12,
+      "capability-registry": 0,
+      "information-model": 0,
+      "task-source": 0,
+      "availability-provider": 0
+    },
+    "distinct_sources": 5
+  },
+  "warrant": {
+    "status": "unwarranted",
+    "independent": [],
+    "dependent": [
+      "test-v2",
+      "test-v5",
+      "test-build"
+    ],
+    "root_count": 3
+  },
+  "anti_patterns": 0,
+  "gates": {
+    "provenance": "pass",
+    "scope": "pass",
+    "worktree": "pass",
+    "test": "pass",
+    "falsifiability": "pass",
+    "dependency": "pass",
+    "freshness": "unknown"
+  },
+  "design_bearing": false
+}

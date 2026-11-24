@@ -1,0 +1,18 @@
+# FILE: terraform/terraform.tfvars.example
+# Copy to terraform.tfvars and fill in values
+# DO NOT commit terraform.tfvars — it contains secrets
+
+# ── Cloudflare ──
+cloudflare_api_token  = "<API token with Access + DNS + MCP Portals permissions>"
+cloudflare_account_id = "46b1ad5683f92c65c744edb9480021e1"
+cloudflare_zone_id    = "<zone ID for techhappens.eu>"
+
+# ── Shared service token (MCP Portal Access App) ──
+# One service token for the MCP Portal Access App, used by all backends
+mcp_service_token_client_id     = "<client ID>"
+mcp_service_token_client_secret = "<client secret>"
+
+# ── Memory-specific headers ──
+memory_bearer_token = "<fresh bearer from http://localhost:3002>"
+memory_project_id   = "229d3378-5eda-42ab-9bfa-133f6360cd34"
+memory_api_key      = "<Memory API key>"
